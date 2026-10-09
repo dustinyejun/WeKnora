@@ -1,5 +1,5 @@
 #!/bin/bash
-# 开发环境启动脚本 - 只启动基础设施，app 和 frontend 需要手动在本地运行
+# 开发环境启动脚本：默认本机 Go/Vite + Docker 基础服务，--docker 启用完整容器模式。
 
 # 设置颜色
 GREEN='\033[0;32m'
@@ -55,16 +55,20 @@ show_help() {
     echo "用法: $0 [命令] [选项]"
     echo ""
     echo "命令:"
-    echo "  start      启动基础设施服务（postgres, redis, docreader, langfuse）"
+    echo "  start      启动基础服务，Go/前端使用本机源码运行"
     echo "  stop       停止所有服务"
     echo "  restart    重启所有服务"
     echo "  logs       查看服务日志"
     echo "  status     查看服务状态"
     echo "  app        启动后端应用（本地运行）"
     echo "  frontend   启动前端开发服务器（本地运行）"
+    echo "  docreader  单独重建并启动本地 Python 镜像"
     echo "  help       显示此帮助信息"
     echo ""
     echo "可选 Profile（用于 start 命令）:"
+    echo "  --docker     从源码构建 Go/前端/Python，全部在 Docker 运行"
+    echo "  --infra-only 仅启动依赖服务，Go/前端由本机运行"
+    echo "  --build      重建本次启用的本地镜像（默认复用 Python 镜像）"
     echo "  --minio       启动 MinIO 对象存储"
     echo "  --qdrant      启动 Qdrant 向量数据库"
     echo "  --neo4j       启动 Neo4j 图数据库"
@@ -75,7 +79,9 @@ show_help() {
     echo "  --full        启动所有可选服务（不含 odl-hybrid，需另加 --odl-hybrid）"
     echo ""
     echo "示例："
-    echo "  $0 start                    # 启动基础服务"
+    echo "  $0 start                    # 启动基础服务，本机 Go/Vite 开发"
+    echo "  $0 start --docker           # 从源码构建完整 Docker 开发环境"
+    echo "  $0 start --infra-only       # 仅启动依赖服务"
     echo "  $0 start --qdrant           # 启动基础服务 + Qdrant"
     echo "  $0 start --dex             # 启动基础服务 + Dex"
     echo "  $0 start --odl-hybrid       # 启动基础服务 + OpenDataLoader hybrid"
@@ -178,7 +184,7 @@ _wait_odl_hybrid_ready() {
 
 # 启动基础设施服务
 start_services() {
-    log_info "启动开发环境基础设施服务..."
+    log_info "启动开发环境..."
     
     check_docker
     if [ $? -ne 0 ]; then
@@ -208,12 +214,25 @@ start_services() {
     
     # 解析 profile 参数
     shift  # 移除 "start" 命令本身
-    # 默认启动基础设施（postgres / redis / docreader）+ langfuse，
+    # 默认启动基础服务 + langfuse，Go/Vite 在本机运行。
     # 其余可选服务通过 --minio / --qdrant / --neo4j / --dex / --full 按需开启。
     PROFILES="--profile langfuse"
     ENABLED_SERVICES="langfuse"
+    local app_containers=false
+    local rebuild=false
     while [ $# -gt 0 ]; do
         case "$1" in
+            --docker)
+                PROFILES="$PROFILES --profile app"
+                app_containers=true
+                ;;
+            --infra-only)
+                PROFILES="${PROFILES//--profile app/}"
+                app_containers=false
+                ;;
+            --build)
+                rebuild=true
+                ;;
             --minio)
                 PROFILES="$PROFILES --profile minio"
                 ENABLED_SERVICES="$ENABLED_SERVICES minio"
@@ -246,6 +265,7 @@ start_services() {
             --full)
                 PROFILES="--profile full"
                 ENABLED_SERVICES="minio qdrant neo4j dex"
+                app_containers=true
                 break
                 ;;
             *)
@@ -255,8 +275,26 @@ start_services() {
         shift
     done
 
-    # 启动服务（odl-hybrid 单独 --build，避免每次重建 docreader）
-    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml $PROFILES up -d
+    # 本机模式停止占用 8080/5173 的应用容器，保留基础服务和数据卷。
+    # Python 仅在镜像不存在或显式 --build 时构建，避免启动基础服务也重编译。
+    if [ "$app_containers" = false ]; then
+        log_info "本机开发模式：释放 Go/Vite 端口，复用基础服务..."
+        "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml --profile app stop frontend app || return 1
+        if [ "$rebuild" = false ] && ! docker image inspect weknora-docreader:dev-local >/dev/null 2>&1; then
+            log_info "首次构建本地 docreader 镜像..."
+            "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml build docreader || return 1
+        fi
+    fi
+
+    # 独立本地标签保证使用本地源码镜像；完整 Docker 模式按当前源码重建。
+    export VERSION_ARG="$(tr -d '\r\n' < VERSION)"
+    export COMMIT_ID_ARG="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    export VITE_FRONTEND_COMMIT="${VITE_FRONTEND_COMMIT:-$COMMIT_ID_ARG}"
+    local build_option=--no-build
+    if [ "$app_containers" = true ] || [ "$rebuild" = true ]; then
+        build_option=--build
+    fi
+    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml $PROFILES up -d "$build_option" --wait --wait-timeout 300
     local compose_rc=$?
     if [ "$compose_rc" -eq 0 ] && [[ "$ENABLED_SERVICES" == *"odl-hybrid"* ]]; then
         log_info "构建/更新 odl-hybrid 镜像..."
@@ -270,9 +308,13 @@ start_services() {
     fi
 
     if [ "$compose_rc" -eq 0 ]; then
-        log_success "基础设施服务已启动"
+        log_success "开发环境已启动"
         echo ""
         log_info "服务访问地址:"
+        if [ "$app_containers" = true ]; then
+            echo "  - Web UI:       http://localhost:${DEV_FRONTEND_PORT:-5173}"
+            echo "  - Go API:       http://localhost:${DEV_APP_PORT:-8080}"
+        fi
         echo "  - PostgreSQL:    localhost:5432"
         echo "  - Redis:         localhost:6379"
         echo "  - DocReader:     localhost:50051"
@@ -300,13 +342,26 @@ start_services() {
         
         echo ""
         log_info "接下来的步骤:"
-        printf "%b\n" "${YELLOW}1. 在新终端运行后端:${NC} make dev-app"
-        printf "%b\n" "${YELLOW}2. 在新终端运行前端:${NC} make dev-frontend"
+        if [ "$app_containers" = true ]; then
+            printf "%b\n" "${YELLOW}打开网页:${NC} http://localhost:${DEV_FRONTEND_PORT:-5173}"
+            log_info "修改源码后再次运行 make dev-docker，按构建缓存更新镜像和容器。"
+        else
+            printf "%b\n" "${YELLOW}1. 在新终端运行后端:${NC} make dev-app"
+            printf "%b\n" "${YELLOW}2. 在新终端运行前端:${NC} make dev-frontend"
+        fi
         return 0
     else
         log_error "服务启动失败"
         return 1
     fi
+}
+
+# Python 修改后只更新解析服务，不构建 Go/前端，也不切换应用运行模式。
+rebuild_docreader() {
+    check_docker || return 1
+    cd "$PROJECT_ROOT"
+    load_env_files || return 1
+    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml up -d --no-deps --build --wait --wait-timeout 300 docreader
 }
 
 # 停止服务
@@ -319,7 +374,7 @@ stop_services() {
     fi
     
     cd "$PROJECT_ROOT"
-    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml down
+    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml --profile '*' down
     
     if [ $? -eq 0 ]; then
         log_success "所有服务已停止"
@@ -332,9 +387,10 @@ stop_services() {
 
 # 重启服务
 restart_services() {
-    stop_services
+    shift
+    stop_services || return 1
     sleep 2
-    start_services
+    start_services start "$@"
 }
 
 # 查看日志
@@ -345,7 +401,7 @@ show_logs() {
     fi
 
     cd "$PROJECT_ROOT"
-    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml logs -f
+    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml --profile '*' logs -f
 }
 
 # 查看状态
@@ -356,7 +412,7 @@ show_status() {
     fi
 
     cd "$PROJECT_ROOT"
-    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml ps
+    "$DOCKER_COMPOSE_BIN" $DOCKER_COMPOSE_SUBCMD -f docker-compose.dev.yml --profile '*' ps
 }
 
 # 远程开发模式下检查基础设施端口是否可达
@@ -574,7 +630,7 @@ case "$CMD" in
         stop_services
         ;;
     restart)
-        restart_services
+        restart_services "$@"
         ;;
     logs)
         show_logs
@@ -587,6 +643,9 @@ case "$CMD" in
         ;;
     frontend)
         start_frontend
+        ;;
+    docreader)
+        rebuild_docreader
         ;;
     help|--help|-h)
         show_help

@@ -87,7 +87,12 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     fi
 
 # Build the application with version info
+ARG GO_BUILD_PARALLELISM=
 RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    if [ -n "$GO_BUILD_PARALLELISM" ]; then \
+        export GOFLAGS="${GOFLAGS:+$GOFLAGS }-p=$GO_BUILD_PARALLELISM"; \
+    fi; \
     if [ "$WITH_ANYDOC" = "1" ]; then \
         make build-prod GO_BUILD_TAGS=anydoc; \
     else \

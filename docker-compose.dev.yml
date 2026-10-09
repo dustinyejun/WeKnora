@@ -1,5 +1,91 @@
-# 开发环境配置 - 只启动基础设施服务，app 和 frontend 在本地运行
+# 开发环境配置：应用从本地源码构建；--profile app 启动 Go 和前端容器。
 services:
+  app:
+    image: weknora-app:dev-local
+    pull_policy: build
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+      args:
+        APK_MIRROR_ARG: ${APK_MIRROR_ARG:-}
+        WITH_ANYDOC: ${WITH_ANYDOC:-1}
+        GO_BUILD_PARALLELISM: ${GO_BUILD_PARALLELISM:-2}
+        VERSION_ARG: ${VERSION_ARG:-dev}
+        COMMIT_ID_ARG: ${COMMIT_ID_ARG:-unknown}
+    container_name: WeKnora-app-dev
+    ports:
+      - "${DEV_APP_PORT:-8080}:8080"
+    env_file:
+      - .env
+    environment:
+      GIN_MODE: debug
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      REDIS_ADDR: redis:6379
+      DOCREADER_ADDR: docreader:50051
+      DOCREADER_TRANSPORT: grpc
+      LOCAL_STORAGE_BASE_DIR: /data/files
+      # 本机已有 Neo4j 或 --neo4j 启动的服务均通过宿主机发布端口访问。
+      NEO4J_URI: ${DEV_NEO4J_URI:-bolt://host.docker.internal:7687}
+    volumes:
+      - ./.local-data/files:/data/files
+      - ./config/config.yaml:/app/config/config.yaml:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      docreader:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    networks:
+      - WeKnora-network-dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    profiles:
+      - app
+      - full
+
+  frontend:
+    image: weknora-ui:dev-local
+    pull_policy: build
+    build:
+      context: ./frontend
+      args:
+        VITE_FRONTEND_COMMIT: ${VITE_FRONTEND_COMMIT:-unknown}
+        NPM_REGISTRY: ${NPM_REGISTRY:-}
+        NODE_MAX_OLD_SPACE_SIZE: ${NODE_MAX_OLD_SPACE_SIZE:-4096}
+    container_name: WeKnora-frontend-dev
+    ports:
+      - "${DEV_FRONTEND_PORT:-5173}:80"
+    environment:
+      APP_HOST: app
+      APP_PORT: "8080"
+      APP_SCHEME: http
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
+      MAX_SKILL_BUNDLE_SIZE_MB: ${MAX_SKILL_BUNDLE_SIZE_MB:-256}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-}
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - WeKnora-network-dev
+    restart: unless-stopped
+    profiles:
+      - app
+      - full
+
   # 只启动依赖的基础设施服务
   postgres:
     image: paradedb/paradedb:v0.25.11-pg17
@@ -11,7 +97,8 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
-      - postgres-data-dev:/var/lib/postgresql/data
+      # 复用 docker-compose.yml 的 postgres-data 卷，保留已有基础数据
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - WeKnora-network-dev
     healthcheck:
@@ -206,10 +293,15 @@ services:
   neo4j:
     image: neo4j:latest
     container_name: WeKnora-neo4j-dev
+    mem_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
+    memswap_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
     volumes:
       - neo4j-data-dev:/data
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-password}
+      - NEO4J_server_memory_heap_initial__size=${NEO4J_HEAP_SIZE:-512m}
+      - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-512m}
+      - NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-256m}
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
@@ -237,10 +329,16 @@ services:
     restart: "no"
 
   docreader:
+    # 默认复用本地镜像，首次构建或 Python 更新由 dev.sh 显式触发。
+    pull_policy: never
     build:
       context: .
       dockerfile: docker/Dockerfile.docreader
-    image: wechatopenai/weknora-docreader:${WEKNORA_VERSION:-latest}
+      args:
+        APT_MIRROR: ${APT_MIRROR:-}
+        PLAYWRIGHT_DOWNLOAD_HOST: ${PLAYWRIGHT_DOWNLOAD_HOST:-}
+        PLAYWRIGHT_WEBKIT_DOWNLOAD_HOST: ${PLAYWRIGHT_WEBKIT_DOWNLOAD_HOST:-}
+    image: weknora-docreader:dev-local
     container_name: WeKnora-docreader-dev
     ports:
       - "${DOCREADER_PORT:-50051}:50051"
@@ -574,6 +672,8 @@ networks:
     driver: bridge
 
 volumes:
+  postgres-data:
+    name: weknora_postgres-data
   postgres-data-dev:
   redis_data_dev:
   minio_data_dev:
