@@ -1,0 +1,48 @@
+# Docker Desktop for Mac 的 docker.sock 属主是 root:root，WeKnora 的 appuser 无法使用。
+# 用 socat 转出一个 GID=2375、权限 660 的 socket，给 app 的 Docker 沙箱用。
+services:
+  docker-sock-proxy:
+    image: alpine/socat
+    container_name: WeKnora-docker-sock-proxy
+    user: root
+    command: UNIX-LISTEN:/shared/docker.sock,fork,unlink-early,mode=660,user=0,group=2375 UNIX-CONNECT:/var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - docker-sock-shared:/shared
+    restart: always
+
+  app:
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker-proxy/docker.sock
+    volumes:
+      - docker-sock-shared:/var/run/docker-proxy
+
+  # 会话分享外网访问：cpolar 只穿透 share-gateway，网关只放行分享页所需路径。
+  share-gateway:
+    image: nginx:1.27-alpine
+    container_name: WeKnora-share-gateway
+    volumes:
+      - ./docker/cpolar/share-gateway.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+    networks:
+      - WeKnora-network
+    restart: always
+
+  cpolar:
+    build:
+      context: ./docker/cpolar
+    image: weknora-cpolar:local
+    container_name: WeKnora-cpolar
+    environment:
+      - CPOLAR_AUTHTOKEN=${CPOLAR_AUTHTOKEN:-}
+      - CPOLAR_SUBDOMAIN=${CPOLAR_SUBDOMAIN:-}
+      - CPOLAR_REGION=${CPOLAR_REGION:-cn}
+    depends_on:
+      - share-gateway
+    networks:
+      - WeKnora-network
+    restart: always
+
+volumes:
+  docker-sock-shared:

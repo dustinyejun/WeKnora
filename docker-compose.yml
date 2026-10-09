@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: wechatopenai/weknora-ui:${WEKNORA_VERSION:-latest}
+    image: ${WEKNORA_UI_IMAGE:-wechatopenai/weknora-ui:${WEKNORA_VERSION:-latest}}
     # Multi-stage Dockerfile builds dist inside the image (no host npm required).
     # Optional: NPM_REGISTRY=https://registry.npmmirror.com docker compose build frontend
     # VITE_FRONTEND_COMMIT: start_all.sh / make docker-build-frontend inject git;
@@ -51,7 +51,7 @@ services:
       # Docker 沙箱默认关闭（见 WEKNORA_SANDBOX_DOCKER_ENABLED）。需要本机 daemon 时
       # 同时设 true 并挂载实际 socket——这等同宿主机 root，仅私有化单机。
       # 入口脚本会按 socket GID 把 appuser 加入对应组（compose group_add 在 gosu 后无效）。
-      # - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       # Optional: declarative built-in models. Copy config/builtin_models.yaml.example
       # to config/builtin_models.yaml, edit it for your deployment, then
       # uncomment the line below. See website-docs/03-features/06-models.md.
@@ -646,10 +646,10 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4JLABS_PLUGINS=["apoc"]
+      - NEO4J_PLUGINS=["apoc"]
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     restart: always
     networks:
       - WeKnora-network
