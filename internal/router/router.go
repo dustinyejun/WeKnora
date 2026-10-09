@@ -200,6 +200,9 @@ func NewRouter(params RouterParams) *gin.Engine {
 	// middleware). The ticket is minted by an authenticated POST.
 	RegisterSandboxTerminalRoutes(r, params.SessionHandler)
 	RegisterSandboxDesktopRoutes(r, params.SessionHandler)
+	// Public conversation shares (user-authorized): the token in the path is the credential.
+	r.GET("/api/v1/public/shares/:token", params.SessionHandler.GetPublicShare)
+	r.GET("/api/v1/public/shares/:token/files/:message_id/:position", params.SessionHandler.DownloadPublicShareFile)
 	r.GET("/api/v1/local-browser/extension", params.SessionHandler.BrowserSkillExtension)
 	r.POST("/api/v1/local-browser/extension/authorize", params.SessionHandler.BrowserSkillAuthorize)
 	r.POST("/api/v1/local-browser/internal", params.SessionHandler.BrowserSkillInternal)

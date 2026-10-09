@@ -23,6 +23,7 @@
                     :can-rewind="canRewind"
                     @fork="emit('fork', $event)"
                     @rewind="emit('rewind', $event)"
+                    @share="emit('share', $event)"
                     @render-complete-change="emit('render-complete-change', $event)" />
             </div>
             <template v-else>
@@ -40,6 +41,7 @@
                     :can-rewind="canRewind"
                     @fork="emit('fork', $event)"
                     @rewind="emit('rewind', $event)"
+                    @share="emit('share', $event)"
                     @render-complete-change="emit('render-complete-change', $event)" />
             </template>
             <deepThink :deepSession="session" v-if="session.showThink && !session.isAgentMode"></deepThink>
@@ -99,6 +101,10 @@
                     </t-button>
                     <span v-if="hasArtifacts" class="answer-toolbar__artifact-count" aria-hidden="true">{{ artifactCount }}</span>
                 </span>
+                <t-button v-if="!embeddedMode" size="small" variant="outline" shape="round" title="分享"
+                    @click.stop="emitShare">
+                    <t-icon name="share" />
+                </t-button>
                 <!-- Fallback 提示图标 -->
                 <t-tooltip v-if="session.is_fallback" :content="$t('chat.fallbackHint')" placement="top">
                     <t-button size="small" variant="outline" shape="round" class="fallback-icon-btn">
@@ -199,7 +205,7 @@ const mentionTagIcon = (item) => {
     return 'file';
 };
 
-const emit = defineEmits(['scroll-bottom', 'render-complete-change', 'fork', 'rewind'])
+const emit = defineEmits(['scroll-bottom', 'render-complete-change', 'fork', 'rewind', 'share'])
 const { t } = useI18n()
 const uiStore = useUIStore();
 let parentMd = ref()
@@ -263,6 +269,10 @@ const emitFork = () => {
 const emitRewind = () => {
     const messageId = persistedAssistantId(props.session) || props.session?.id
     if (messageId) emit('rewind', messageId)
+}
+const emitShare = () => {
+    const messageId = persistedAssistantId(props.session) || props.session?.id
+    if (messageId) emit('share', messageId)
 }
 
 const showRequestInfo = computed(() => !!(props.session?.request_id || props.session?.id));

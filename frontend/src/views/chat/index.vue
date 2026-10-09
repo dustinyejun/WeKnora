@@ -109,6 +109,9 @@
 
                             <div v-if="session.role == 'user'" class="message-row"
                                 :data-message-id="session.id || undefined">
+                                <t-checkbox v-if="shareMode && shareIdOf(session)" class="share-check"
+                                    :checked="!!shareSelected[shareIdOf(session)]"
+                                    @change="(v) => setShareSelected(session, v)" />
                                 <usermsg :content="session.content" :mentioned_items="session.mentioned_items"
                                     :images="session.images" :attachments="session.attachments" :embeddedMode="embeddedMode"
                                     :session-id="session_id"
@@ -126,6 +129,9 @@
                             <div v-if="session.role == 'assistant' && shouldRenderAssistantMessage(session)"
                                 class="message-row"
                                 :data-message-id="session.id || undefined">
+                                <t-checkbox v-if="shareMode && shareIdOf(session)" class="share-check"
+                                    :checked="!!shareSelected[shareIdOf(session)]"
+                                    @change="(v) => setShareSelected(session, v)" />
                                 <botmsg :content="session.content" :session="session" :session-id="session_id"
                                     :user-query="getUserQuery(index)" @scroll-bottom="scrollToBottom"
                                     :isFirstEnter="isFirstEnter" :embeddedMode="embeddedMode"
@@ -134,6 +140,7 @@
                                     :can-rewind="canRewindMessage(session.id)"
                                     @fork="handleFork"
                                     @rewind="handleRewind"
+                                    @share="handleShareStart"
                                     @render-complete-change="(ready) => handleAnswerRenderComplete(session, ready)">
                                 </botmsg>
                                 <FollowUpSuggestions v-if="session.answerFullyRendered && !session.steerForked && !session.suggestionsDismissed"
@@ -153,7 +160,26 @@
                     </div>
                 </div>
             </div>
-            <div ref="composerElement" class="chat_composer">
+            <div v-if="shareMode" class="share-bar">
+                <t-checkbox class="share-bar__all" :checked="shareAllSelected" :indeterminate="shareSomeSelected" @change="toggleShareAll">全选</t-checkbox>
+                <div class="share-bar__actions">
+                    <button v-for="a in shareActions" :key="a.key" class="share-tile" :disabled="shareBusy || !shareSelectedIds.length"
+                        @click="a.run()">
+                        <span class="share-tile__icon"><t-icon :name="a.icon" /></span>
+                        <span class="share-tile__label">{{ a.label }}</span>
+                    </button>
+                </div>
+                <t-button class="share-bar__close" variant="text" shape="circle" title="退出分享" @click="exitShare"><t-icon name="close" /></t-button>
+            </div>
+            <t-dialog v-model:visible="shareQrVisible" :header="shareQrTitle" :footer="false" width="360px">
+                <div class="share-qr">
+                    <t-qrcode :value="shareLink" :size="200" />
+                    <p>{{ shareQrHint }}</p>
+                    <p class="share-qr__url">{{ shareLink }}</p>
+                    <t-button variant="outline" @click="copyShareLink">复制链接</t-button>
+                </div>
+            </t-dialog>
+            <div v-show="!shareMode" ref="composerElement" class="chat_composer">
                 <div class="input-container" :class="{ 'is-embedded': embeddedMode }">
                     <transition name="scroll-btn-fade">
                         <div v-show="userHasScrolledUp" class="scroll-to-bottom-btn" @click="onClickScrollToBottom">
@@ -201,7 +227,7 @@ import { useRoute, useRouter, onBeforeRouteLeave, onBeforeRouteUpdate } from 'vu
 import InputField from '../../components/Input-field.vue';
 import botmsg from './components/botmsg.vue';
 import usermsg from './components/usermsg.vue';
-import { getMessageList, getSession, forkSession, rewindSession } from "@/api/chat/index";
+import { getMessageList, getSession, forkSession, rewindSession, createConversationShare } from "@/api/chat/index";
 import { resolveForkAffordance } from './forkPoint';
 import { rewindSkipMessage } from './rewindNotice';
 import { rewindPrefillText, rewindBlockedByOutgoingWork, canReplaceRewindTranscript, shouldApplyRewindLocally, rewindHistoryHasMore, keepMessagesThroughRewindPoint, rewindableMessageIds, rewindHttpConflictCode, rewindConflictI18nKey } from './rewindView';
@@ -1744,8 +1770,139 @@ onBeforeRouteUpdate((to, from, next) => {
     // 因为新会话的 getSession 也在那边触发，便于保证 restore→snapshot→apply 顺序。
     next()
 })
+// ---- Conversation share (pattern from WorkBuddy): pick messages, then link / QR / open. ----
+const shareMode = ref(false);
+const shareSelected = reactive({});
+const shareBusy = ref(false);
+const shareQrVisible = ref(false);
+const shareLink = ref('');
+let shareLinkKey = '';
+
+const shareIdOf = (m) => {
+    if (!m) return '';
+    if (m.role === 'assistant') return shouldRenderAssistantMessage(m) ? (persistedAssistantId(m) || m.id || '') : '';
+    return m.role === 'user' ? (m.id || '') : '';
+};
+const shareRowIds = computed(() => [...new Set(messagesList.map(shareIdOf).filter(Boolean))]);
+const shareSelectedIds = computed(() => shareRowIds.value.filter((id) => shareSelected[id]));
+const shareAllSelected = computed(() => shareRowIds.value.length > 0 && shareSelectedIds.value.length === shareRowIds.value.length);
+const shareSomeSelected = computed(() => shareSelectedIds.value.length > 0 && !shareAllSelected.value);
+
+function setShareSelected(m, checked) {
+    const id = shareIdOf(m);
+    if (id) shareSelected[id] = !!checked;
+}
+function toggleShareAll(checked) {
+    shareRowIds.value.forEach((id) => { shareSelected[id] = !!checked; });
+}
+function handleShareStart(messageId) {
+    Object.keys(shareSelected).forEach((k) => delete shareSelected[k]);
+    const idx = messagesList.findIndex((m) => shareIdOf(m) === messageId);
+    if (idx >= 0) {
+        shareSelected[messageId] = true;
+        for (let i = idx - 1; i >= 0; i--) {
+            if (messagesList[i].role === 'user') {
+                if (messagesList[i].id) shareSelected[messagesList[i].id] = true;
+                break;
+            }
+        }
+    }
+    shareMode.value = true;
+}
+function exitShare() {
+    shareMode.value = false;
+    shareQrVisible.value = false;
+}
+async function ensureShareLink() {
+    const key = shareSelectedIds.value.join(',');
+    if (key && key === shareLinkKey && shareLink.value) return shareLink.value;
+    shareBusy.value = true;
+    try {
+        const res = await createConversationShare(session_id.value, {
+            message_ids: shareSelectedIds.value,
+            title: currentSession.value?.title || '',
+        });
+        shareLink.value = res.data.url || `${window.location.origin}${res.data.path}`;
+        shareLinkKey = key;
+        return shareLink.value;
+    } catch (e) {
+        MessagePlugin.error(e?.message || '生成分享链接失败');
+        return '';
+    } finally {
+        shareBusy.value = false;
+    }
+}
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch {
+        // http on a LAN address is not a secure context: fall back to execCommand.
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    }
+}
+const shareQrTitle = ref('分享到微信');
+const shareQrHint = ref('');
+// A web page cannot drive the WeChat client, so the WeChat tile shows the link as a QR code.
+async function showShareQr(title, hint) {
+    if (!(await ensureShareLink())) return;
+    shareQrTitle.value = title;
+    shareQrHint.value = hint;
+    shareQrVisible.value = true;
+}
+const shareActions = [
+    { key: 'wechat', icon: 'logo-wechat-stroke', label: '分享到微信',
+        run: () => showShareQr('分享到微信', '用手机微信扫码打开，再点右上角「···」转发给好友') },
+    { key: 'copy', icon: 'link', label: '复制链接', run: () => copyShareLink() },
+    { key: 'browser', icon: 'internet', label: '浏览器打开', run: () => openShareInBrowser() },
+];
+async function copyShareLink() {
+    const url = await ensureShareLink();
+    if (!url) return;
+    await copyText(url);
+    MessagePlugin.success('链接已复制');
+}
+async function openShareInBrowser() {
+    // Open synchronously so the popup blocker treats it as the click's window.
+    const win = window.open('', '_blank');
+    const url = await ensureShareLink();
+    if (!url) { win?.close(); return; }
+    if (win) win.location.href = url; else window.location.href = url;
+}
 </script>
 <style lang="less" scoped>
+.message-row { position: relative; }
+/* Checkbox column: rows shift right while selecting, checks align in one column. */
+.message-row:has(> .share-check) { padding-left: 44px; }
+.share-check { position: absolute; left: 4px; top: 10px; z-index: 2; }
+.share-check, .share-bar__all { --td-brand-color: var(--td-text-color-primary); --td-brand-color-hover: var(--td-text-color-primary); }
+.share-bar {
+    position: relative; display: flex; align-items: center;
+    max-width: 900px; width: calc(100% - 32px); margin: 0 auto; padding: 14px 16px 16px;
+    border-top: 1px solid var(--td-component-stroke); background: var(--td-bg-color-container);
+}
+.share-bar__all { flex: none; }
+.share-bar__actions { display: flex; gap: 28px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+.share-bar__close { flex: none; }
+.share-tile {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    border: none; background: none; padding: 0; cursor: pointer; color: var(--td-text-color-primary);
+}
+.share-tile:disabled { cursor: not-allowed; opacity: .45; }
+.share-tile__icon {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    background: var(--td-bg-color-secondarycontainer); font-size: 22px; transition: background .15s;
+}
+.share-tile:not(:disabled):hover .share-tile__icon { background: var(--td-bg-color-component-hover); }
+.share-tile__label { font-size: 12px; color: var(--td-text-color-secondary); white-space: nowrap; }
+.share-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.share-qr p { margin: 0; color: var(--td-text-color-secondary); font-size: 13px; }
+.share-qr__url { word-break: break-all; font-size: 12px !important; }
+
 .chat {
     // 水平方向不留 padding，让滚动条贴到内容区最右缘；
     // 消息列与输入列各自用 --chat-content-inset 做左右对称的留白（窄屏时才可见）。

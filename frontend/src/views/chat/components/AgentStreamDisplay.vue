@@ -429,6 +429,10 @@
                   </t-button>
                   <span v-if="hasArtifacts" class="answer-toolbar__artifact-count" aria-hidden="true">{{ artifactCount }}</span>
                 </span>
+                <t-button v-if="!embeddedMode" size="small" variant="outline" shape="round" title="分享"
+                  @click.stop="emitShare">
+                  <t-icon name="share" />
+                </t-button>
                 <t-tooltip v-if="event.is_fallback" :content="$t('chat.fallbackHint')" placement="top">
                   <t-button size="small" variant="outline" shape="round" class="fallback-icon-btn">
                     <t-icon name="info-circle" />
@@ -1000,6 +1004,7 @@ const emit = defineEmits<{
   (event: 'render-complete-change', ready: boolean): void;
   (event: 'fork', messageId: string): void;
   (event: 'rewind', messageId: string): void;
+  (event: 'share', messageId: string): void;
 }>();
 
 const canFork = computed(() => props.canFork === true && !props.embeddedMode)
@@ -1013,6 +1018,10 @@ const emitFork = () => {
 const emitRewind = () => {
   const messageId = persistedAssistantId(props.session) || String(props.session?.id || '')
   if (messageId) emit('rewind', messageId)
+}
+const emitShare = () => {
+  const messageId = persistedAssistantId(props.session) || String(props.session?.id || '')
+  if (messageId) emit('share', messageId)
 }
 
 const embedAuthProps = computed(() => ({

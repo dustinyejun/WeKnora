@@ -2,6 +2,7 @@ package session
 
 import (
 	stderrors "errors"
+	"gorm.io/gorm"
 	"net/http"
 
 	"github.com/Tencent/WeKnora/internal/application/service"
@@ -59,6 +60,7 @@ type Handler struct {
 	desktopService  *service.SandboxDesktopService
 	desktopTickets  service.SandboxDesktopTicketStore
 	desktopLast     service.SandboxDesktopLastStore
+	db              *gorm.DB // conversation share snapshots
 	// redis backs the distributed desktop slot. Nil in Lite mode, where the
 	// in-process limiter is the correct degradation.
 	redis *redis.Client
@@ -108,6 +110,7 @@ func NewHandler(
 	forkService *service.SessionForkService,
 	rewindService *service.SessionRewindService,
 	approvedProjectDirs HostProjectDirsLoader,
+	db *gorm.DB,
 ) *Handler {
 	h := &Handler{
 		browserSkill:          browserSkill,
@@ -138,6 +141,7 @@ func NewHandler(
 		desktopLast:           desktopLast,
 		redis:                 rdb,
 		approvedProjectDirs:   approvedProjectDirs,
+		db:                    db,
 		attachmentProcessor: NewAttachmentProcessor(
 			fileService,
 			documentReader,

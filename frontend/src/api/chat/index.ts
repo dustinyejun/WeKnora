@@ -171,3 +171,12 @@ export async function deleteMessageArtifact(
     `/api/v1/sessions/${session_id}/messages/${message_id}/artifacts/${index}${query}`,
   );
 }
+
+// createConversationShare snapshots the selected messages (and their generated
+// files) into a public read-only link.
+export async function createConversationShare(
+  session_id: string,
+  data: { message_ids: string[]; title?: string; agent_name?: string },
+): Promise<{ data: { token: string; path: string; url: string } }> {
+  return post(`/api/v1/sessions/${session_id}/shares`, data) as any;
+}

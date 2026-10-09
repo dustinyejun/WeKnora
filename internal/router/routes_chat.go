@@ -109,6 +109,7 @@ func RegisterSessionRoutes(
 		sessions.GET("/:id/artifacts", handler.ListSessionArtifacts)
 		sessions.GET("/:id/messages/:message_id/artifacts", handler.ListMessageArtifacts)
 		sessions.GET("/:id/messages/:message_id/artifacts/:index/download", handler.DownloadMessageArtifact)
+		sessions.POST("/:session_id/shares", handler.CreateShare)
 		// Deleting reclaims the stored bytes, so it is owner-only: unlike the
 		// download above it does not honour shared-agent read access.
 		sessions.DELETE("/:id/messages/:message_id/artifacts/:index", handler.DeleteMessageArtifact)

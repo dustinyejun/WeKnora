@@ -54,6 +54,13 @@ const router = createRouter({
       component: () => import("../views/auth/Login.vue"),
       meta: { requiresAuth: false, requiresInit: false }
     },
+    // Public read-only conversation share; the token is the credential.
+    {
+      path: "/s/:token",
+      name: "conversationShare",
+      component: () => import("../views/share/ShareView.vue"),
+      meta: { requiresAuth: false, requiresInit: false }
+    },
     // Embed chat is a separate entry (embed.html + embed-main.ts), not this SPA.
     {
       path: "/register",
