@@ -847,7 +847,7 @@ const handleExport = async () => {
     link.href = url
     link.download = 'weknora-memories.json'
     link.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
   } catch (error: any) {
     MessagePlugin.error(t('memorySettings.toasts.saveFailed', { message: error?.message || '' }))
   }

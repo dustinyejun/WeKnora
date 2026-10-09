@@ -737,7 +737,7 @@ function exportOverlay() {
   a.href = url
   a.download = 'models.json'
   a.click()
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 // ---------- 版本历史 ----------

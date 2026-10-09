@@ -413,7 +413,9 @@ async function handleDownload(item: ArtifactMeta) {
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
-        setTimeout(() => URL.revokeObjectURL(url), 1000)
+        // Keep the blob alive past a "where to save" dialog; revoking it
+        // earlier makes the browser save the dead blob URL under its UUID.
+        setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch (err) {
         console.error('[ChatArtifactsDrawer] download failed:', err)
         MessagePlugin.error(t('agent.artifactDrawer.downloadFailed'))

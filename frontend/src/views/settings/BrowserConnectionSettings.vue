@@ -270,7 +270,9 @@ async function download() {
     if (!alive) return
     const url = URL.createObjectURL(blob), link = document.createElement('a')
     link.href = url; link.download = 'browser-skill-weknora.zip'; link.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    // Keep the blob alive past a "where to save" dialog; revoking it
+    // earlier makes the browser save the dead blob URL under its UUID.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
   } catch (e: any) { if (alive) error.value = e?.message || t('localBrowser.failed') }
   finally { if (alive) downloading.value = false }
 }

@@ -237,7 +237,7 @@ async function download(): Promise<void> {
     a.href = url
     a.download = downloadName(img, blob.type)
     a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
   } catch {
     // A cross-origin image the browser may not read back: let it open instead.
     openOriginal()

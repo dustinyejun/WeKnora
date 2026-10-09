@@ -2272,7 +2272,7 @@ const downloadJSONExample = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 // 下载 CSV 示例
@@ -2308,7 +2308,7 @@ const downloadCSVExample = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 // 下载 Excel 示例
@@ -2340,7 +2340,7 @@ const downloadExportBlob = (blob: Blob, ext: 'csv' | 'json') => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 const handleExportFAQ = async (format: 'csv' | 'json') => {
   if (!props.kbId) {
