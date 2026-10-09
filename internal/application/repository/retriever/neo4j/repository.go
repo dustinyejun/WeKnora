@@ -219,10 +219,16 @@ func (n *Neo4jRepository) SearchNode(
 			}
 
 			// Convert relationship to types.Relation
+			// The match is undirected, so n is the seed, not necessarily the
+			// source; orient by the stored relationship instead.
 			relData := rel.(neo4j.Relationship)
+			src, dst := nodeData, targetNodeData
+			if relData.StartElementId == targetNodeData.ElementId {
+				src, dst = targetNodeData, nodeData
+			}
 			graphData.Relation = append(graphData.Relation, &types.GraphRelation{
-				Node1: nodeData.Props["name"].(string),
-				Node2: targetNodeData.Props["name"].(string),
+				Node1: src.Props["name"].(string),
+				Node2: dst.Props["name"].(string),
 				Type:  relData.Type,
 			})
 		}
@@ -274,14 +280,16 @@ func graphSearchCypher(labelExpr string, nodes []string) (string, map[string]int
 		WHERE ANY(nodeText IN $nodes WHERE n.name CONTAINS nodeText)
 		  AND EXISTS { (n)--() }
 		WITH n,
+		     reduce(best = 0, t IN $nodes |
+		       CASE WHEN n.name CONTAINS t AND size(t) > best THEN size(t) ELSE best END) AS match_len,
 		     CASE WHEN n.name IN $nodes THEN 0 ELSE 1 END AS seed_rank,
 		     size(n.name) AS name_len,
 		     n.name AS name
-		ORDER BY seed_rank, name_len, name
+		ORDER BY match_len DESC, seed_rank, name_len, name
 		LIMIT $maxSeedNodes
 		MATCH (n)-[r]-(m:` + labelExpr + `)
-		WITH n, r, m, seed_rank, name_len, name
-		ORDER BY seed_rank, name_len, name
+		WITH n, r, m, match_len, seed_rank, name_len, name
+		ORDER BY match_len DESC, seed_rank, name_len, name
 		LIMIT $maxRows
 		RETURN n, r, m
 	`

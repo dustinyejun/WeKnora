@@ -15,7 +15,7 @@ func TestGraphSearchCypherBoundsAndOrders(t *testing.T) {
 	for _, want := range []string{
 		"EXISTS { (n)--() }",
 		"CASE WHEN n.name IN $nodes THEN 0 ELSE 1 END AS seed_rank",
-		"ORDER BY seed_rank, name_len, name",
+		"ORDER BY match_len DESC, seed_rank, name_len, name",
 		"LIMIT $maxSeedNodes",
 		"LIMIT $maxRows",
 	} {
@@ -24,9 +24,12 @@ func TestGraphSearchCypherBoundsAndOrders(t *testing.T) {
 		}
 	}
 
+	// Seeds rank by the longest query term they contain, so a specific entity
+	// ("5.1 数据适配器" via "数据适配器") is not crowded out by nodes that only
+	// match, or exactly equal, a generic short word such as "系统".
 	// The ordering key has to reach both caps: a row LIMIT without it keeps an
 	// arbitrary subset of the rows.
-	if got := strings.Count(query, "ORDER BY seed_rank, name_len, name"); got != 2 {
+	if got := strings.Count(query, "ORDER BY match_len DESC, seed_rank, name_len, name"); got != 2 {
 		t.Errorf("ORDER BY applied %d time(s), want 2 (seed cap and row cap):\n%s", got, query)
 	}
 	if strings.Index(query, "LIMIT $maxSeedNodes") > strings.Index(query, "LIMIT $maxRows") {

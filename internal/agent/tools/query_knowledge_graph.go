@@ -79,7 +79,16 @@ func graphSearchTerms(query string) []string {
 	}
 	seen := map[string]bool{query: true}
 	var tokens []string
-	for _, word := range queryTerms(query) {
+	// Whitespace-separated fields are usually whole entity names the agent
+	// typed ("数据适配器 采购合同数据"); jieba alone would only keep their
+	// fragments, so keep the fields too and let the length sort rank them.
+	var fields []string
+	for _, field := range strings.FieldsFunc(query, isSnippetSeparator) {
+		if len([]rune(field)) >= 2 {
+			fields = append(fields, field)
+		}
+	}
+	for _, word := range append(fields, queryTerms(query)...) {
 		if !seen[word] {
 			seen[word] = true
 			tokens = append(tokens, word)
