@@ -390,7 +390,7 @@ export default {
     reopen: 'プロダクトツアー',
     steps: {
       welcome: {
-        title: 'WeKnoraへようこそ',
+        title: 'KnowPulseへようこそ',
         desc: '数ステップでナレッジベース、チャット、エージェントの使い方をご紹介します。「次へ」をクリックして開始してください。'
       },
       knowledge: {
@@ -2672,11 +2672,11 @@ export default {
     haveAccount: 'すでにアカウントをお持ちですか？',
     backToLogin: 'ログインに戻る',
     loginHint: 'ログインして続行してください。初めての方は下からアカウントを作成できます。',
-    firstTime: 'WeKnoraは初めてですか？',
+    firstTime: 'KnowPulseは初めてですか？',
     registerSuccess: '登録が完了しました。ログインしてください',
     registerFailed: '登録に失敗しました',
-    subtitle: 'RAG質問応答、ReActエージェント、Wiki。LLMが支える企業向けナレッジフレームワーク',
-    registerSubtitle: 'アカウントを作成してWeKnoraを使い始めましょう',
+    subtitle: 'KnowPulse ワークスペースにログイン',
+    registerSubtitle: 'アカウントを作成してKnowPulseを使い始めましょう',
     emailPlaceholder: 'メールアドレスを入力',
     passwordPlaceholder: 'パスワードを入力',
     confirmPasswordPlaceholder: 'パスワードを再入力',
@@ -2970,7 +2970,7 @@ export default {
     goToAgentSettings: 'エージェント設定に移動'
   },
   createChat: {
-    title: 'こんにちは、WeKnoraです。あなたのナレッジを、すぐそばに',
+    title: 'こんにちは、KnowPulseです。あなたのナレッジを、すぐそばに',
     newSessionTitle: '新しいセッション',
     openProject: 'プロジェクトを選択',
     clearProject: '解除',
@@ -5182,8 +5182,8 @@ export default {
     }
   },
   platform: {
-    subtitle: 'LLM駆動のエンタープライズ向けナレッジフレームワーク',
-    description: 'RAG検索、エージェント推論、Wikiナレッジベースにより、ドキュメントを本当に理解し活用できます',
+    subtitle: '知識につながりを。\n判断に根拠を。',
+    description: '分散した文書と情報をつなぎ、知識を検索・関連付け・活用できます。',
     rag: 'RAG拡張生成',
     agent: 'ReActエージェント',
     wiki: 'Wikiナレッジベース',

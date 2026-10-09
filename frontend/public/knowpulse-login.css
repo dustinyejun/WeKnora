@@ -1,0 +1,191 @@
+/* KnowPulse login identity. Scoped to authentication pages. */
+html .login-layout.login-layout {
+  --td-brand-color: #1769ee;
+  --td-brand-color-hover: #3382ff;
+  --td-brand-color-active: #0d4fcc;
+  --td-brand-color-focus: #e8f1ff;
+  --td-brand-color-light: #e8f1ff;
+  --td-success-color-light: #e8f5fc;
+  min-height: 100vh;
+  background: #f7f9fd !important;
+  overflow: hidden;
+  font-family: var(--app-font-family), sans-serif;
+}
+html .login-layout.login-layout::before {
+  inset: 0 44% 0 0;
+  background: radial-gradient(ellipse at 85% 66%, #074458 0%, transparent 54%),
+    radial-gradient(ellipse at 5% 10%, #122c61 0%, transparent 62%), #08172f;
+}
+html .login-layout.login-layout::after {
+  content: 'KnowPulse · KNOWLEDGE IN MOTION';
+  position: absolute;
+  left: 5%; bottom: 26px;
+  color: #84a0bf;
+  font-size: 10px;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+html .login-layout.login-layout .animated-bg { display: none; }
+html .login-layout.login-layout .header-logo { top: 30px; left: 5%; }
+html .login-layout.login-layout .header-logo .logo-image {
+  width: 180px;
+  height: 36px;
+  content: url('/knowpulse-logo-dark.svg');
+  filter: none !important;
+}
+html .login-layout.login-layout .header-links { top: 28px; right: 4%; }
+html .login-layout.login-layout .header-links > a { display: none; }
+html .login-layout.login-layout .header-link {
+  color: #52647c;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+  padding: 9px 14px;
+  border-radius: 10px;
+}
+html .login-layout.login-layout .header-link .link-text { display: inline; }
+html .login-layout.login-layout .language-dropdown { background: #fff; color: #23364e; }
+html .login-layout.login-layout .language-option { color: #23364e; }
+html .login-layout.login-layout .language-option.active { background: #edf5ff; color: #1769ee; }
+html .login-layout.login-layout .showcase-section {
+  flex: 0 0 56%;
+  min-width: 0;
+  align-items: center;
+  padding: 105px 5% 70px;
+}
+html .login-layout.login-layout .showcase-content {
+  max-width: 650px;
+  margin: 0;
+}
+html .login-layout.login-layout .showcase-content::before {
+  content: 'KNOWLEDGE  /  CONNECTION  /  INSIGHT';
+  color: #5ce0e0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.4px;
+  margin-bottom: 26px;
+}
+html .login-layout.login-layout .showcase-subtitle {
+  color: #f5faff;
+  font-size: clamp(30px, 3.5vw, 52px);
+  font-weight: 650;
+  letter-spacing: -1.5px;
+  line-height: 1.38;
+  white-space: pre-line;
+  margin: 0 0 22px;
+}
+html .login-layout.login-layout .showcase-description {
+  color: #a1b6ce;
+  max-width: 470px;
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 0 0 26px;
+}
+html .login-layout.login-layout .feature-tags { gap: 9px; margin: 0; }
+html .login-layout.login-layout .tag {
+  color: #c3d6ed;
+  border: 1px solid #29465e;
+  background: #ffffff05;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 400;
+}
+html .login-layout.login-layout .carousel-container {
+  margin-top: 24px;
+  height: clamp(180px, 18vw, 250px);
+  background: url('/knowpulse-login-visual.svg') center / contain no-repeat;
+  border-radius: 0;
+  pointer-events: none;
+}
+html .login-layout.login-layout .screenshot-swiper { display: none; }
+html .login-layout.login-layout .form-section {
+  flex: 0 0 44%;
+  min-width: 0;
+  align-items: center;
+  padding: 105px 4% 70px;
+}
+html .login-layout.login-layout .form-panel { max-width: 440px; margin: 0; }
+html .login-layout.login-layout .form-card {
+  background: #fff !important;
+  border: 1px solid #e4eaf4 !important;
+  border-radius: 20px;
+  padding: 30px 34px;
+  box-shadow: 0 16px 60px #17366e0a;
+  color: #122540;
+  --td-text-color-primary: #122540;
+  --td-text-color-secondary: #697b90;
+  --td-bg-color-container: #fff;
+  --td-bg-color-container-hover: #f5f8fd;
+  --td-component-stroke: #dbe4f0;
+}
+html .login-layout.login-layout .form-header { text-align: left; margin-bottom: 24px; }
+html .login-layout.login-layout .form-title {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+  color: #122540;
+  margin-bottom: 10px;
+}
+html .login-layout.login-layout .form-welcome { font-size: 13px; line-height: 1.8; color: #697b90; }
+html .login-layout.login-layout .form-hint { display: none; }
+html .login-layout.login-layout .t-form__label { font-size: 13px; color: #344960; }
+html .login-layout.login-layout .t-form__item { margin-bottom: 22px; }
+html .login-layout.login-layout .t-input {
+  background: #fbfcff;
+  border: 1px solid #dce5f1;
+  border-radius: 9px;
+  height: 46px;
+  color: #122540;
+}
+html .login-layout.login-layout .t-input:focus-within {
+  border-color: #3382ff;
+  box-shadow: 0 0 0 3px #1769ee12;
+}
+html .login-layout.login-layout .submit-button {
+  margin: 12px 0 6px;
+  height: 47px;
+  background: linear-gradient(110deg, #1665ee, #078bc5);
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 18px #146bee26;
+}
+html .login-layout.login-layout .submit-button:hover { filter: brightness(1.07); }
+html .login-layout.login-layout .register-cta__divider { margin: 23px 0 14px; font-size: 12px; }
+html .login-layout.login-layout .register-cta__divider span { background: #fff; }
+html .login-layout.login-layout .register-cta__button {
+  height: 44px;
+  border-color: #d3e0f2;
+  color: #1769ee;
+  background: #fff;
+  border-radius: 9px;
+  font-size: 13px;
+}
+html .login-layout.login-layout .login-features { display: flex; flex-wrap: wrap; gap: 8px 12px; border-top: 1px solid #edf1f7; padding-top: 16px; margin-top: 22px; }
+html .login-layout.login-layout .login-features .feature-item { font-size: 10px; margin-bottom: 0; }
+html .login-layout.login-layout .login-features .feature-icon { color: #087daa; background: #eaf6fb; width: 17px; height: 17px; }
+@media (max-width: 900px) {
+  html .login-layout.login-layout .showcase-section { padding-left: 4%; padding-right: 4%; }
+  html .login-layout.login-layout .form-section { padding-left: 20px; padding-right: 20px; }
+  html .login-layout.login-layout .form-card { padding: 30px 24px; }
+  html .login-layout.login-layout .showcase-subtitle { font-size: 32px; }
+}
+@media (max-width: 768px) {
+  html .login-layout.login-layout { flex-direction: column; overflow: visible; }
+  html .login-layout.login-layout::before { inset: 0; height: 350px; }
+  html .login-layout.login-layout .header-logo { position: absolute; top: 25px; left: 24px; }
+  html .login-layout.login-layout .header-logo .logo-image { width: 160px; height: 32px; }
+  html .login-layout.login-layout .header-links { position: absolute; top: 23px; right: 22px; }
+  html .login-layout.login-layout .header-link { color: #d3e9f5; background: #ffffff08; border-color: #3b5875; }
+  html .login-layout.login-layout .showcase-section { flex: none; min-height: 350px; padding: 105px 24px 35px; align-items: flex-start; }
+  html .login-layout.login-layout .showcase-content::before { margin-bottom: 13px; font-size: 8px; }
+  html .login-layout.login-layout .showcase-subtitle { font-size: 30px; margin-bottom: 14px; }
+  html .login-layout.login-layout .showcase-description { font-size: 12px; line-height: 1.8; margin-bottom: 16px; }
+  html .login-layout.login-layout .tag { font-size: 10px; padding: 4px 8px; }
+  html .login-layout.login-layout .carousel-container { display: none; }
+  html .login-layout.login-layout .form-section { flex: none; padding: 26px 20px 62px; }
+  html .login-layout.login-layout .form-card { padding: 28px; }
+  html .login-layout.login-layout::after { left: 0; right: 0; bottom: 22px; text-align: center; color: #8192a9; font-size: 8px; }
+}
