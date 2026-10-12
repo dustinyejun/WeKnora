@@ -1,4 +1,4 @@
--- Migration: 000115_conversation_shares
+-- Migration: 000116_conversation_shares
 -- Public read-only snapshots of selected chat messages. Files are copied in at
 -- share time so the link stays complete after the source session changes and
 -- the public endpoint never touches tenant-scoped storage.
