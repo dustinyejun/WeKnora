@@ -2594,6 +2594,14 @@ export default {
       documentsPlaceholder: '每行输入一个候选文档',
       documentsHint: '每个非空行会作为一个独立文档发送给 ReRank 模型',
       imageFile: '图片文件',
+      similarityMode: '相似度',
+      similarityQuery: '查询文本',
+      similarityQueryPlaceholder: '输入一条查询，例如：草地上奔跑的狗',
+      similarityCandidates: '候选文本',
+      similarityCandidatesPlaceholder: '每行输入一个候选文本',
+      similarityHint: '查询按检索查询方式向量化，候选按文档方式向量化，与线上检索一致；结果按余弦相似度从高到低排列',
+      similarityImage: '候选图片（可选）',
+      similarityImageCandidate: '图片',
       audioFile: '音频文件',
       chooseFile: '选择文件',
       parameters: '请求参数',
@@ -3315,14 +3323,45 @@ export default {
         success: '已将 {count} 个空间的存储配额更新为 {gb} GB',
         failed: '应用到所有空间失败'
       },
+      userList: {
+        title: '平台用户列表',
+        rowLabel: '用户管理',
+        rowDesc: '查看平台上的全部注册用户（跨空间），支持分页与按用户名/邮箱筛选。',
+        searchPlaceholder: '按用户名或邮箱筛选（当前页）',
+        refresh: '刷新',
+        active: '正常',
+        inactive: '已停用',
+        colUsername: '用户名',
+        colStatus: '状态',
+        colRole: '角色',
+        colCreated: '创建日期',
+        colAction: '操作',
+        prev: '上一页',
+        next: '下一页',
+        pageCount: '{shown} 条 / 本页 {total}',
+        enable: '启用',
+        disable: '停用',
+        resetPassword: '重置密码',
+        confirmDisable: '确定停用账号 {name} 吗？将立即吊销其登录状态。',
+        confirmEnable: '确定启用账号 {name} 吗？',
+        enabledMsg: '已启用 {name}',
+        disabledMsg: '已停用 {name}',
+        actionFailed: '操作失败',
+        loadFailed: '加载用户列表失败',
+        roleAdmin: '系统管理员',
+        roleUser: '普通用户',
+        confirmRevoke: '确定撤销 {name} 的系统管理员权限吗？',
+        confirmPromote: '确定将 {name} 提升为系统管理员吗？',
+        revokeBtn: '撤销',
+        promoteBtn: '提升',
+        revokedMsg: '已撤销 {name} 的管理员权限',
+        promotedMsg: '已将 {name} 提升为系统管理员',
+        roleFailed: '修改角色失败',
+      },
       passwordReset: {
-        label: '重置用户密码',
-        description: '为忘记密码的其他用户设置新密码。重置成功后，该用户当前所有登录会话都会失效，需要使用新密码重新登录。',
-        action: '重置密码',
         dialogTitle: '重置其他用户的密码',
         warning: '这是高风险操作。请核对用户邮箱；出于安全考虑，不能在这里重置自己的密码。',
         emailLabel: '用户邮箱',
-        emailPlaceholder: '输入需要重置密码的用户邮箱',
         newPasswordLabel: '新密码',
         newPasswordPlaceholder: '请输入新密码',
         confirmPasswordLabel: '确认新密码',
@@ -3332,8 +3371,6 @@ export default {
         failed: '重置密码失败',
       },
       createUser: {
-        label: '创建用户',
-        description: '开通一个新的本地用户账号。如果平台的默认空间模式设置为「自动创建个人空间」，该用户会像自助注册的用户一样，同时获得一个个人空间。',
         action: '创建用户',
         dialogTitle: '创建新用户',
         warning: '这是高风险操作。请仔细核对用户名和邮箱——它们将作为该用户登录的唯一凭据。',
@@ -3356,10 +3393,6 @@ export default {
           usernameLength: '用户名长度必须为 2-50 个字符',
           emailRequired: '请输入邮箱',
           emailInvalid: '请输入有效的邮箱地址',
-          passwordRequired: '请输入新密码',
-          passwordLength: '密码长度必须为 8-32 个字符',
-          passwordLetter: '密码必须包含字母',
-          passwordNumber: '密码必须包含数字',
           confirmRequired: '请再次输入新密码',
           passwordMismatch: '两次输入的密码不一致'
         },
@@ -3372,26 +3405,6 @@ export default {
           copyBtn: '复制账号信息',
           copySuccess: '账号信息已复制到剪贴板',
           acknowledgeBtn: '我已保存密码'
-        }
-      },
-      admins: {
-        label: '系统管理员',
-        description: '拥有平台级权限的用户。在右侧输入邮箱并回车即可提升用户为管理员；点击 × 即为撤销其权限。当前你（自己）已是管理员，不在列表中显示，也无法被自己撤销。',
-        placeholder: '输入用户邮箱并回车',
-        loadFailed: '加载系统管理员失败',
-        saveSuccess: '已更新系统管理员',
-        saveFailed: '更新系统管理员失败',
-        confirm: {
-          revoke: {
-            header: '撤销系统管理员',
-            body: '确认撤销 {email} 的系统管理员权限？撤销后该用户将无法再访问任何系统级功能。',
-            confirmBtn: '撤销'
-          },
-          promote: {
-            header: '提升为系统管理员',
-            body: '确认将 {email} 提升为系统管理员？该用户将获得平台级权限，可访问所有空间、修改系统设置、管理其他管理员。',
-            confirmBtn: '提升'
-          }
         }
       },
       reset: {
@@ -3712,36 +3725,27 @@ export default {
           generic: '获取队列状态失败'
         }
       },
-      runtimeTable: {
-        setting: '配置项与用途',
-        value: '当前值'
-      },
       sections: {
         other: {
-          tab: '其他 {count}',
           title: '其他配置',
           description: '当前部署中未归入标准分组的配置项。'
         },
         security: {
-          tab: '网络安全 {count}',
           title: '网络安全',
           description: '管理 SSRF 白名单，以及是否允许 Docker 沙箱（本机 docker.sock 等同宿主机 root）。'
         },
         runtime: {
-          tab: '运行与并发 {count}',
           title: '运行与并发',
           description: '配置后台任务池与模型服务的并发容量。',
           restartHint: 'Worker 配置需重启生效'
         },
         tenant: {
-          tab: '空间默认值 {count}',
           title: '空间默认值',
           description: '设置新空间的初始配额与兼容性行为，不会自动改写已有空间。'
         },
         access: {
-          tab: '账户与访问 {count}',
-          title: '账户与访问',
-          description: '管理系统管理员、公开注册与用户创建空间的规则。'
+          title: '注册与访问',
+          description: '管理注册方式、密码要求和用户创建空间的规则。'
         }
       },
       priorityHint: {
@@ -3943,6 +3947,7 @@ export default {
         desktopRetry: '重新连接',
         notStarted: '终端尚未启动。启动后会连接本会话的沙箱环境；若沙箱不存在或已暂停，将为你创建或唤醒它。',
         paused: '本会话的沙箱已暂停。启动终端会唤醒它。',
+        stopped: '本会话的沙箱未在运行：可能已停止，或因长时间空闲已被回收。启动终端会重新启动它；若已被回收，则会新建一个沙箱，之前的文件和安装的软件不会保留。',
         start: '启动终端',
         connecting: '正在连接沙箱…',
         needsProvision: '本会话当前没有运行中的沙箱环境。创建并启动会新建一个沙箱，并按工作区配置计费。',
@@ -3953,6 +3958,8 @@ export default {
         retry: '重新连接',
         sessionEnded: '终端会话已结束',
         idleDisconnected: '终端空闲已断开，沙箱将按工作区 TTL 自行暂停。可重新连接。',
+        idleDisconnectedNewShell: '终端空闲已断开，其中的 shell 已结束（nohup 启动的后台任务不受影响）。重新连接会打开一个新的 shell。',
+        disconnectedNewShell: '连接已断开，终端中的 shell 已结束（nohup 启动的后台任务不受影响）。重新连接会打开一个新的 shell。',
         authRevoked: '登录状态已失效，终端已断开。请重新登录后再连接。',
     },
     questionMinimapTitle: '问答',
@@ -4533,11 +4540,11 @@ export default {
         imageLoadError: '图片加载失败',
         noCaption: '暂无描述',
         noOcr: '未识别到文字',
-        caption: '描述',
-        ocr: '图中文字（OCR）',
-        attributes: '属性',
+        caption: '图片描述',
+        ocr: '图中文字',
+        attributes: '图片属性',
         source: '来源文档',
-        details: '详细信息',
+        details: '基本信息',
         dimensions: '尺寸',
         status: '状态',
         openSource: '打开来源文档',
@@ -4553,6 +4560,19 @@ export default {
         viewerClose: '关闭 (Esc)',
         prev: '上一张 (←)',
         next: '下一张 (→)',
+        sourceFilter: '按文档',
+        sourceFilterTitle: '按来源文档筛选',
+        sourceFilterSearch: '搜索文档名称',
+        sourceFilterEmpty: '没有匹配的文档',
+        sourceFilterSubtitle: '画廊仅展示所选文档中的图片，便于逐个核对摘要与 OCR 结果',
+        sourceFilterSelected: '已选 {count} 个文档',
+        sourceFilterClear: '清空已选',
+        sourceFilterTooMany: '最多只能选择 1000 个文档',
+        sourceFilterColName: '文件名',
+        sourceFilterColTime: '上传时间',
+        sourceFilterSelectAll: '全选 / 全不选（含全部命中结果）',
+        sourceFilterOverflowRecent: '文档较多，仅显示最近 {cap} 条，请输入关键字精确定位',
+        sourceFilterOverflowHits: '命中 {total} 个文档，仅显示前 {cap} 条，请细化关键字后再全选',
         // Display names for the builtin attributes the gallery itself
         // declares. Attributes contributed by other sources fall back to the
         // pipeline's own wording (see the imageAttr namespace).
@@ -4652,6 +4672,16 @@ export default {
       helpZoomDesc: '缩放画布',
       neighborsProgress: '已显示邻居 {visible}/{total}（还有 {hidden} 个未加载）',
       neighborsAllShown: '全部 {total} 个邻居已在图中（可点"展开邻居"聚焦到该节点子图）',
+      graphNavigationHint: '拖拽空白处移动 · 滚轮缩放',
+      focusGroup: '聚焦这组页面',
+      focusGroupViewing: '正在查看：{name}',
+      focusGroupBack: '返回全图',
+      focusGroupSwitch: '切换到其他分组',
+      unlinkedHidden: '已隐藏 {count} 个无关联页面',
+      unlinkedSection: '无关联页面 · {count}',
+      offscreenSection: '当前视图无连线（存在链接）· {count}',
+      hideUnlinked: '隐藏无关联页面（{count}）',
+      showUnlinked: '显示无关联页面（{count}）',
       neighborsNone: '该节点没有链接邻居',
       neighborsCenterUnreachable: '已显示邻居 {visible}/{total}（还有 {hidden} 个无法连通：可能是死链、被过滤或已删除）',
       neighborsOverviewHidden: '已显示邻居 {visible}/{total}（{hidden} 个不在概览范围，点"展开邻居"以此为中心查看）',
@@ -7011,6 +7041,11 @@ export default {
     }
   },
   uploadConfirm: {
+    imageEmbeddingModel: "图像索引 Embedding 模型",
+    imageIndexInherited: "图像索引使用知识库绑定的 Embedding 模型；如需更换，请前往知识库设置。",
+    imageVectorIndex: "本次图片向量索引",
+    imageVectorIndexHint: "为本次上传或重新解析的图片生成向量，不改变知识库默认配置。是否参与检索仍由知识库的“图片向量检索”开关决定。",
+    imageVectorRequiresIndex: "请先在知识库设置中开启向量索引。",
     documentSummary: "文档摘要",
     documentSummaryDescription: "为本次导入的文档选择是否自动生成摘要。",
     generateSummary: "生成文档摘要",
@@ -7357,10 +7392,10 @@ export default {
     statusFailed: '失败',
     statusCancelled: '已取消',
     statusDraft: '草稿',
-    noDescription: '无描述',
+    noDescription: '暂无描述',
     emptyKnowledgeDragDrop: '知识为空，拖放上传',
-    pdfDocFormat: 'pdf、doc 格式文件，不超过10M',
-    textMarkdownFormat: 'text、markdown格式文件，不超过200K',
+    pdfDocFormat: 'pdf、doc 格式文件，不超过{size}M',
+    textMarkdownFormat: 'text、markdown格式文件，不超过{size}M',
     dragFileNotText: '请拖拽文件而不是文本或链接',
     searchPlaceholder: '搜索知识库...',
     docSearchPlaceholder: '搜索文档名称...',

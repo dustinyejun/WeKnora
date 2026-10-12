@@ -2594,6 +2594,14 @@ export default {
       documentsPlaceholder: '每行輸入一個候選文件',
       documentsHint: '每個非空行會作為一個獨立文件傳送給 ReRank 模型',
       imageFile: '圖片檔案',
+      similarityMode: '相似度',
+      similarityQuery: '查詢文字',
+      similarityQueryPlaceholder: '輸入一條查詢，例如：草地上奔跑的狗',
+      similarityCandidates: '候選文字',
+      similarityCandidatesPlaceholder: '每行輸入一個候選文字',
+      similarityHint: '查詢按檢索查詢方式向量化，候選按文件方式向量化，與線上檢索一致；結果按餘弦相似度由高到低排列',
+      similarityImage: '候選圖片（可選）',
+      similarityImageCandidate: '圖片',
       audioFile: '音訊檔案',
       chooseFile: '選擇檔案',
       parameters: '請求參數',
@@ -3315,14 +3323,45 @@ export default {
         success: '已將 {count} 個空間的存儲配額更新為 {gb} GB',
         failed: '應用到所有空間失敗'
       },
+      userList: {
+        title: '平台使用者列表',
+        rowLabel: '使用者管理',
+        rowDesc: '檢視平台上的全部註冊使用者（跨空間），支援分頁與依使用者名稱/郵箱篩選。',
+        searchPlaceholder: '依使用者名稱或郵箱篩選（目前頁面）',
+        refresh: '重新整理',
+        active: '正常',
+        inactive: '已停用',
+        colUsername: '使用者名稱',
+        colStatus: '狀態',
+        colRole: '角色',
+        colCreated: '建立日期',
+        colAction: '操作',
+        prev: '上一頁',
+        next: '下一頁',
+        pageCount: '{shown} 筆 / 本頁 {total}',
+        enable: '啟用',
+        disable: '停用',
+        resetPassword: '重設密碼',
+        confirmDisable: '確定停用帳號 {name} 嗎？將立即撤銷其登入狀態。',
+        confirmEnable: '確定啟用帳號 {name} 嗎？',
+        enabledMsg: '已啟用 {name}',
+        disabledMsg: '已停用 {name}',
+        actionFailed: '操作失敗',
+        loadFailed: '載入使用者列表失敗',
+        roleAdmin: '系統管理員',
+        roleUser: '一般使用者',
+        confirmRevoke: '確定撤銷 {name} 的系統管理員權限嗎？',
+        confirmPromote: '確定將 {name} 提升為系統管理員嗎？',
+        revokeBtn: '撤銷',
+        promoteBtn: '提升',
+        revokedMsg: '已撤銷 {name} 的管理員權限',
+        promotedMsg: '已將 {name} 提升為系統管理員',
+        roleFailed: '修改角色失敗',
+      },
       passwordReset: {
-        label: '重設使用者密碼',
-        description: '為忘記密碼的其他使用者設定新密碼。重設成功後，該使用者當前所有登入會話都會失效，需要使用新密碼重新登入。',
-        action: '重設密碼',
         dialogTitle: '重設其他使用者的密碼',
         warning: '這是高風險操作。請核對使用者電子信箱；出於安全考慮，不能在這裡重設自己的密碼。',
         emailLabel: '使用者電子信箱',
-        emailPlaceholder: '輸入需要重設密碼的使用者電子信箱',
         newPasswordLabel: '新密碼',
         newPasswordPlaceholder: '請輸入新密碼',
         confirmPasswordLabel: '確認新密碼',
@@ -3332,8 +3371,6 @@ export default {
         failed: '重設密碼失敗',
       },
       createUser: {
-        label: '建立使用者',
-        description: '開通一個新的本地使用者帳號。如果平台的預設空間模式設定為「自動建立個人空間」，該使用者會像自助註冊的使用者一樣，同時獲得一個個人空間。',
         action: '建立使用者',
         dialogTitle: '建立新使用者',
         warning: '這是高風險操作。請仔細核對使用者名和電子信箱──它們將作為該使用者登入的唯一憑據。',
@@ -3356,10 +3393,6 @@ export default {
           usernameLength: '使用者名長度必須為 2-50 個字符',
           emailRequired: '請輸入電子信箱',
           emailInvalid: '請輸入有效的電子信箱地址',
-          passwordRequired: '請輸入新密碼',
-          passwordLength: '密碼長度必須為 8-32 個字符',
-          passwordLetter: '密碼必須包含字母',
-          passwordNumber: '密碼必須包含數字',
           confirmRequired: '請再次輸入新密碼',
           passwordMismatch: '兩次輸入的密碼不一致'
         },
@@ -3372,26 +3405,6 @@ export default {
           copyBtn: '複製帳號資訊',
           copySuccess: '帳號資訊已複製到剪貼簿',
           acknowledgeBtn: '我已儲存密碼'
-        }
-      },
-      admins: {
-        label: '系統管理員',
-        description: '擁有平台級權限的使用者。在右側輸入電子信箱並Enter即可提升使用者為管理員；點擊 × 即為撤銷其權限。當前你（自己）已是管理員，不在清單中顯示，也無法被自己撤銷。',
-        placeholder: '輸入使用者電子信箱並Enter',
-        loadFailed: '載入系統管理員失敗',
-        saveSuccess: '已更新系統管理員',
-        saveFailed: '更新系統管理員失敗',
-        confirm: {
-          revoke: {
-            header: '撤銷系統管理員',
-            body: '確認撤銷 {email} 的系統管理員權限？撤銷後該使用者將無法再存取任何系統級功能。',
-            confirmBtn: '撤銷'
-          },
-          promote: {
-            header: '提升為系統管理員',
-            body: '確認將 {email} 提升為系統管理員？該使用者將獲得平台級權限，可存取所有空間、修改系統設定、管理其他管理員。',
-            confirmBtn: '提升'
-          }
         }
       },
       reset: {
@@ -3712,36 +3725,27 @@ export default {
           generic: '獲取佇列狀態失敗'
         }
       },
-      runtimeTable: {
-        setting: '設定項與用途',
-        value: '當前值'
-      },
       sections: {
         other: {
-          tab: '其他 {count}',
           title: '其他設定',
           description: '當前部署中未歸入標準分組的設定項。'
         },
         security: {
-          tab: '網路安全 {count}',
           title: '網路安全',
           description: '管理 SSRF 白名單，以及是否允許 Docker 沙箱（本機 docker.sock 等同宿主機 root）。'
         },
         runtime: {
-          tab: '運行與併發 {count}',
           title: '運行與併發',
           description: '設定後台任務池與模型服務的併發容量。',
           restartHint: 'Worker 設定需重啟生效'
         },
         tenant: {
-          tab: '空間預設值 {count}',
           title: '空間預設值',
           description: '設定新空間的初始配額與相容性行為，不會自動改寫已有空間。'
         },
         access: {
-          tab: '帳戶與存取 {count}',
-          title: '帳戶與存取',
-          description: '管理系統管理員、公開註冊與使用者建立空間的規則。'
+          title: '註冊與存取',
+          description: '管理註冊方式、密碼要求及使用者建立空間的規則。'
         }
       },
       priorityHint: {
@@ -3943,6 +3947,7 @@ export default {
         desktopRetry: '重新連結',
         notStarted: '終端尚未啟動。啟動後會連結本會話的沙箱環境；若沙箱不存在或已暫停，將為你建立或喚醒它。',
         paused: '本會話的沙箱已暫停。啟動終端會喚醒它。',
+        stopped: '本會話的沙箱未在執行：可能已停止，或因長時間閒置已被回收。啟動終端會重新啟動它；若已被回收，則會新建一個沙箱，先前的檔案和安裝的軟體不會保留。',
         start: '啟動終端',
         connecting: '正在連結沙箱…',
         needsProvision: '本會話當前沒有運行中的沙箱環境。建立並啟動會新建一個沙箱，並按工作區設定計費。',
@@ -3953,6 +3958,8 @@ export default {
         retry: '重新連結',
         sessionEnded: '終端會話已結束',
         idleDisconnected: '終端空閒已斷開，沙箱將按工作區 TTL 自行暫停。可重新連結。',
+        idleDisconnectedNewShell: '終端閒置已斷開，其中的 shell 已結束（nohup 啟動的背景任務不受影響）。重新連結會開啟一個新的 shell。',
+        disconnectedNewShell: '連結已斷開，終端中的 shell 已結束（nohup 啟動的背景任務不受影響）。重新連結會開啟一個新的 shell。',
         authRevoked: '登入狀態已失效，終端已斷開。請重新登入後再連結。',
     },
     questionMinimapTitle: '問答',
@@ -4533,11 +4540,11 @@ export default {
         imageLoadError: '圖片載入失敗',
         noCaption: '暫無描述',
         noOcr: '未識別到文字',
-        caption: '描述',
-        ocr: '圖中文字（OCR）',
-        attributes: '屬性',
+        caption: '圖片描述',
+        ocr: '圖中文字',
+        attributes: '圖片屬性',
         source: '來源文件',
-        details: '詳細資訊',
+        details: '基本資訊',
         dimensions: '尺寸',
         status: '狀態',
         openSource: '打開來源文件',
@@ -4553,6 +4560,19 @@ export default {
         viewerClose: '關閉 (Esc)',
         prev: '上一張 (←)',
         next: '下一張 (→)',
+        sourceFilter: '按文件',
+        sourceFilterTitle: '按來源文件篩選',
+        sourceFilterSearch: '搜尋文件名稱',
+        sourceFilterEmpty: '沒有符合的文件',
+        sourceFilterSubtitle: '圖庫僅顯示所選文件中的圖片，方便逐一核對摘要與 OCR 結果',
+        sourceFilterSelected: '已選 {count} 個文件',
+        sourceFilterClear: '清空已選',
+        sourceFilterTooMany: '最多只能選擇 1000 個文件',
+        sourceFilterColName: '文件名稱',
+        sourceFilterColTime: '上傳時間',
+        sourceFilterSelectAll: '全選 / 全不選（含全部命中結果）',
+        sourceFilterOverflowRecent: '文件較多，僅顯示最近 {cap} 條，請輸入關鍵字精確定位',
+        sourceFilterOverflowHits: '命中 {total} 個文件，僅顯示前 {cap} 條，請細化關鍵字後再全選',
         // Display names for the builtin attributes the gallery itself
         // declares. Attributes contributed by other sources fall back to the
         // pipeline's own wording (see the imageAttr namespace).
@@ -4652,6 +4672,16 @@ export default {
       helpZoomDesc: '縮放畫布',
       neighborsProgress: '已顯示鄰居 {visible}/{total}（還有 {hidden} 個未載入）',
       neighborsAllShown: '全部 {total} 個鄰居已在圖中（可點"展開鄰居"聚焦到該節點子圖）',
+      graphNavigationHint: '拖曳空白處移動 · 滾輪縮放',
+      focusGroup: '聚焦這組頁面',
+      focusGroupViewing: '正在查看：{name}',
+      focusGroupBack: '返回全圖',
+      focusGroupSwitch: '切換到其他分組',
+      unlinkedHidden: '已隱藏 {count} 個無關聯頁面',
+      unlinkedSection: '無關聯頁面 · {count}',
+      offscreenSection: '目前視圖無連線（存在連結）· {count}',
+      hideUnlinked: '隱藏無關聯頁面（{count}）',
+      showUnlinked: '顯示無關聯頁面（{count}）',
       neighborsNone: '該節點沒有連結鄰居',
       neighborsCenterUnreachable: '已顯示鄰居 {visible}/{total}（還有 {hidden} 個無法連通：可能是死鏈、被篩選或已刪除）',
       neighborsOverviewHidden: '已顯示鄰居 {visible}/{total}（{hidden} 個不在概覽範圍，點"展開鄰居"以此為中心查看）',
@@ -7011,6 +7041,11 @@ export default {
     }
   },
   uploadConfirm: {
+    imageEmbeddingModel: "圖像索引 Embedding 模型",
+    imageIndexInherited: "圖像索引使用知識庫綁定的 Embedding 模型；如需更換，請前往知識庫設定。",
+    imageVectorIndex: "本次圖片向量索引",
+    imageVectorIndexHint: "為本次上傳或重新解析的圖片產生向量，不改變知識庫預設設定。是否參與檢索仍由知識庫的「圖片向量檢索」開關決定。",
+    imageVectorRequiresIndex: "請先在知識庫設定中開啟向量索引。",
     documentSummary: "文件摘要",
     documentSummaryDescription: "為本次匯入的文件選擇是否自動生成摘要。",
     generateSummary: "生成文件摘要",
@@ -7357,10 +7392,10 @@ export default {
     statusFailed: '失敗',
     statusCancelled: '已取消',
     statusDraft: '草稿',
-    noDescription: '無描述',
+    noDescription: '暫無描述',
     emptyKnowledgeDragDrop: '知識為空，拖放上傳',
-    pdfDocFormat: 'pdf、doc 格式檔案，不超過10M',
-    textMarkdownFormat: 'text、markdown格式檔案，不超過200K',
+    pdfDocFormat: 'pdf、doc 格式檔案，不超過{size}M',
+    textMarkdownFormat: 'text、markdown格式檔案，不超過{size}M',
     dragFileNotText: '請拖曳檔案而不是文字或連結',
     searchPlaceholder: '搜尋知識庫...',
     docSearchPlaceholder: '搜尋檔案名稱...',

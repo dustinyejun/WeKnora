@@ -2592,6 +2592,14 @@ export default {
       documentsPlaceholder: '후보 문서를 한 줄에 하나씩 입력하세요',
       documentsHint: '비어 있지 않은 각 줄은 ReRank 모델에 별도 문서로 전송됩니다',
       imageFile: '이미지 파일',
+      similarityMode: '유사도',
+      similarityQuery: '쿼리',
+      similarityQueryPlaceholder: '쿼리를 입력하세요. 예: 잔디 위를 달리는 개',
+      similarityCandidates: '후보 텍스트',
+      similarityCandidatesPlaceholder: '한 줄에 하나의 후보 텍스트를 입력하세요',
+      similarityHint: '쿼리는 검색 쿼리로, 후보는 문서로 벡터화됩니다(실제 검색과 동일). 결과는 코사인 유사도가 높은 순으로 정렬됩니다',
+      similarityImage: '후보 이미지(선택)',
+      similarityImageCandidate: '이미지',
       audioFile: '오디오 파일',
       chooseFile: '파일 선택',
       parameters: '요청 매개변수',
@@ -3313,14 +3321,45 @@ export default {
         success: '{count}개 워크스페이스의 저장 용량을 {gb} GB로 갱신했습니다',
         failed: '모든 워크스페이스에 적용 실패'
       },
+      userList: {
+        title: '플랫폼 사용자 목록',
+        rowLabel: '사용자 관리',
+        rowDesc: '워크스페이스 전체의 등록 사용자를 페이지네이션 및 사용자 이름/이메일 필터와 함께 표시합니다.',
+        searchPlaceholder: '사용자 이름 또는 이메일로 필터링(현재 페이지)',
+        refresh: '새로고침',
+        active: '활성',
+        inactive: '비활성',
+        colUsername: '사용자 이름',
+        colStatus: '상태',
+        colRole: '역할',
+        colCreated: '생성일',
+        colAction: '작업',
+        prev: '이전',
+        next: '다음',
+        pageCount: '{shown}개 표시 / 페이지 내 {total}',
+        enable: '활성화',
+        disable: '비활성화',
+        resetPassword: '비밀번호 재설정',
+        confirmDisable: '{name} 계정을 비활성화할까요? 활성 세션이 즉시 취소됩니다.',
+        confirmEnable: '{name} 계정을 활성화할까요?',
+        enabledMsg: '{name} 활성화됨',
+        disabledMsg: '{name} 비활성화됨',
+        actionFailed: '작업 실패',
+        loadFailed: '사용자 목록을 불러오지 못했습니다',
+        roleAdmin: '시스템 관리자',
+        roleUser: '일반 사용자',
+        confirmRevoke: '{name}의 시스템 관리자 권한을 취소할까요?',
+        confirmPromote: '{name}을(를) 시스템 관리자로 승격할까요?',
+        revokeBtn: '취소',
+        promoteBtn: '승격',
+        revokedMsg: '{name}의 관리자 권한을 취소했습니다',
+        promotedMsg: '{name}을(를) 시스템 관리자로 승격했습니다',
+        roleFailed: '역할 변경 실패',
+      },
       passwordReset: {
-        label: '사용자 비밀번호 재설정',
-        description: '로그인할 수 없는 다른 사용자의 새 비밀번호를 설정합니다. 재설정하면 해당 사용자의 현재 로그인 세션이 모두 만료되며 새 비밀번호로 다시 로그인해야 합니다.',
-        action: '비밀번호 재설정',
         dialogTitle: '다른 사용자의 비밀번호 재설정',
         warning: '보안에 민감한 작업입니다. 사용자 이메일을 반드시 확인하세요. 여기서는 자신의 비밀번호를 재설정할 수 없습니다.',
         emailLabel: '사용자 이메일',
-        emailPlaceholder: '비밀번호를 재설정할 사용자의 이메일 입력',
         newPasswordLabel: '새 비밀번호',
         newPasswordPlaceholder: '새 비밀번호 입력',
         confirmPasswordLabel: '새 비밀번호 확인',
@@ -3330,8 +3369,6 @@ export default {
         failed: '비밀번호 재설정 실패',
       },
       createUser: {
-        label: '사용자 생성',
-        description: '새 로컬 사용자 계정을 개설합니다. 플랫폼의 기본 공간 모드가 "개인 공간 자동 생성"으로 설정된 경우, 스스로 가입한 사용자와 마찬가지로 개인 공간도 함께 만들어집니다.',
         action: '사용자 생성',
         dialogTitle: '새 사용자 생성',
         warning: '보안에 민감한 작업입니다. 새 사용자가 로그인할 때 사용할 사용자 이름과 이메일을 신중히 확인하세요.',
@@ -3354,10 +3391,6 @@ export default {
           usernameLength: '사용자 이름은 2~50자여야 합니다',
           emailRequired: '이메일을 입력하세요',
           emailInvalid: '올바른 이메일 주소를 입력하세요',
-          passwordRequired: '새 비밀번호를 입력하세요',
-          passwordLength: '비밀번호는 8~32자여야 합니다',
-          passwordLetter: '비밀번호에 문자가 포함되어야 합니다',
-          passwordNumber: '비밀번호에 숫자가 포함되어야 합니다',
           confirmRequired: '새 비밀번호를 다시 입력하세요',
           passwordMismatch: '비밀번호가 일치하지 않습니다'
         },
@@ -3370,26 +3403,6 @@ export default {
           copyBtn: '계정 정보 복사',
           copySuccess: '계정 정보가 클립보드에 복사되었습니다',
           acknowledgeBtn: '비밀번호를 저장했습니다'
-        }
-      },
-      admins: {
-        label: '시스템 관리자',
-        description: '플랫폼 수준 권한을 가진 사용자입니다. 오른쪽에 이메일을 입력하고 엔터를 누르면 해당 사용자를 관리자로 승격하고, 태그의 ×를 누르면 권한을 회수합니다. 본인은 관리자이지만 목록에 표시되지 않으며 자신의 권한을 회수할 수 없습니다.',
-        placeholder: '사용자 이메일을 입력하고 엔터를 누르세요',
-        loadFailed: '시스템 관리자 정보를 불러오지 못했습니다',
-        saveSuccess: '시스템 관리자가 업데이트되었습니다',
-        saveFailed: '시스템 관리자 업데이트 실패',
-        confirm: {
-          revoke: {
-            header: '시스템 관리자 권한 회수',
-            body: '{email} 사용자의 시스템 관리자 권한을 회수하시겠습니까? 회수 후에는 시스템 수준 기능에 더 이상 접근할 수 없습니다.',
-            confirmBtn: '회수 확인'
-          },
-          promote: {
-            header: '시스템 관리자로 승격',
-            body: '{email} 사용자를 시스템 관리자로 승격하시겠습니까? 이 사용자는 모든 워크스페이스 접근, 시스템 설정 변경, 관리자 명단 관리 등 플랫폼 수준의 권한을 갖게 됩니다.',
-            confirmBtn: '승격 확인'
-          }
         }
       },
       reset: {
@@ -3710,36 +3723,27 @@ export default {
           generic: '큐 상태를 불러오지 못했습니다'
         }
       },
-      runtimeTable: {
-        setting: '설정 및 용도',
-        value: '현재 값'
-      },
       sections: {
         other: {
-          tab: '기타 {count}',
           title: '기타 설정',
           description: '표준 제품 그룹에 포함되지 않은 현재 배포의 설정입니다.'
         },
         security: {
-          tab: '네트워크 보안 {count}',
           title: '네트워크 보안',
           description: 'SSRF 허용 목록과 Docker 샌드박스 허용 여부(로컬 docker.sock은 호스트 root와 같음)를 관리합니다.'
         },
         runtime: {
-          tab: '런타임 및 동시성 {count}',
           title: '런타임 및 동시성',
           description: '백그라운드 워커 풀과 모델 서비스의 동시 처리 용량을 설정합니다.',
           restartHint: '워커 설정은 재시작 후 적용'
         },
         tenant: {
-          tab: '워크스페이스 기본값 {count}',
           title: '워크스페이스 기본값',
           description: '기존 워크스페이스를 변경하지 않고 신규 워크스페이스의 초기 할당량과 호환 동작을 설정합니다.'
         },
         access: {
-          tab: '계정 및 액세스 {count}',
-          title: '계정 및 액세스',
-          description: '시스템 관리자, 공개 가입, 공간 생성 규칙을 관리합니다.'
+          title: '가입 및 액세스',
+          description: '가입 방식, 비밀번호 요구 사항, 공간 생성 규칙을 관리합니다.'
         }
       },
       priorityHint: {
@@ -3941,6 +3945,7 @@ export default {
         desktopRetry: 'Reconnect',
         notStarted: '터미널이 아직 실행되지 않았습니다. 시작하면 이 대화의 샌드박스에 연결하며, 샌드박스가 없거나 일시 중지된 경우 생성하거나 다시 시작합니다.',
         paused: '이 대화의 샌드박스가 일시 중지되었습니다. 터미널을 시작하면 다시 시작됩니다.',
+        stopped: '이 대화의 샌드박스가 실행 중이 아닙니다. 중지되었거나 오랫동안 유휴 상태여서 회수되었을 수 있습니다. 터미널을 시작하면 다시 시작되며, 이미 회수된 경우 새 샌드박스가 만들어지고 이전 파일과 설치한 소프트웨어는 유지되지 않습니다.',
         start: '터미널 시작',
         connecting: '샌드박스에 연결하는 중…',
         needsProvision: '이 대화에는 실행 중인 샌드박스가 없습니다. 생성하고 시작하면 새 샌드박스가 만들어지며 워크스페이스 설정에 따라 요금이 부과됩니다.',
@@ -3951,6 +3956,8 @@ export default {
         retry: '다시 연결',
         sessionEnded: '터미널 세션이 종료되었습니다',
         idleDisconnected: '터미널이 유휴 상태로 연결이 끊어졌습니다. 샌드박스는 TTL에 따라 일시 중지됩니다. 다시 연결할 수 있습니다.',
+        idleDisconnectedNewShell: '터미널이 유휴 상태로 연결이 끊어져 셸이 종료되었습니다(nohup으로 시작한 백그라운드 작업은 영향을 받지 않습니다). 다시 연결하면 새 셸이 열립니다.',
+        disconnectedNewShell: '연결이 끊어져 터미널의 셸이 종료되었습니다(nohup으로 시작한 백그라운드 작업은 영향을 받지 않습니다). 다시 연결하면 새 셸이 열립니다.',
         authRevoked: '로그인 상태가 더 이상 유효하지 않아 터미널 연결이 끊어졌습니다. 다시 로그인한 뒤 재연결하세요.',
     },
     questionMinimapTitle: '질문',
@@ -4531,11 +4538,11 @@ export default {
         imageLoadError: '이미지를 불러오지 못했습니다',
         noCaption: '설명 없음',
         noOcr: '인식된 텍스트 없음',
-        caption: '설명',
-        ocr: '이미지 속 텍스트(OCR)',
-        attributes: '속성',
+        caption: '이미지 설명',
+        ocr: '이미지 속 텍스트',
+        attributes: '이미지 속성',
         source: '원본 문서',
-        details: '상세 정보',
+        details: '기본 정보',
         dimensions: '크기',
         status: '상태',
         openSource: '원본 문서 열기',
@@ -4551,6 +4558,19 @@ export default {
         viewerClose: '닫기 (Esc)',
         prev: '이전 (←)',
         next: '다음 (→)',
+        sourceFilter: '문서별 필터',
+        sourceFilterTitle: '원본 문서로 필터',
+        sourceFilterSearch: '문서 이름 검색',
+        sourceFilterEmpty: '일치하는 문서가 없습니다',
+        sourceFilterSubtitle: '선택한 문서의 이미지만 표시하여 캡션과 OCR 결과를 하나씩 확인할 수 있습니다',
+        sourceFilterSelected: '{count}개 문서 선택됨',
+        sourceFilterClear: '선택 지우기',
+        sourceFilterTooMany: '최대 1000개 문서까지 선택할 수 있습니다',
+        sourceFilterColName: '파일 이름',
+        sourceFilterColTime: '업로드 시간',
+        sourceFilterSelectAll: '전체 선택 / 해제 (모든 검색 결과 대상)',
+        sourceFilterOverflowRecent: '문서가 많아 최근 {cap}개만 표시합니다. 키워드로 좁혀 주세요',
+        sourceFilterOverflowHits: '{total}개 문서가 일치했습니다. 처음 {cap}개만 표시 중입니다. 전체 선택 전 키워드를 좁혀 주세요',
         // Display names for the builtin attributes the gallery itself
         // declares. Attributes contributed by other sources fall back to the
         // pipeline's own wording (see the imageAttr namespace).
@@ -4650,6 +4670,16 @@ export default {
       helpZoomDesc: '캔버스 확대/축소',
       neighborsProgress: '이웃 {visible}/{total} 표시됨 ({hidden}개 미로딩)',
       neighborsAllShown: '모든 {total}개 이웃이 이미 캔버스에 있습니다 (확장을 클릭하여 이 노드의 서브그래프에 집중)',
+      graphNavigationHint: '빈 공간을 드래그하여 이동 · 스크롤하여 확대/축소',
+      focusGroup: '이 그룹에 초점 맞추기',
+      focusGroupViewing: '보는 중: {name}',
+      focusGroupBack: '전체 그래프로 돌아가기',
+      focusGroupSwitch: '다른 그룹으로 전환',
+      unlinkedHidden: '연결 없는 페이지 {count}개 숨김',
+      unlinkedSection: '연결 없는 페이지 · {count}',
+      offscreenSection: '현재 화면에 연결 없음 (링크 있음) · {count}',
+      hideUnlinked: '연결 없는 페이지 숨기기 ({count})',
+      showUnlinked: '연결 없는 페이지 표시 ({count})',
       neighborsNone: '이 페이지에는 연결된 이웃이 없습니다',
       neighborsCenterUnreachable: '이웃 {visible}/{total} 표시됨 ({hidden}개 연결 불가: 끊긴 링크, 필터됨 또는 삭제됨)',
       neighborsOverviewHidden: '이웃 {visible}/{total} 표시됨 ({hidden}개는 개요 범위 밖 — 확장을 클릭하여 이곳으로 전환)',
@@ -5403,7 +5433,7 @@ export default {
     usernameRequired: '사용자명을 입력해주세요',
     usernameMinLength: '사용자명은 최소 2자여야 합니다',
     usernameMaxLength: '사용자명은 20자를 초과할 수 없습니다',
-    usernameInvalid: '사용자명은 문자, 숫자, 밑줄, 한글만 포함할 수 있습니다',
+    usernameInvalid: '사용자명은 영문자, 숫자, 밑줄(_), 한자만 포함할 수 있습니다',
     confirmPasswordRequired: '비밀번호를 확인해주세요',
     passwordMismatch: '두 비밀번호가 일치하지 않습니다',
     loginError: '로그인 오류, 이메일 또는 비밀번호를 확인해주세요',
@@ -7009,6 +7039,11 @@ export default {
     }
   },
   uploadConfirm: {
+    imageEmbeddingModel: "이미지 인덱싱 Embedding 모델",
+    imageIndexInherited: "이미지 인덱싱에는 지식 베이스에 연결된 Embedding 모델을 사용합니다. 변경하려면 지식 베이스 설정으로 이동하세요.",
+    imageVectorIndex: "이번 가져오기의 이미지 벡터 인덱싱",
+    imageVectorIndexHint: "이번 업로드 또는 재분석에서 이미지 벡터를 생성하며 지식 베이스 기본 설정은 변경하지 않습니다. 검색 사용 여부는 지식 베이스의 이미지 벡터 검색 설정을 따릅니다.",
+    imageVectorRequiresIndex: "먼저 지식 베이스 설정에서 벡터 인덱싱을 활성화하세요.",
     documentSummary: "문서 요약",
     documentSummaryDescription: "이번에 가져오는 문서의 요약을 자동으로 생성할지 선택합니다.",
     generateSummary: "문서 요약 생성",
@@ -7355,10 +7390,10 @@ export default {
     statusFailed: '실패',
     statusCancelled: '취소됨',
     statusDraft: '초안',
-    noDescription: '설명 없음',
+    noDescription: '아직 설명이 없습니다',
     emptyKnowledgeDragDrop: '지식이 비어 있음, 드래그 앤 드롭으로 업로드',
-    pdfDocFormat: 'pdf, doc 형식 파일, 최대 10MB',
-    textMarkdownFormat: 'text, markdown 형식 파일, 최대 200KB',
+    pdfDocFormat: 'pdf, doc 형식 파일, 최대 {size}MB',
+    textMarkdownFormat: 'text, markdown 형식 파일, 최대 {size}MB',
     dragFileNotText: '텍스트나 링크가 아닌 파일을 드래그하세요',
     searchPlaceholder: '지식베이스 검색...',
     docSearchPlaceholder: '문서 이름 검색...',
