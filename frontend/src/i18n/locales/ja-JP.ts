@@ -1828,6 +1828,7 @@ export default {
       skillTranscriptLive: 'インストールログ',
       skillTranscriptLiveHint: 'インストール中 — クリックで表示',
       skillTranscriptTitle: 'インストールの実行内容',
+      skillTranscriptPrompt: 'インストール指示',
       skillTranscriptHide: 'インストールの実行内容を非表示',
       skillGuidance: {
         placeholder: '必要な CLI、インストール手順、環境の制約などを入力',
@@ -1946,6 +1947,7 @@ export default {
       installedCount: '{count}個のサンドボックスにインストール済み',
       installPanelGroup: 'インストール済み',
       installPanelAvailable: '未インストール',
+      installAction: 'インストール',
       viewInstallProgress: '進捗を表示',
       manageOnSandbox: 'サンドボックス「{name}」でこのスキルを管理',
       manageDrawerDesc: 'サンドボックス「{name}」での有効化、変数、アンインストールを管理します。',
@@ -5684,6 +5686,9 @@ export default {
     authTypeApiKey: 'APIキー／トークン',
     authTypeOAuth: 'OAuth 2.0（初回接続時に認可）',
     oauthScopes: 'スコープ（任意、スペース区切り）',
+    oauthClientId: 'クライアント ID（任意）',
+    oauthClientIdDesc: '認可サーバーに事前登録したクライアントを指定します。空欄の場合は動的クライアント登録で自動登録します。クライアント ID を変更する場合はシークレットも更新してください。',
+    oauthClientSecret: 'クライアントシークレット（任意）',
     oauthAuthorization: '認可状態',
     oauthAuthorized: '認可済み',
     oauthRefreshable: 'トークンの有効期限が切れています。次回利用時に自動的に更新されます',
@@ -6301,6 +6306,22 @@ export default {
       script: 'スクリプト',
       instructions: 'スキル説明'
     },
+    attachmentTarget: {
+      list: 'すべての添付ファイル',
+      file: '添付ファイル',
+      images: '{name} の画像',
+      imagesUnnamed: '添付ファイルの画像',
+      image: '{name} の画像 {n}',
+      imageUnnamed: '添付ファイルの画像 {n}'
+    },
+    imageView: {
+      summary: '「{file}」の画像 {numbers} を確認しました（全 {total} 枚）',
+      single: '画像「{file}」を確認しました',
+      descriptionsHeading: 'ビジョンモデルによる画像の説明',
+      imageLabel: '画像 #{n}',
+      noDescription: '説明を生成できませんでした',
+      remaining: '未確認の画像があと {count} 枚あります'
+    },
     sandboxFiles: {
       found: '{count}件のファイルが見つかりました',
       empty: 'ファイルなし',
@@ -6614,6 +6635,13 @@ export default {
       kbMetricRag: 'RAGナレッジベース',
       kbMetricWiki: 'Wikiナレッジベース',
       statusInactive: '選択済みの{count}個のツールは、現在の設定では有効になりません',
+      searchConversations: '過去の会話を検索',
+      searchConversationsDesc: 'ユーザー自身の過去の会話から以前話した内容を探します',
+      groupStored: '保存済み（ここでは提供されていません）',
+      switchManagedDesc: 'このリストではなくエージェントの他の設定で制御されるため、ここでチェックしても有効になりません。チェックを外すと削除されます。',
+      unrecognizedDesc: 'このバージョンにはないツールのため、エージェントは呼び出せません。チェックを外すと削除されます。',
+      keptUnknownWarning: '保存しました。次の保存済みツールはこのバージョンにはないため残しましたが、エージェントは呼び出せません：{names}',
+      droppedWarning: '保存しました。次のツールはエージェントの他の設定で制御されるため、ツールリストから削除しました：{names}',
       effectiveLabel: '有効なツール',
       effectiveDesc: '現在の設定から算出された、エージェントが実際に呼び出せるツールです',
       effectiveEmpty: '利用可能なツールがありません。エージェントは通常のモデル対話にフォールバックします'
