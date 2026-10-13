@@ -10,40 +10,16 @@
 | `scripts/dev-custom.sh` | 叠加 `docker-compose.dev.custom.yml` 编排容器；`app`、`frontend` 直接交给上游 `scripts/dev.sh` |
 | `docker-compose.dev.custom.yml` | 开发环境覆盖配置：Go/前端容器、本地构建 docreader、共用正式环境 postgres 数据卷、Neo4j 内存限制 |
 | `docker-compose.override.yml` | 不带 `-f` 运行 `docker compose` 时自动合并，给正式环境的 Neo4j 加内存限制 |
+| `CUSTOM_LOCAL_RUN.md` | 两种本地运行方式的说明 |
 
 只有两处直接改了官方文件，都是很少变动的位置：
 
 - `.dockerignore`：排除 `.local-data/`。上游 `dev.sh` 把本机运行时上传的文件放在这里，而 `Dockerfile.app` 会 `COPY . .`。
 - `docker/Dockerfile.app`：Go 构建步骤加 go-build 缓存和 `GO_BUILD_PARALLELISM`，Docker 虚拟机内存较小时不容易编译失败。
 
-## 两种开发模式
+## 本地运行
 
-**本机模式（默认）**：Go 和 Vite 在本机运行，docreader 与基础设施在 Docker 中运行。修改 Go/Vue 代码不需要构建镜像。
-
-```bash
-make dev-start DEV_ARGS=--no-langfuse   # 启动基础服务，并停掉占用 8080/5173 的应用容器
-make dev-app                            # 终端 1：Go（装了 air 会自动重载）
-make dev-frontend                       # 终端 2：Vite
-# 页面 http://localhost:5173，后端 API http://localhost:8080
-
-make dev-docreader                      # 修改了 Python 代码后，只重建解析服务
-```
-
-`make dev-local` 和 `make dev-start` 相同。已有本地 docreader 镜像时直接复用，第一次缺少镜像才从源码构建。
-
-**完整 Docker 模式**：Go、前端、docreader 都从当前源码构建，全部在容器里运行。先在本机的 Go/Vite 终端按 Ctrl+C 释放端口，再执行：
-
-```bash
-make dev-docker DEV_ARGS=--no-langfuse  # 修改源码后再次执行，按构建缓存更新镜像
-```
-
-三个应用使用本地标签 `weknora-app:dev-local`、`weknora-ui:dev-local`、`weknora-docreader:dev-local`，不使用官方镜像。前端容器用 NGINX 提供页面，并把 API 转发到 `app:8080`。
-
-两种模式共用 `.local-data/files` 和数据库、Redis 数据卷，切换模式不会删除数据。切回本机模式只需 `make dev-local`，基础服务不用停。
-
-其他命令：`make dev-stop`、`make dev-restart DEV_ARGS=...`、`make dev-logs`、`make dev-status`。这些命令覆盖所有 profile 下的容器。`start` 的全部选项见 `./scripts/dev-custom.sh help`。
-
-注意：一条 make 命令里的目标都属于上面这些开发命令时，才会走定制版。像 `make dev-stop build` 这样混着写，会整体交给上游 `Makefile`，`dev-stop` 也会变成官方版本。
+两种本地运行方式（app 和前端用源码直接运行、打包成镜像运行）的完整步骤见 [CUSTOM_LOCAL_RUN.md](CUSTOM_LOCAL_RUN.md)。
 
 ## 可选环境变量（写在 `.env`）
 
