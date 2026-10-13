@@ -56,7 +56,24 @@ make dev-docker DEV_ARGS=--no-langfuse  # 修改源码后再次执行，按构�
 | `NEO4J_PAGECACHE_SIZE` | `256m` | Neo4j 页缓存 |
 | `NEO4J_MEMORY_LIMIT` | `1536m` | Neo4j 容器内存上限，要比堆加页缓存大，给堆外内存、线程、索引留空间 |
 
+## 部署（正式环境）
+
+`custom_dev` 没有改应用代码，部署直接用官方镜像。下面的命令在仓库根目录运行，会自动叠加 `docker-compose.override.yml`：
+
+```bash
+make dev-stop                          # 先停开发环境
+docker compose --profile neo4j pull    # 拉取 .env 中 WEKNORA_VERSION 对应的官方镜像
+docker compose --profile neo4j up -d
+docker compose --profile neo4j ps      # 等服务变成 healthy/running
+# 页面 http://localhost（FRONTEND_PORT），API http://localhost:8080（APP_PORT）
+```
+
+- **升级**：在 `.env` 中修改 `WEKNORA_VERSION`（`latest` 或发布标签如 `v0.7.0`），再执行 `pull` 和 `up -d`。
+- **停止**：`docker compose --profile neo4j down`。不要加 `-v`，否则会删除数据卷。
+- **用自己的源码部署**（以后改了应用代码时）：`docker compose --profile neo4j up -d --build`。构建出的镜像会占用官方标签 `wechatopenai/weknora-*:latest`，之后再 `pull` 会被官方镜像覆盖。
+
 ## 注意
 
-- **两套 postgres 不要同时启动**：开发环境的 postgres 挂载的是正式环境的 `weknora_postgres-data` 卷。先跑了 `make dev-start`，又跑 `docker compose up -d`，两个 postgres 会同时写同一份数据，可能损坏数据库。
+- **开发环境和正式环境不要同时运行**：两个 compose 文件都没有设置项目名，都属于同一个 compose 项目 `weknora`。同名服务（postgres、redis、app 等）会互相替换容器，`make dev-stop` 也会把正式环境的 Neo4j 容器一起删掉（数据卷保留）。切换前先停掉当前这一套。
+- **两套环境共用 postgres 数据**：开发环境挂载的是正式环境的 `weknora_postgres-data` 卷，部署后能看到开发时的数据，反之亦然。
 - **不要再改官方文件**：新的定制内容放进上面这些独立文件。同步上游的方法：在 `custom_dev` 上运行 `git sync-upstream`，再 `git push`。
