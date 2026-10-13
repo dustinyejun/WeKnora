@@ -1,0 +1,10 @@
+# custom_dev：不带 -f 运行 docker compose 时会自动合并本文件，上游 docker-compose.yml 保持原样。
+services:
+  neo4j:
+    # 小型部署默认预留 768 MiB 给 JVM 堆外、线程和数据库原生内存。
+    mem_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
+    memswap_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
+    environment:
+      - NEO4J_server_memory_heap_initial__size=${NEO4J_HEAP_SIZE:-512m}
+      - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-512m}
+      - NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-256m}

@@ -647,16 +647,10 @@ services:
   neo4j:
     image: neo4j:2025.10.1
     container_name: WeKnora-neo4j
-    # 小型部署默认预留 768 MiB 给 JVM 堆外、线程和数据库原生内存。
-    mem_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
-    memswap_limit: ${NEO4J_MEMORY_LIMIT:-1536m}
     volumes:
       - neo4j-data:/data
     environment:
       - NEO4J_AUTH=${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-password}
-      - NEO4J_server_memory_heap_initial__size=${NEO4J_HEAP_SIZE:-512m}
-      - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-512m}
-      - NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-256m}
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true

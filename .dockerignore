@@ -56,7 +56,6 @@ test/data/mswag.txt
 
 # 敏感文件
 .env
-.env.local
 .env.lite
 *.pem
 *.key

@@ -56,10 +56,7 @@ help:
 	@echo "  show-platform     显示当前构建平台"
 	@echo ""
 	@echo "开发模式（推荐）:"
-	@echo "  dev-start         启动基础服务，Go/Vite 在本机运行（默认）"
-	@echo "  dev-local         同 dev-start；自动停止 Go/前端容器以释放端口"
-	@echo "  dev-docker        从源码构建 Go/前端/Python，全部在 Docker 运行"
-	@echo "  dev-docreader     仅重建并启动本地 Python 解析镜像"
+	@echo "  dev-start         启动开发环境基础设施（仅启动依赖服务）"
 	@echo "                    可选: make dev-start DEV_ARGS=--odl-hybrid"
 	@echo "  dev-stop          停止开发环境"
 	@echo "  dev-restart       重启开发环境"
@@ -361,24 +358,14 @@ show-platform:
 	@echo "Docker构建平台: $(PLATFORM)"
 
 # Development mode commands
-.PHONY: dev-local dev-docker dev-docreader
 dev-start:
 	./scripts/dev.sh start $(DEV_ARGS)
-
-dev-local:
-	./scripts/dev.sh start --infra-only $(DEV_ARGS)
-
-dev-docker:
-	./scripts/dev.sh start --docker $(DEV_ARGS)
-
-dev-docreader:
-	./scripts/dev.sh docreader
 
 dev-stop:
 	./scripts/dev.sh stop
 
 dev-restart:
-	./scripts/dev.sh restart $(DEV_ARGS)
+	./scripts/dev.sh restart
 
 dev-logs:
 	./scripts/dev.sh logs

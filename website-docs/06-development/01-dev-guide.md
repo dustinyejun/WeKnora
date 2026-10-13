@@ -1,6 +1,6 @@
 # 开发指南
 
-开发环境默认在本机运行 Go 后端和 Vite 前端，通过 `docker-compose.dev.yml` 启动 Python 解析服务及基础设施；也支持从当前源码构建三个应用镜像并全部在 Docker 中运行。代码修改后按所在模块执行构建与测试，再检查相关集成路径。
+开发环境使用 `docker-compose.dev.yml` 启动依赖服务，并支持独立运行 Go 后端、Web 前端和 docreader。代码修改后按所在模块执行构建与测试，再检查相关集成路径。
 
 ## 技术栈与环境要求 {#_1-技术栈与环境要求}
 
@@ -33,23 +33,21 @@ pip install uv          # docreader 使用 uv sync 安装依赖
 
 ## 快速开始：开发模式（推荐） {#_2-快速开始-开发模式-推荐}
 
-日常开发默认在本机运行 Go 和 Vite，Python `docreader` 与基础设施继续使用 Docker。`make dev-start`（或 `make dev-local`）启动基础服务，并停止占用应用端口的 Go/前端容器。已有本地 Python 镜像时直接复用，首次缺少镜像才从源码构建；修改 Go/Vue 不需要构建 Docker 镜像。
+开发模式在 Docker 中运行基础设施，在本地运行 `app` 和 `frontend`。修改应用代码后可直接重启进程，无需重建依赖镜像。入口为 `scripts/dev.sh`，Makefile 的 `dev-*` 目标封装了相应操作。
 
 ```bash
 # 1. 准备环境变量：dev.sh 会加载 .env（必须存在），再用 .env.local 覆盖（可选）
 cp .env.example .env
 
-# 2. 启动基础服务（默认还带 Langfuse）
-make dev-start DEV_ARGS=--no-langfuse  # 不启用自建可观测服务
-# 等价 make dev-local DEV_ARGS=--no-langfuse
+# 2. 启动基础设施（ParadeDB/Postgres + Redis + docreader，默认还带 Langfuse）
+make dev-start                      # 等价 ./scripts/dev.sh start
+make dev-start DEV_ARGS=--qdrant    # 附加可选 profile
 
-# 3. 在两个终端分别运行本机源码
-make dev-app       # Go；安装 Air 后自动重载，否则修改代码后重启此命令
-make dev-frontend  # Vite；修改 Vue/TS 自动热更新
-# 页面 http://localhost:5173；后端 API http://localhost:8080
+# 3. 另开终端：本地跑后端（内部执行 go run -ldflags=... ./cmd/server）
+make dev-app                        # 等价 ./scripts/dev.sh app
 
-# Python 源码更新：只重建解析服务
-make dev-docreader
+# 4. 再开终端：本地跑前端（cd frontend && npm install && npm run dev）
+make dev-frontend                   # 等价 ./scripts/dev.sh frontend
 
 # 其他
 make dev-status   # 查看容器状态
@@ -57,20 +55,6 @@ make dev-logs     # 查看日志
 make dev-stop     # 停止
 make dev-restart  # 重启
 ```
-
-### 完整 Docker 模式 {#_2-docker-mode}
-
-需要验证镜像运行时，先在本机 Go/Vite 终端按 Ctrl+C 释放端口，再执行：
-
-```bash
-make dev-docker DEV_ARGS=--no-langfuse
-# 等价 make dev-start DEV_ARGS="--docker --no-langfuse"
-# 修改源码后再次执行上述命令，按构建缓存更新镜像。
-```
-
-三个应用使用独立本地标签 `weknora-app:dev-local`、`weknora-ui:dev-local`、`weknora-docreader:dev-local`，不使用 `WEKNORA_VERSION` 指定的官方应用镜像。Docker 前端在容器内使用 NGINX 提供构建后的页面，并将 API 请求转发至 `app:8080`。Docker 宿主机端口可用 `DEV_FRONTEND_PORT`、`DEV_APP_PORT` 调整，默认分别为 `5173`、`8080`。
-
-切回本机开发时，执行 `make dev-local DEV_ARGS=--no-langfuse`，再分别运行 `make dev-app`、`make dev-frontend`；基础服务不必停止。两种模式复用 `.local-data/files` 和数据库、Redis 持久卷，切换与更新镜像不删除数据。完整 Docker 模式不需要执行本机启动命令。
 
 前端 dev server 监听 `5173`（`frontend/vite.config.ts` 中 `server.port: 5173`），把 `/api`、`/files` 与 `/mcp/` 代理到后端。代理目标依次取进程环境变量 `VITE_DEV_PROXY_TARGET`、`FRONTEND_BACKEND_URL`，两者都未设置或为空时使用 `http://localhost:8080`。`DEV_PROXY_TARGET` 是配置文件中的内部常量，不是环境变量。
 
@@ -93,12 +77,10 @@ VITE_DEV_PROXY_TARGET=https://kb.example.com npm run dev
 
 ### docker-compose.dev.yml 服务清单 {#_2-1-docker-compose-dev-yml-服务清单}
 
-默认启动与 profile 可选服务如下（profile 通过 `dev.sh start` 的参数开启）：
+`docker-compose.dev.yml` 只包含依赖服务，不含 `app`/`frontend`。默认启动与 profile 可选服务如下（profile 通过 `dev.sh start` 的参数开启）：
 
 | 服务 | 镜像 | 端口（默认） | 启动条件 |
 | --- | --- | --- | --- |
-| `app` | 本地构建 `weknora-app:dev-local` | `8080` | `--docker` / `--full` |
-| `frontend` | 本地构建 `weknora-ui:dev-local` | `5173` | 同上 |
 | `postgres` | `paradedb/paradedb:v0.25.11-pg17`（自带 pg_search/BM25） | `5432` | 默认启动 |
 | `redis` | `redis:7.0-alpine`（`--requirepass`） | `6379` | 默认启动 |
 | `docreader` | 本地构建 `docker/Dockerfile.docreader` | `50051`（gRPC） | 默认启动 |
@@ -114,17 +96,16 @@ VITE_DEV_PROXY_TARGET=https://kb.example.com npm run dev
 | `odl-hybrid` | 本地构建 `docker/Dockerfile.odl-hybrid`（Docling PDF 后端） | `5002` | `--odl-hybrid`（镜像较大，按需） |
 | `sandbox` | `wechatopenai/weknora-sandbox`（Skills 脚本执行沙箱，仅 build/pull，非常驻） | - | profile `full` |
 
-`dev.sh start` 的可选参数：`--docker`（全部应用容器运行）、`--infra-only`（本机调试模式，默认）、`--build`（显式重建本次启用的本地镜像）、`--minio`、`--qdrant`、`--neo4j`、`--dex`、`--langfuse`（默认开）、`--no-langfuse`、`--odl-hybrid`、`--full`（全部可选服务和应用容器，不含 odl-hybrid）。通过 Makefile 传参：`make dev-start DEV_ARGS=--odl-hybrid`。Go 容器默认通过 `host.docker.internal:7687` 使用已发布到宿主机的 Neo4j，外部图数据库可通过 `DEV_NEO4J_URI` 覆盖。
-
-Neo4j 默认限制为 `1536m` 容器内存、`512m` JVM 堆和 `256m` 页缓存，适合小型开发数据库。可通过 `.env` 的 `NEO4J_MEMORY_LIMIT`、`NEO4J_HEAP_SIZE`、`NEO4J_PAGECACHE_SIZE` 调整；容器上限需要为堆外、线程及索引等留出空间，不能只等于堆与页缓存之和。两个 Compose 文件都使用这些参数。
+`dev.sh start` 的可选参数：`--minio`、`--qdrant`、`--neo4j`、`--dex`、`--langfuse`（默认开）、`--no-langfuse`、`--odl-hybrid`、`--full`（全部可选服务，不含 odl-hybrid）。通过 Makefile 传参：`make dev-start DEV_ARGS=--odl-hybrid`。
 
 ### 本地单独跑 docreader {#_2-2-本地单独跑-docreader}
 
-`dev-start` 默认把 docreader 跑在本地构建的容器里；如需本地调试 Python 代码，在项目根目录执行：
+`dev-start` 默认把 docreader 跑在容器里；如需本地调试 Python 代码：
 
 ```bash
-uv sync --project docreader --locked
-docreader/.venv/bin/python -m docreader.main  # 默认监听 50051；先停止占用该端口的 docreader 容器
+cd docreader
+uv sync                       # 按 uv.lock 安装依赖（容器内为 uv sync --locked --no-dev）
+uv run -m docreader.main      # 启动 gRPC 服务（与 Dockerfile CMD 一致），监听 DOCREADER_GRPC_PORT（默认 50051）
 ```
 
 docreader 的大量调优参数（PDF 渲染 DPI、扫描件判定、SSRF 白名单、gRPC TLS 等）以 `DOCREADER_*` 环境变量注入，完整清单见 `docker-compose.dev.yml` 的 `docreader.environment` 段。
@@ -190,10 +171,7 @@ make package-mac-app  # 打 macOS .app（scripts/package-mac-app.sh）
 
 | 目标 | 作用 |
 | --- | --- |
-| `dev-start` / `dev-stop` / `dev-restart` / `dev-logs` / `dev-status` | `scripts/dev.sh start/stop/restart/logs/status`；默认本机 Go/Vite + Docker 基础服务，start/restart 支持 `DEV_ARGS`；完整容器重启传 `--docker` |
-| `dev-local` | 同 `dev-start`，释放应用容器端口，复用本地 Python 镜像 |
-| `dev-docker` | 从源码构建 Go/前端/Python，并启动完整容器模式 |
-| `dev-docreader` | 仅重建并启动 Python 镜像，不构建 Go/前端或切换模式 |
+| `dev-start` / `dev-stop` / `dev-restart` / `dev-logs` / `dev-status` | `scripts/dev.sh start/stop/restart/logs/status`（支持 `DEV_ARGS` 传 profile 参数） |
 | `dev-app` | 本地 `go run ./cmd/server`（带版本 ldflags） |
 | `dev-frontend` | 本地 `npm run dev` |
 | `build-lite` / `run-lite` / `package-lite` / `package-mac-app` | Lite 模式构建/运行/打包（见 2.3） |
