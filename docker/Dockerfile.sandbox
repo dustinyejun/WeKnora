@@ -86,6 +86,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # Add packages here when installed skills actually need them:
+# Office document generation (.docx / .xlsx). Agents otherwise pip install
+# these on every session, which fails on flaky egress to PyPI.
+# PIP_INDEX_ARG optionally points at a PyPI mirror for the build.
+ARG PIP_INDEX_ARG
+RUN uv pip install --system --no-cache ${PIP_INDEX_ARG:+--index-url "$PIP_INDEX_ARG"} \
+    python-docx \
+    openpyxl
 
 # Sandbox scripts run as root by default: each chat session owns its own
 # sandbox, so the in-container account is not a tenant boundary, and agents are
