@@ -1,4 +1,5 @@
 import { get, post, put, del, postChat, getDown } from "../../utils/request";
+import type { MindNode } from "../../utils/answerMindmap";
 
 export async function createSessions(data: Record<string, unknown> = {}) {
   return post("/api/v1/sessions", data);
@@ -22,6 +23,10 @@ export async function unpinSession(session_id: string) {
 
 export async function generateSessionsTitle(session_id: string, data: any) {
   return post(`/api/v1/sessions/${session_id}/generate_title`, data);
+}
+
+export async function generateSessionMindmap(session_id: string, data: { content: string; title?: string }) {
+  return post<{ success: boolean; data: MindNode }>(`/api/v1/sessions/${session_id}/mindmap`, data, { timeout: 150000 });
 }
 
 export async function updateSession(session_id: string, data: { title: string; description?: string }) {

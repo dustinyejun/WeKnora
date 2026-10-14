@@ -4092,6 +4092,7 @@ export default {
     referenceChunkCount: '{count} chunk(s)',
     fallbackHint: 'No relevant content found in knowledge base. Above is a direct response from the model.',
     truncatedHint: 'This answer was cut off at the per-response output limit. Above is what the model produced before the cut.',
+    mindmap: { button: 'Mind map', empty: 'Nothing to map', generating: 'Generating mind map, please wait…', renderFailed: 'Failed to generate mind map', localFallback: 'Built from the answer structure (model unavailable)' },
     rewind: {
       tooltip: 'Rewind to here',
       confirmTitle: 'Rewind to here?',

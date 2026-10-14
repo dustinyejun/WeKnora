@@ -89,6 +89,10 @@
                     :title="$t('agent.addToKnowledgeBase')">
                     <t-icon name="bookmark-add" />
                 </t-button>
+                <t-button size="small" variant="outline" shape="round" @click.stop="handleGenerateMindmap"
+                    :title="$t('chat.mindmap.button')">
+                    <t-icon name="mind-map" />
+                </t-button>
                 <!-- Skill artifact download: only shown when this reply's
                      assistant message actually recorded any generated files.
                      Emptiness is the default: the button stays hidden for
@@ -179,6 +183,7 @@ import {
     formatManualTitle,
 } from '@/utils/chatMessageShared';
 import { copyWithToast } from '@/utils/clipboard';
+import { openAnswerMindmap } from "@/utils/answerMindmapViewer";
 import {
     createChatMarkdownRenderer,
     renderChatMarkdown,
@@ -457,6 +462,17 @@ const handleCopyAnswer = async () => {
     }
 
     await copyWithToast(content, 'common.copySuccess', 'common.copyFailed');
+};
+
+// 生成脑图：让会话模型把回答归纳为 mermaid mindmap；模型失败或产物无法渲染时
+// 回退到按标题/列表结构的本地转换，然后在全屏查看器中打开
+const handleGenerateMindmap = async () => {
+    const content = getActualContent();
+    if (!content) {
+        MessagePlugin.warning(t('chat.mindmap.empty'));
+        return;
+    }
+    await openAnswerMindmap({ sessionId: props.sessionId, content, title: props.userQuery?.trim() || undefined, t });
 };
 
 // 添加到知识库

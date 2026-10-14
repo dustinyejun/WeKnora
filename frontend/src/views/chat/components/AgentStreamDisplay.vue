@@ -441,6 +441,10 @@
                   :title="$t('agent.addToKnowledgeBase')">
                   <t-icon name="bookmark-add" />
                 </t-button>
+                <t-button size="small" variant="outline" shape="round" @click.stop="handleGenerateMindmap(event)"
+                  :title="$t('chat.mindmap.button')">
+                  <t-icon name="mind-map" />
+                </t-button>
                 <!-- Skill artifact download: only shown when the persisted
                      assistant message recorded any generated files. Agent
                      mode is the primary path for skills, so this is where
@@ -733,6 +737,7 @@ import {
   type CachedMermaidSvgHtml,
 } from '@/utils/chatMessageShared';
 import { copyWithToast } from '@/utils/clipboard';
+import { openAnswerMindmap } from "@/utils/answerMindmapViewer";
 import {
   configureMarkedForChatMarkdown,
   renderChatMarkdown,
@@ -3180,6 +3185,16 @@ const handleCopyAnswer = async (answerEvent: any) => {
   }
 
   await copyWithToast(content, 'agentStream.copy.success', 'agentStream.copy.failed');
+};
+
+// 生成脑图：会话模型归纳为 mermaid mindmap，失败时回退到结构化转换
+const handleGenerateMindmap = async (answerEvent: any) => {
+  const content = getActualContent(answerEvent);
+  if (!content) {
+    MessagePlugin.warning(t('chat.mindmap.empty'));
+    return;
+  }
+  await openAnswerMindmap({ sessionId: props.sessionId, content, title: props.userQuery?.trim() || undefined, t });
 };
 
 const handleAddToKnowledge = (answerEvent: any) => {

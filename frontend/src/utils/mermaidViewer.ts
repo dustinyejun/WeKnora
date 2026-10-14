@@ -65,7 +65,7 @@ const showBtnFeedback = (btn: HTMLElement, success: boolean, text?: string): voi
 /**
  * 打开 Mermaid 全屏查看器
  */
-export const openMermaidFullscreen = (svgHtml: string): void => {
+export const openMermaidFullscreen = (svgHtml: string, filename = 'mermaid-diagram.png'): void => {
   let scale = 1
   let translateX = 0
   let translateY = 0
@@ -140,7 +140,7 @@ export const openMermaidFullscreen = (svgHtml: string): void => {
   downloadBtn.onclick = (e) => {
     e.stopPropagation()
     if (!svgEl) return
-    downloadSvgAsImage(svgEl)
+    downloadSvgAsImage(svgEl, filename)
     showBtnFeedback(downloadBtn, true, t('mermaid.downloading'))
   }
 

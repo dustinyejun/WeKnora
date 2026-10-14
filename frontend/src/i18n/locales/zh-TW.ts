@@ -4033,6 +4033,7 @@ export default {
     referenceChunkCount: '{count}個片段',
     fallbackHint: '未從知識庫中檢索到相關內容，以上為模型直接回答',
     truncatedHint: '回答在模型單次輸出上限處被截斷，以上為截斷前已生成的內容',
+    mindmap: { button: '生成腦圖', empty: '暫無可生成腦圖的內容', generating: '生成腦圖中，請稍候…', renderFailed: '腦圖生成失敗', localFallback: '已用本地結構生成（模型暫時不可用）' },
     rewind: {
       tooltip: '回滾到這裡',
       confirmTitle: '回滾到這裡？',

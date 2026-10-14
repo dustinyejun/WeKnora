@@ -4092,6 +4092,7 @@ export default {
     referenceChunkCount: '{count}件のチャンク',
     fallbackHint: 'ナレッジベースから関連する内容が見つかりませんでした。上記はモデルの直接回答です。',
     truncatedHint: 'モデルの1回あたりの出力上限で回答が途中で打ち切られました。上記は打ち切り前に生成された内容です。',
+    mindmap: { button: 'マインドマップ', empty: 'マインドマップにできる内容がありません', generating: 'マインドマップを生成中です。しばらくお待ちください…', renderFailed: 'マインドマップの生成に失敗しました', localFallback: 'モデルが利用できないため、回答の構造から生成しました' },
     rewind: {
       tooltip: 'ここに巻き戻す',
       confirmTitle: 'ここに巻き戻しますか？',
