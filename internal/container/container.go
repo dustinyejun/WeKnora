@@ -943,6 +943,11 @@ func initDatabase(cfg *config.Config) (*gorm.DB, error) {
 			)
 		}
 
+		// Idempotent, outside the numbered migrations (see database.EnsureConversationShareSchema).
+		if err := database.EnsureConversationShareSchema(db); err != nil {
+			logger.Errorf(context.Background(), "Ensure conversation share schema failed: %v", err)
+		}
+
 		// Post-migration: resolve __pending_env__ storage provider markers for historical KBs.
 		// The SQL migration marks KBs that have documents but no provider with "__pending_env__";
 		// we replace that with the actual STORAGE_TYPE from the environment.
