@@ -324,6 +324,7 @@ export default {
   },
   menu: {
     sessionInProgress: '会話中',
+    sessionUnread: '新しい回答',
     knowledgeBase: 'ナレッジベース',
     agents: 'エージェント',
     artifacts: '成果物',
@@ -2806,7 +2807,13 @@ export default {
     mcpStale: '再同期が必要',
     belongsToKb: 'ナレッジベース: ',
     belongsToOrg: '共有スペース: ',
-    noCompatibleKbForAgent: 'このエージェントのツールはスコープ内のナレッジベースの機能と一致しないため、参照できるナレッジベースがありません。'
+    noCompatibleKbForAgent: 'このエージェントのツールはスコープ内のナレッジベースの機能と一致しないため、参照できるナレッジベースがありません。',
+    tag: 'タグ',
+    searchPlaceholder: 'ナレッジ・ファイル等を検索',
+    searchInGroup: '{group}内を検索…',
+    typeToSearch: "{'@'} の後に入力して検索…",
+    viewAll: 'すべて表示',
+    back: '戻る'
   },
   file: {
     upload: 'ファイルをアップロード'
@@ -4087,6 +4094,7 @@ export default {
     truncatedHint: 'モデルの1回あたりの出力上限で回答が途中で打ち切られました。上記は打ち切り前に生成された内容です。',
     rewind: {
       tooltip: 'ここに巻き戻す',
+      confirmTitle: 'ここに巻き戻しますか？',
       confirmBody: 'これより後の会話を削除します。質問から巻き戻すとその質問自体も消え、入力欄に戻します。チェックポイントがあればワークスペースも戻します。この操作は元に戻せません。',
       confirmButton: '巻き戻す',
       cancelButton: 'キャンセル',
@@ -5644,6 +5652,9 @@ export default {
     "serverDocumentation": "サーバーの元の説明",
     "noServerDocumentation": "この MCP サーバーの initialize に instructions / serverInfo.description はありません（どちらも任意）。ツールの説明は下の各 description にあります。",
     "policyHint": "ツールの有効化と承認設定は即時保存され、一覧の更新後も維持されます。",
+    "columnTool": "ツール",
+    "columnEnabled": "有効",
+    "columnApproval": "承認",
     "failed": "ツール一覧を読み込めませんでした",
     "setupProgress": "MCP 設定の手順",
     "connection": "接続設定",
@@ -6137,7 +6148,8 @@ export default {
     getDocumentInfo: 'ドキュメント情報の取得',
     queryKnowledgeGraph: 'ナレッジグラフの照会',
     think: '深い思考',
-    todoWrite: '計画の作成'
+    todoWrite: '計画の作成',
+    askUser: 'ユーザーに質問'
   },
   vectorStoreBadge: {
     systemDefault: 'システムデフォルト',
@@ -6235,10 +6247,37 @@ export default {
     }
   },
   agentStream: {
+    askUser: {
+      title: 'あなたへの質問',
+      selectPlaceholder: '選択してください',
+      textPlaceholder: '回答を入力',
+      otherPlaceholder: 'その他（任意）',
+      decline: '回答しない',
+      submit: '送信',
+      declinedTag: '回答を辞退しました',
+      submitted: '送信済み',
+      answeredTag: '回答済み',
+      timedOutTag: '時間内に回答なし',
+      canceledTag: 'キャンセル済み',
+      unansweredTag: '未回答',
+      submitFailed: '送信に失敗しました',
+    },
+    promptDock: {
+      approvalTitle: '承認が必要です',
+      oauthTitle: '認可が必要です',
+      waiting: 'あなたの対応待ち',
+      handle: '対応する',
+      pager: '{current} / {total}',
+      previous: '前へ',
+      next: '次へ',
+      collapse: '折りたたむ',
+      expand: '展開'
+    },
     toolApproval: {
       waiting: '承認待ち · {target}',
       waitingStatus: '承認待ち',
       targetWithTool: '{service} › {tool}',
+      dockQuestion: '{target} の実行を許可しますか？',
       titleWithTarget: '承認 · {service} › {tool}',
       argsLabel: '引数',
       argsModified: '変更あり',
@@ -6247,6 +6286,9 @@ export default {
       reject: '拒否',
       approvedTag: '承認済み',
       rejectedTag: '拒否済み',
+      parked: 'バックグラウンドで待機中。後で対応できます',
+      parkedUntil: 'バックグラウンドで待機中。{time} までに対応してください',
+      abandonedTag: '破棄済み',
       invalidJson: '引数は有効なJSONである必要があります',
       submitted: '送信しました',
       submitFailed: '送信に失敗しました',
@@ -6256,6 +6298,7 @@ export default {
       waiting: '認可待ち · {target}',
       waitingStatus: '認可待ち',
       targetWithTool: '{service} › {tool}',
+      dockQuestion: '続行するには {target} を認可してください',
       titleWithService: 'OAuth · {service}',
       titleWithTool: 'OAuth · {service} › {tool}',
       desc: '認可すると、サインイン用の新しいウィンドウが開きます。認可が成功すると、ツール呼び出しは自動的に再開されます。',
@@ -6283,6 +6326,7 @@ export default {
       readDocument: 'ドキュメントを読む',
       listDocuments: 'ドキュメント一覧',
       todoWrite: '計画管理',
+      askUser: 'ユーザーに質問',
       knowledgeGraphExtract: 'ナレッジグラフ抽出',
       thinking: '思考',
       attachmentParsing: '添付ファイルを解析',
@@ -6576,6 +6620,8 @@ export default {
       thinkingDesc: '動的かつ内省的に問題を解決する思考ツール',
       todoWrite: '計画',
       todoWriteDesc: '構造化された調査計画を作成します',
+      askUser: 'ユーザーに質問',
+      askUserDesc: '必要な情報が不足しているときにユーザーへ質問し、回答を待ってから続行します',
       searchKnowledge: 'ナレッジベースを検索',
       searchKnowledgeDesc: 'セマンティック・キーワード・ハイブリッド検索でナレッジベースのチャンクを検索します',
       readDocument: 'ドキュメントを読む',

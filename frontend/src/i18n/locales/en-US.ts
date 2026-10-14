@@ -324,6 +324,7 @@ export default {
   },
   menu: {
     sessionInProgress: 'Conversation in progress',
+    sessionUnread: 'New reply',
     knowledgeBase: 'Knowledge Base',
     agents: 'Agents',
     artifacts: 'Artifacts',
@@ -2806,7 +2807,13 @@ export default {
     mcpStale: 'Needs resync',
     belongsToKb: 'Knowledge base: ',
     belongsToOrg: 'Space: ',
-    noCompatibleKbForAgent: 'This agent\'s tools don\'t match any knowledge base\'s capabilities in scope, so nothing can be referenced.'
+    noCompatibleKbForAgent: 'This agent\'s tools don\'t match any knowledge base\'s capabilities in scope, so nothing can be referenced.',
+    tag: 'Tags',
+    searchPlaceholder: 'Search KBs, files, skills…',
+    searchInGroup: 'Search in {group}…',
+    typeToSearch: "Keep typing after {'@'} to search…",
+    viewAll: 'View all',
+    back: 'Back'
   },
   file: {
     upload: 'Upload File'
@@ -4087,6 +4094,7 @@ export default {
     truncatedHint: 'This answer was cut off at the per-response output limit. Above is what the model produced before the cut.',
     rewind: {
       tooltip: 'Rewind to here',
+      confirmTitle: 'Rewind to here?',
       confirmBody: 'Later messages will be deleted. Rewinding from a question also removes that question and puts it back in the input. The workspace rolls back when a checkpoint is available. This cannot be undone.',
       confirmButton: 'Rewind',
       cancelButton: 'Cancel',
@@ -5644,6 +5652,9 @@ export default {
     "serverDocumentation": "Original server documentation",
     "noServerDocumentation": "This MCP server's initialize result did not include instructions or serverInfo.description (both are optional). Tool text lives in each tool's description below.",
     "policyHint": "Tool and approval switches save immediately and survive directory refreshes.",
+    "columnTool": "Tool",
+    "columnEnabled": "Enabled",
+    "columnApproval": "Approval",
     "failed": "Could not load the tool directory",
     "setupProgress": "MCP setup steps",
     "connection": "Connection",
@@ -6137,7 +6148,8 @@ export default {
     getDocumentInfo: 'Get Document Info',
     queryKnowledgeGraph: 'Query Knowledge Graph',
     think: 'Deep Thinking',
-    todoWrite: 'Make Plan'
+    todoWrite: 'Make Plan',
+    askUser: 'Ask User'
   },
   vectorStoreBadge: {
     systemDefault: 'System default',
@@ -6235,10 +6247,37 @@ export default {
     }
   },
   agentStream: {
+    askUser: {
+      title: 'Question for you',
+      selectPlaceholder: 'Select',
+      textPlaceholder: 'Type your answer',
+      otherPlaceholder: 'Other (optional)',
+      decline: 'Skip',
+      submit: 'Submit',
+      declinedTag: 'Declined to answer',
+      submitted: 'Submitted',
+      answeredTag: 'Answered',
+      timedOutTag: 'No answer in time',
+      canceledTag: 'Canceled',
+      unansweredTag: 'Not answered',
+      submitFailed: 'Failed to submit',
+    },
+    promptDock: {
+      approvalTitle: 'Needs your review',
+      oauthTitle: 'Needs your authorization',
+      waiting: 'Waiting for you',
+      handle: 'Respond',
+      pager: '{current} / {total}',
+      previous: 'Previous',
+      next: 'Next',
+      collapse: 'Collapse',
+      expand: 'Expand'
+    },
     toolApproval: {
       waiting: 'Awaiting review · {target}',
       waitingStatus: 'Awaiting review',
       targetWithTool: '{service} › {tool}',
+      dockQuestion: 'Allow {target} to run?',
       titleWithTarget: 'Review · {service} › {tool}',
       argsLabel: 'Arguments',
       argsModified: 'Modified',
@@ -6247,6 +6286,9 @@ export default {
       reject: 'Reject',
       approvedTag: 'Approved',
       rejectedTag: 'Rejected',
+      parked: 'Waiting in the background — answer any time',
+      parkedUntil: 'Waiting in the background — answer before {time}',
+      abandonedTag: 'Abandoned',
       invalidJson: 'Arguments must be valid JSON',
       submitted: 'Submitted',
       submitFailed: 'Submit failed',
@@ -6256,6 +6298,7 @@ export default {
       waiting: 'Awaiting authorization · {target}',
       waitingStatus: 'Awaiting authorization',
       targetWithTool: '{service} › {tool}',
+      dockQuestion: 'Authorize {target} to continue',
       titleWithService: 'OAuth · {service}',
       titleWithTool: 'OAuth · {service} › {tool}',
       desc: 'Authorizing opens a new window to sign in. The tool call resumes automatically once authorization succeeds.',
@@ -6283,6 +6326,7 @@ export default {
       readDocument: 'Read document',
       listDocuments: 'List documents',
       todoWrite: 'Plan Management',
+      askUser: 'Ask User',
       knowledgeGraphExtract: 'Knowledge Graph Extraction',
       thinking: 'Thinking',
       attachmentParsing: 'Parsing Attachment',
@@ -6576,6 +6620,8 @@ export default {
       thinkingDesc: 'Dynamic and reflective problem-solving thinking tool',
       todoWrite: 'Plan',
       todoWriteDesc: 'Create structured research plans',
+      askUser: 'Ask User',
+      askUserDesc: 'Ask the user for missing information and wait for the answer before continuing',
       searchKnowledge: 'Search knowledge',
       searchKnowledgeDesc: 'Semantic, keyword or hybrid search over knowledge-base chunks',
       readDocument: 'Read document',
