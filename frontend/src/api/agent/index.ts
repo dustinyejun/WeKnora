@@ -355,6 +355,8 @@ export interface IMChannel {
   session_mode?: 'user' | 'thread';
   knowledge_base_id?: string;
   credentials: Record<string, any>;
+  // List responses omit credentials and report only whether they are set.
+  credentials_configured?: boolean;
   created_at?: string;
   updated_at?: string;
 }

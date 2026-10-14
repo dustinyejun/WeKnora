@@ -818,11 +818,14 @@ watch(
     }
   },
 );
-// Whether WeChat credentials are already bound
+// Whether WeChat credentials are already bound. List responses omit
+// credentials, so an existing channel counts as bound via
+// credentials_configured until the user starts a QR rebind.
+const wechatRebinding = ref(false);
 const wechatBound = computed(() => {
-  return formData.value.platform === 'wechat' &&
-    formData.value.credentials.bot_token &&
-    formData.value.credentials.ilink_bot_id;
+  if (formData.value.platform !== 'wechat') return false;
+  if (formData.value.credentials.bot_token && formData.value.credentials.ilink_bot_id) return true;
+  return !!editingChannel.value?.credentials_configured && !wechatRebinding.value;
 });
 
 
@@ -868,6 +871,7 @@ function normalizeYunzhijiaCredentials() {
 
 async function startWeChatBinding() {
   stopWeChatPolling();
+  wechatRebinding.value = true;
   wechatLoading.value = true;
   wechatQRContent.value = '';
   wechatQRImgUrl.value = '';
@@ -995,6 +999,7 @@ async function editChannel(channel: IMChannel | IMChannelOverview) {
     return;
   }
   editingChannel.value = fullChannel;
+  wechatRebinding.value = false;
   editingEnabled.value = fullChannel.enabled;
   channelNameTouched.value = true;
   formData.value = {
@@ -1018,6 +1023,7 @@ function resetForm() {
   wizardStep.value = 0;
   channelNameTouched.value = false;
   stopWeChatPolling();
+  wechatRebinding.value = false;
   wechatQRContent.value = '';
   wechatQRImgUrl.value = '';
   wechatQRCode.value = '';
@@ -1039,7 +1045,7 @@ async function handleSave() {
   saving.value = true;
   try {
     // For WeChat, validate that credentials are bound
-    if (formData.value.platform === 'wechat' && !formData.value.credentials.bot_token) {
+    if (formData.value.platform === 'wechat' && !wechatBound.value) {
       MessagePlugin.warning(t('agentEditor.im.wechatScanBind'));
       return;
     }

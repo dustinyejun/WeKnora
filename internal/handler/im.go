@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"sort"
@@ -265,7 +266,12 @@ func (h *IMHandler) UpdateIMChannel(c *gin.Context) {
 		}
 	}
 	if req.Credentials != nil {
-		channel.Credentials = req.Credentials
+		merged, err := mergeIMCredentials(channel.Credentials, req.Credentials)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid credentials"})
+			return
+		}
+		channel.Credentials = merged
 	}
 	if req.Enabled != nil {
 		channel.Enabled = *req.Enabled
@@ -292,6 +298,37 @@ func (h *IMHandler) UpdateIMChannel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": channel})
+}
+
+// mergeIMCredentials overlays incoming credential fields on the stored ones.
+// List responses never carry credentials, so the edit form submits blanks for
+// secrets it cannot see; a blank or null field keeps the stored value instead
+// of wiping it (e.g. a WeChat bot_token that only a QR rebind can recreate).
+// ponytail: a field cannot be cleared to "" through update; delete and
+// recreate the channel if that is ever needed.
+func mergeIMCredentials(existing, incoming types.JSON) (types.JSON, error) {
+	in := map[string]any{}
+	if err := json.Unmarshal(incoming, &in); err != nil {
+		return nil, err
+	}
+	out := map[string]any{}
+	if len(existing) > 0 {
+		_ = json.Unmarshal(existing, &out)
+	}
+	for k, v := range in {
+		if v == nil {
+			continue
+		}
+		if s, ok := v.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		out[k] = v
+	}
+	b, err := json.Marshal(out)
+	if err != nil {
+		return nil, err
+	}
+	return types.JSON(b), nil
 }
 
 func normalizeIMLocale(locale string) (string, error) {
