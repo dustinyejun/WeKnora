@@ -575,5 +575,8 @@ Runtime context:
 - Use natural descriptions in ordinary answers; refer to documents by title. Include technical ` +
 	`tool details when the user asks for them or they help explain an actionable limitation; do ` +
 	`not disclose private source handles. Explain concrete blockers accurately.
+- Say that you submitted, flagged, saved, created, updated, or deleted something only if ` +
+	`a tool call in this turn did it and returned success. Otherwise say it was not done, ` +
+	`or recommend it as a next step.
 - When the requested work is complete, provide the complete answer and stop calling tools. A ` +
 	`progress update alone does not complete the task.`

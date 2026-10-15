@@ -256,6 +256,7 @@ func TestBuildRuntimeContextBlock_PinnedDocuments(t *testing.T) {
 	assert.Contains(t, block, `file_type="pdf"`)
 	assert.NotContains(t, block, "<note>")
 	assert.Contains(t, runtimePromptContract, "Honor the current pinned-document scope")
+	assert.Contains(t, runtimePromptContract, "only if a tool call in this turn did it and returned success")
 	assert.NotContains(t, block, "<must_use>")
 }
 
