@@ -67,6 +67,11 @@
             })
             }}</span>
           </div>
+          <t-button size="small" variant="outline" class="wiki-health-check-btn graph-health-check-btn"
+            @click="runHealthCheck">
+            <template #icon><t-icon name="heart" /></template>
+            {{ $t('knowledgeEditor.wikiBrowser.healthCheck') }}
+          </t-button>
         </div>
 
         <!-- Legend Overlay -->
@@ -209,6 +214,10 @@
                 stats.pending_issues
             }) }}</span>
           </div>
+          <t-button size="small" variant="outline" block class="wiki-health-check-btn" @click="runHealthCheck">
+            <template #icon><t-icon name="heart" /></template>
+            {{ $t('knowledgeEditor.wikiBrowser.healthCheck') }}
+          </t-button>
           <t-input v-model="searchQuery" :placeholder="$t('knowledgeEditor.wikiBrowser.searchPlaceholder')" clearable
             @enter="doSearch" @clear="searchResults = null">
             <template #prefixIcon><t-icon name="search" /></template>
@@ -746,6 +755,45 @@
       </div>
     </t-drawer>
 
+    <!-- Structural health check (GET /wiki/lint) -->
+    <t-drawer v-model:visible="showHealthDrawer" :header="$t('knowledgeEditor.wikiBrowser.healthCheckTitle')"
+      size="480px" :footer="false" class="wiki-global-issues-drawer">
+      <div v-if="healthLoading" class="wiki-health-loading"><t-loading /></div>
+      <template v-else-if="healthReport">
+        <div class="wiki-health-score">
+          <span class="wiki-health-score__value" :class="healthReport.health_score >= 80 ? 'is-good'
+            : healthReport.health_score >= 60 ? 'is-fair' : 'is-poor'">{{ healthReport.health_score }}</span>
+          <span class="wiki-health-score__label">{{ $t('knowledgeEditor.wikiBrowser.healthScore') }}</span>
+          <span class="wiki-health-score__count">{{ $t('knowledgeEditor.wikiBrowser.healthIssueCount',
+            { count: healthIssues.length }) }}</span>
+        </div>
+        <p class="wiki-health-note">{{ $t('knowledgeEditor.wikiBrowser.healthScopeNote') }}</p>
+        <div class="wiki-issue-popup-list">
+          <div v-for="(issue, i) in healthIssues" :key="i" class="wiki-issue-popup-item">
+            <div class="wiki-issue-popup-main">
+              <div class="wiki-issue-popup-tags">
+                <t-tag :theme="issue.severity === 'error' ? 'danger' : issue.severity === 'warning' ? 'warning'
+                  : 'default'" variant="light" size="small">{{
+                    $t(`knowledgeEditor.wikiBrowser.lintSeverity.${issue.severity}`) }}</t-tag>
+              </div>
+              <div class="wiki-issue-popup-desc">
+                <div style="font-weight: 500; margin-bottom: 4px; color: var(--td-brand-color); cursor: pointer;"
+                  @click="openHealthIssuePage(issue.page_slug)">
+                  <t-icon name="link" size="12px" /> {{ $t('knowledgeEditor.wikiBrowser.issuePagePrefix') }}{{
+                    slugDisplayName(issue.page_slug) }}
+                </div>
+                {{ healthIssueText(issue) }}
+              </div>
+            </div>
+          </div>
+          <div v-if="healthIssues.length === 0"
+            style="padding: 40px; text-align: center; color: var(--td-text-color-placeholder);">
+            {{ $t('knowledgeEditor.wikiBrowser.healthNoIssues') }}
+          </div>
+        </div>
+      </template>
+    </t-drawer>
+
     <!-- Fix Chat Drawer -->
     <t-drawer v-model:visible="showFixDrawer" :header="$t('knowledgeEditor.wikiBrowser.fixAssistantTitle')" size="700px"
       :footer="false" class="wiki-fix-drawer">
@@ -859,6 +907,9 @@ import {
   searchWikiPages,
   listWikiIssues,
   updateWikiIssueStatus,
+  getWikiLint,
+  type WikiLintReport,
+  type WikiLintIssue,
   type WikiPage,
   type WikiFolderNode,
   type WikiGraphData,
@@ -1014,6 +1065,40 @@ const showIssuesBox = ref(false)
 const showFixDrawer = ref(false)
 const showGlobalIssuesDrawer = ref(false)
 const globalIssues = ref<WikiPageIssue[]>([])
+const showHealthDrawer = ref(false)
+const healthLoading = ref(false)
+const healthReport = ref<WikiLintReport | null>(null)
+const healthIssues = computed(() => {
+  const rank = { error: 0, warning: 1, info: 2 } as const
+  return [...(healthReport.value?.issues || [])].sort((a, b) => rank[a.severity] - rank[b.severity])
+})
+
+async function runHealthCheck() {
+  showHealthDrawer.value = true
+  healthLoading.value = true
+  healthReport.value = null
+  try {
+    healthReport.value = await getWikiLint(props.knowledgeBaseId)
+  } catch (e) {
+    console.error('Wiki health check failed:', e)
+    MessagePlugin.error(t('knowledgeEditor.wikiBrowser.healthCheckFailed'))
+  } finally {
+    healthLoading.value = false
+  }
+}
+
+function healthIssueText(issue: WikiLintIssue): string {
+  return t(`knowledgeEditor.wikiBrowser.lintIssue.${issue.type}`, {
+    page: slugDisplayName(issue.page_slug),
+    target: issue.target_slug ? slugDisplayName(issue.target_slug) : '',
+  })
+}
+
+async function openHealthIssuePage(slug: string) {
+  showHealthDrawer.value = false
+  if (props.view === 'graph') handleGraphSearchSelect(slug)
+  else await navigateToSlug(slug)
+}
 const currentFixSessionId = ref('')
 const stats = ref<WikiStats | null>(null)
 const graphData = ref<WikiGraphData | null>(null)
@@ -6615,6 +6700,42 @@ span.graph-focus-name {
 .graph-issues-badge {
   box-shadow: var(--td-shadow-1);
   opacity: 0.95;
+}
+
+.graph-health-check-btn {
+  box-shadow: var(--td-shadow-1);
+  background: var(--td-bg-color-container);
+}
+
+.wiki-health-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.wiki-health-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  &__value {
+    font-size: 32px;
+    font-weight: 600;
+
+    &.is-good { color: var(--td-success-color); }
+    &.is-fair { color: var(--td-warning-color); }
+    &.is-poor { color: var(--td-error-color); }
+  }
+
+  &__label { color: var(--td-text-color-secondary); }
+  &__count { margin-left: auto; color: var(--td-text-color-secondary); }
+}
+
+.wiki-health-note {
+  margin: 0 0 12px;
+  font-size: var(--app-text-sm);
+  color: var(--td-text-color-placeholder);
 }
 
 :deep(.wiki-graph-drawer) {

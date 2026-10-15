@@ -354,6 +354,36 @@ export function listWikiIssues(kbId: string, slug?: string, status?: string) {
   return get(`/api/v1/knowledgebase/${kbId}/wiki/issues?${params.toString()}`);
 }
 
+export type WikiLintIssueType =
+  | 'orphan_page'
+  | 'broken_link'
+  | 'stale_ref'
+  | 'missing_cross_ref'
+  | 'empty_content'
+  | 'duplicate_slug';
+
+export interface WikiLintIssue {
+  type: WikiLintIssueType;
+  severity: 'info' | 'warning' | 'error';
+  page_slug: string;
+  target_slug?: string;
+  description: string;
+  auto_fixable: boolean;
+}
+
+export interface WikiLintReport {
+  knowledge_base_id: string;
+  issues: WikiLintIssue[] | null;
+  health_score: number;
+  summary: string;
+}
+
+// Structural health check (links, orphans, stale refs). The endpoint
+// returns the report itself, not a {data} envelope.
+export function getWikiLint(kbId: string) {
+  return get<WikiLintReport>(`/api/v1/knowledgebase/${kbId}/wiki/lint`);
+}
+
 export function updateWikiIssueStatus(kbId: string, issueId: string, status: string) {
   return put(`/api/v1/knowledgebase/${kbId}/wiki/issues/${issueId}/status`, { status });
 }
