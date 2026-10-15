@@ -268,13 +268,15 @@ Handler: `internal/handler/session/temporary_document.go`
 
 ### POST /api/v1/sessions/:session_id/attachments
 
-用途：上传会话级临时文档（异步解析）。multipart 字段：`file`（必填）、`agent_id`（可选，决定解析引擎/ASR 模型）、`parser_engine`（可选；使用共享智能体时忽略，由智能体的解析规则决定）。
+用途：上传并保存会话附件。保存后立即排入后台解析队列，上传完成不代表已解析。快速问答在回答流建立后等待未完成的解析；智能推理通过 `read_file` 按需读取正文，读取时才等待未就绪的文档。单独上传的图片在启用图片上传时会先等待就绪。multipart 字段：`file`（必填）、`agent_id`（可选，决定解析引擎/ASR 模型）、`parser_engine`（可选；使用共享智能体时忽略，由智能体的解析规则决定）。
 
 响应：202 `{"success":true,"data":{TemporaryDocument}}`（`id,session_id,file_name,file_type,file_size,status(uploaded/processing/ready/failed),resource_ref,...`）
 
 ```bash
 curl -X POST $BASE/api/v1/sessions/s-1/attachments -H "Authorization: Bearer $TOKEN" -F 'file=@notes.pdf'
 ```
+
+`uploaded` 是可发送的已存储状态，客户端不应强制等到 `ready` 才允许提问。附件被有效会话消息（含分叉）引用期间不受默认 24 小时 TTL 清理；未引用的过期文件才由后台清理。
 
 ### GET /api/v1/sessions/:id/attachments
 
@@ -370,7 +372,7 @@ Handler: `internal/handler/session/qa.go`。API key：聊天需 `chat`/full；`k
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `query` | string | 是（`binding:"required"`） | 用户问题；为空、仅含空白、含控制字符或非法 UTF-8 时返回 400 |
+| `query` | string | 通常必填 | 用户问题；带非空内联 `images[].data` 或 `attachment_uploads[].data` 时可不输入文字，系统生成默认问题。仅传 `attachment_ids` 或图片 URL 不能省略文字；非法字符、无内容请求返回 400 |
 | `knowledge_base_ids` | []string | 否 | 检索的 KB |
 | `knowledge_ids` | []string | 否 | 限定知识文件 |
 | `agent_enabled` | bool | 否 | 是否启用 Agent 模式 |
@@ -577,6 +579,8 @@ curl -X DELETE "$BASE/api/v1/artifacts?session_id=session-1&message_id=message-1
 ### 每轮用量
 
 消息返回持久化的 usage，Agent 完成事件携带 turn_usage；包含本轮各用途模型调用聚合结果。工具调用自身并不都产生 Token，用量以提供商返回或后端已采集的记录为准。字段见[可观测性](../03-features/16-observability.md)。
+
+智能体模式的完成事件在 `data.model_id` 中携带本轮实际运行的对话模型 ID（产生本轮用量的模型），可据此通过模型接口取得模型信息、按单价换算用量。消息记录中的 `model_id` 是请求时绑定的模型，请求指定的模型无效而回退到智能体模型时两者不同。快速问答的完成事件暂不携带该字段。
 
 ## 实现参考
 
