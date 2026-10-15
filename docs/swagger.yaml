@@ -247,20 +247,28 @@ definitions:
     properties:
       auto_fixable:
         type: boolean
+        x-agent: true
       description:
         type: string
+        x-agent: true
       page_slug:
         type: string
+        x-agent: slug
       severity:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueSeverity'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueSeverity'
+        x-agent: true
       target_slug:
         description: |-
           TargetSlug identifies the other page involved in the issue (e.g. the
           broken link target, or the entity slug for a missing cross-ref). It is
           the structured field used by AutoFix instead of parsing Description.
         type: string
+        x-agent: true
       type:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueType'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueType'
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueSeverity:
     enum:
@@ -293,6 +301,7 @@ definitions:
       health_score:
         description: 0-100
         type: integer
+        x-agent: true
       issues:
         items:
           $ref: '#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssue'
@@ -303,6 +312,7 @@ definitions:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.WikiStats'
       summary:
         type: string
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_config.PromptTemplate:
     properties:
@@ -1385,19 +1395,28 @@ definitions:
   github_com_Tencent_WeKnora_internal_types.AuditLog:
     properties:
       action:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AuditAction'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AuditAction'
+        x-agent: true
       actor_role:
         type: string
+        x-agent: true
       actor_user_id:
         type: string
       created_at:
         type: string
+        x-agent: true
       details:
         type: object
+        x-agent: true
+        x-agent-keys: title|trigger|via|processing_status
       id:
         type: integer
+        x-agent: event_id
       outcome:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AuditOutcome'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AuditOutcome'
+        x-agent: true
       request_method:
         type: string
       request_path:
@@ -1410,6 +1429,7 @@ definitions:
         type: string
       target_type:
         type: string
+        x-agent: true
       target_user_id:
         type: string
       tenant_id:
@@ -1590,13 +1610,16 @@ definitions:
       chunk_index:
         description: Index position of the chunk in the original document
         type: integer
+        x-agent: true
       chunk_type:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ChunkType'
         description: Chunk 类型，用于区分不同类型的 Chunk
+        x-agent: true
       content:
         description: Actual text content of the chunk
         type: string
+        x-agent: true
       content_hash:
         description: ContentHash 存储内容的 hash 值，用于快速匹配（主要用于 FAQ）
         type: string
@@ -1613,6 +1636,7 @@ definitions:
       end_at:
         description: Ending character position in the original text
         type: integer
+        x-agent: true
       flags:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ChunkFlags'
@@ -1622,6 +1646,7 @@ definitions:
       id:
         description: Unique identifier of the chunk, using UUID format
         type: string
+        x-agent: chunk_id
       image_info:
         description: 图片信息，存储为 JSON
         type: string
@@ -1639,6 +1664,7 @@ definitions:
         description: Whether the chunk is enabled, can be used to temporarily disable
           certain chunks
         type: boolean
+        x-agent: true
       knowledge_base_id:
         description: ID of the knowledge base, for quick location
         type: string
@@ -1680,6 +1706,7 @@ definitions:
       start_at:
         description: Starting character position in the original text
         type: integer
+        x-agent: true
       status:
         description: Status of the chunk
         type: integer
@@ -2623,11 +2650,15 @@ definitions:
   github_com_Tencent_WeKnora_internal_types.FAQEntry:
     properties:
       answer_strategy:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy'
+        x-agent: true
       answers:
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-runes: "8000"
       chunk_id:
         type: string
       chunk_type:
@@ -2636,12 +2667,15 @@ definitions:
         type: string
       id:
         type: integer
+        x-agent: entry_id
       index_mode:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.FAQIndexMode'
       is_enabled:
         type: boolean
+        x-agent: true
       is_recommended:
         type: boolean
+        x-agent: true
       knowledge_base_id:
         type: string
       knowledge_id:
@@ -2657,20 +2691,29 @@ definitions:
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-runes: "8000"
       score:
         type: number
       similar_questions:
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-runes: "8000"
       standard_question:
         type: string
+        x-agent: true
+        x-agent-max-runes: "8000"
       tag_id:
         type: integer
+        x-agent: tag_seq_id
       tag_name:
         type: string
+        x-agent: true
       updated_at:
         type: string
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.FAQEntryFieldsBatchUpdate:
     properties:
@@ -2702,30 +2745,62 @@ definitions:
   github_com_Tencent_WeKnora_internal_types.FAQEntryPayload:
     properties:
       answer_strategy:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy'
+        description: all returns every answer; random returns one.
+        enum:
+        - all
+        - random
+        x-agent: true
+        x-agent-required: true
       answers:
+        description: Answers; one is picked by answer_strategy.
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-bytes: "32000"
+        x-agent-required: true
       id:
         description: ID 可选，用于数据迁移时指定 seq_id（必须小于自增起始值 100000000）
         type: integer
       is_enabled:
+        description: Whether the entry is served; omit to keep the current or default
+          value.
         type: boolean
+        x-agent: true
       is_recommended:
+        description: Whether the entry is recommended; omit to keep the current or
+          default value.
         type: boolean
+        x-agent: true
       negative_questions:
+        description: Phrasings that must not match; [] for none.
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-bytes: "32000"
+        x-agent-required: true
       similar_questions:
+        description: Other phrasings that should match; [] for none.
         items:
           type: string
         type: array
+        x-agent: true
+        x-agent-max-bytes: "32000"
+        x-agent-required: true
       standard_question:
+        description: The question the entry answers.
         type: string
+        x-agent: true
+        x-agent-max-bytes: "32000"
       tag_id:
+        description: Tag seq id (tag_seq_id from knowledge_base.list_tags); 0 for
+          none.
         type: integer
+        x-agent: tag_seq_id
+        x-agent-required: true
       tag_name:
         type: string
     required:
@@ -3269,15 +3344,19 @@ definitions:
       graph_enabled:
         description: GraphEnabled enables knowledge graph entity/relation extraction
         type: boolean
+        x-agent: true
       keyword_enabled:
         description: KeywordEnabled enables keyword-based (BM25) search
         type: boolean
+        x-agent: true
       vector_enabled:
         description: VectorEnabled enables semantic vector embedding and search
         type: boolean
+        x-agent: true
       wiki_enabled:
         description: WikiEnabled enables automatic wiki page generation from documents
         type: boolean
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.InviteMemberRequest:
     properties:
@@ -3460,9 +3539,11 @@ definitions:
         description: Channel indicates through which channel the knowledge was ingested
           (web, api, browser_extension, wechat, etc.)
         type: string
+        x-agent: true
       created_at:
         description: Creation time of the knowledge
         type: string
+        x-agent: true
       custom_metadata:
         description: |-
           CustomMetadata is user-authored descriptive metadata. It is deliberately
@@ -3481,24 +3562,29 @@ definitions:
       enable_status:
         description: Enable status of the knowledge
         type: string
+        x-agent: true
       error_message:
         description: Error message of the knowledge
         type: string
+        x-agent: true
       file_hash:
         description: File hash of the knowledge
         type: string
       file_name:
         description: File name of the knowledge
         type: string
+        x-agent: true
       file_path:
         description: File path of the knowledge
         type: string
       file_size:
         description: File size of the knowledge
         type: integer
+        x-agent: true
       file_type:
         description: File type of the knowledge
         type: string
+        x-agent: true
       folder_path:
         description: |-
           FolderPath is the canonical relative directory this entry belongs to
@@ -3507,20 +3593,25 @@ definitions:
           display/navigation concern only: it never affects where the file is
           physically stored (see FilePath).
         type: string
+        x-agent: true
       id:
         description: Unique identifier of the knowledge
         type: string
+        x-agent: knowledge_id
       knowledge_base_id:
         description: ID of the knowledge base
         type: string
+        x-agent: true
       knowledge_base_name:
         description: Knowledge base name (not stored in database, populated on query)
         type: string
+        x-agent: true
       last_activity_at:
         description: |-
           Most recent processing progress (row or span write) for an in-flight
           row, so clients can tell a slow stage from a stalled one. Not stored.
         type: string
+        x-agent: true
       last_faq_import_result:
         description: Last FAQ import result (for FAQ type knowledge only)
         type: object
@@ -3530,6 +3621,7 @@ definitions:
       parse_status:
         description: Parse status of the knowledge
         type: string
+        x-agent: true
       pending_subtasks_count:
         description: |-
           PendingSubtasksCount is the outstanding enrichment subtask count
@@ -3539,6 +3631,7 @@ definitions:
       processed_at:
         description: Processed time of the knowledge
         type: string
+        x-agent: true
       profile:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProfile'
@@ -3551,18 +3644,21 @@ definitions:
         description: Source of the knowledge (e.g. URL address for url type, "manual"
           for manual type)
         type: string
+        x-agent: true
       stall_state:
         description: |-
           Verdict on an in-flight row gone quiet: StallStateQueued (its work is
           still queued, i.e. backlogged) or StallStateStalled (nothing left to
           run it). Empty while it is progressing or the probe failed. Not stored.
         type: string
+        x-agent: true
       storage_size:
         description: Storage size of the knowledge
         type: integer
       summary_status:
         description: Summary status for async summary generation
         type: string
+        x-agent: true
       tags:
         description: Tags holds the tags associated with this knowledge (populated
           on query, not persisted directly).
@@ -3575,12 +3671,15 @@ definitions:
       title:
         description: Title of the knowledge
         type: string
+        x-agent: true
       type:
         description: Type of the knowledge
         type: string
+        x-agent: true
       updated_at:
         description: Last updated time of the knowledge
         type: string
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.KnowledgeBase:
     properties:
@@ -3596,6 +3695,7 @@ definitions:
       chunk_count:
         description: Chunk count (not stored in database, calculated on query)
         type: integer
+        x-agent: true
       chunking_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ChunkingConfig'
@@ -3624,6 +3724,7 @@ definitions:
       description:
         description: Description of the knowledge base
         type: string
+        x-agent: true
       embedding_model_id:
         description: ID of the embedding model
         type: string
@@ -3646,6 +3747,7 @@ definitions:
       id:
         description: Unique identifier of the knowledge base
         type: string
+        x-agent: knowledge_base_id
       image_processing_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ImageProcessingConfig'
@@ -3656,6 +3758,7 @@ definitions:
         description: |-
           IndexingStrategy controls which indexing pipelines are active for this knowledge base.
           Pipelines: vector search, keyword search, wiki generation, knowledge graph extraction.
+        x-agent: true
       is_pinned:
         description: |-
           IsPinned and PinnedAt are computed per-caller from user_kb_pins
@@ -3671,6 +3774,7 @@ definitions:
         description: IsProcessing indicates if there is a processing import task (for
           FAQ type knowledge bases)
         type: boolean
+        x-agent: true
       is_temporary:
         description: Whether this knowledge base is temporary (ephemeral) and should
           be hidden from UI
@@ -3678,9 +3782,11 @@ definitions:
       knowledge_count:
         description: Knowledge count (not stored in database, calculated on query)
         type: integer
+        x-agent: true
       name:
         description: Name of the knowledge base
         type: string
+        x-agent: true
       pinned_at:
         description: |-
           PinnedAt records when the current caller pinned this knowledge
@@ -3690,6 +3796,7 @@ definitions:
         description: ProcessingCount indicates the number of knowledge items being
           processed (for document type knowledge bases)
         type: integer
+        x-agent: true
       profile_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeBaseProfileConfig'
@@ -3729,9 +3836,11 @@ definitions:
       type:
         description: Type of the knowledge base (document, faq, etc.)
         type: string
+        x-agent: true
       updated_at:
         description: Last updated time of the knowledge base
         type: string
+        x-agent: true
       vector_store_id:
         description: |-
           VectorStoreID references the VectorStore this knowledge base is bound to.
@@ -3805,12 +3914,15 @@ definitions:
       error:
         description: Error holds the last generation error when Status is failed.
         type: string
+        x-agent: profile_error
       generated_at:
         description: GeneratedAt records when the text was produced.
         type: string
+        x-agent: true
       gist:
         description: Gist is a short statement of what the knowledge base covers.
         type: string
+        x-agent: true
       model_id:
         description: ModelID records which chat model produced the text.
         type: string
@@ -3821,16 +3933,19 @@ definitions:
       status:
         description: Status is one of the KnowledgeBaseProfileStatus* values.
         type: string
+        x-agent: profile_status
       topics:
         description: Topics is the merged topic list (at most KnowledgeBaseProfileMaxTopics).
         items:
           type: string
         type: array
+        x-agent: true
       typical_questions:
         description: TypicalQuestions lists questions this knowledge base can answer.
         items:
           type: string
         type: array
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.KnowledgeBaseProfileConfig:
     properties:
@@ -3974,15 +4089,19 @@ definitions:
       document_count:
         description: DocumentCount counts entries whose folder_path equals Path.
         type: integer
+        x-agent: true
       name:
         description: Name is the last segment of Path, used as the tree row label.
         type: string
+        x-agent: true
       path:
         description: Path is the canonical folder path, e.g. "docs/spec".
         type: string
+        x-agent: folder_path
       total_count:
         description: TotalCount counts entries in Path and in all descendant folders.
         type: integer
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.KnowledgeFolderTree:
     properties:
@@ -3997,11 +4116,13 @@ definitions:
           (folder_path = ""), i.e. documents that were not uploaded as part of a
           folder.
         type: integer
+        x-agent: true
       total_document_count:
         description: |-
           TotalDocumentCount counts every entry in the knowledge base, matching
           the unfiltered document list total.
         type: integer
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.KnowledgeMoveProgress:
     properties:
@@ -4011,22 +4132,29 @@ definitions:
       error:
         description: 错误信息
         type: string
+        x-agent: true
       failed:
         description: 失败数
         type: integer
+        x-agent: true
       message:
         description: 状态消息
         type: string
+        x-agent: true
       processed:
         description: 已处理数
         type: integer
+        x-agent: true
       progress:
         description: 0-100
         type: integer
+        x-agent: true
       source_kb_id:
         type: string
       status:
-        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KBCloneTaskStatus'
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KBCloneTaskStatus'
+        x-agent: true
       target_kb_id:
         type: string
       task_id:
@@ -4034,6 +4162,7 @@ definitions:
       total:
         description: 总知识数
         type: integer
+        x-agent: true
       updated_at:
         description: 最后更新时间
         type: integer
@@ -4118,15 +4247,56 @@ definitions:
       id:
         description: Unique identifier of the tag (UUID)
         type: string
+        x-agent: tag_id
       knowledge_base_id:
         description: Knowledge base ID that this tag belongs to
         type: string
       name:
         description: Tag name, unique within the same knowledge base
         type: string
+        x-agent: true
       seq_id:
         description: SeqID is an auto-increment integer ID for external API usage
         type: integer
+        x-agent: tag_seq_id
+      sort_order:
+        description: Sort order within the same knowledge base
+        type: integer
+      tenant_id:
+        description: Workspace ID
+        type: integer
+      updated_at:
+        description: Last updated time
+        type: string
+    type: object
+  github_com_Tencent_WeKnora_internal_types.KnowledgeTagWithStats:
+    properties:
+      chunk_count:
+        type: integer
+      color:
+        description: Optional display color
+        type: string
+      created_at:
+        description: Creation time
+        type: string
+      id:
+        description: Unique identifier of the tag (UUID)
+        type: string
+        x-agent: tag_id
+      knowledge_base_id:
+        description: Knowledge base ID that this tag belongs to
+        type: string
+      knowledge_count:
+        type: integer
+        x-agent: true
+      name:
+        description: Tag name, unique within the same knowledge base
+        type: string
+        x-agent: true
+      seq_id:
+        description: SeqID is an auto-increment integer ID for external API usage
+        type: integer
+        x-agent: tag_seq_id
       sort_order:
         description: Sort order within the same knowledge base
         type: integer
@@ -4435,17 +4605,29 @@ definitions:
       channel:
         type: string
       content:
+        description: |-
+          Markdown content. The assistant may send a full document; the API limit
+          is 200000 runes, and x-agent-max-bytes covers that in UTF-8.
         type: string
+        x-agent: true
+        x-agent-max-bytes: "800000"
       process_config:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides'
       status:
+        description: draft keeps the document out of search; publish indexes it.
+        enum:
+        - draft
+        - publish
         type: string
+        x-agent: true
       tag_ids:
         items:
           type: string
         type: array
       title:
+        description: Document title.
         type: string
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.MatchType:
     enum:
@@ -5620,19 +5802,18 @@ definitions:
       updated_at:
         type: string
     type: object
-  github_com_Tencent_WeKnora_internal_types.PageResult:
+  github_com_Tencent_WeKnora_internal_types.PageContext:
     properties:
-      data:
-        description: Data
-      page:
-        description: Current page number
-        type: integer
-      page_size:
-        description: Page size
-        type: integer
-      total:
-        description: Total number of records
-        type: integer
+      knowledge_base_id:
+        type: string
+      knowledge_id:
+        type: string
+      wiki_issue_ids:
+        items:
+          type: string
+        type: array
+      wiki_slug:
+        type: string
     type: object
   github_com_Tencent_WeKnora_internal_types.ParserEngineConfig:
     properties:
@@ -8181,14 +8362,18 @@ definitions:
         type: integer
       id:
         type: string
+        x-agent: folder_id
       knowledge_base_id:
         type: string
       name:
         type: string
+        x-agent: true
       parent_id:
         type: string
+        x-agent: true
       path:
         type: string
+        x-agent: true
       sort_order:
         type: integer
       tenant_id:
@@ -8199,9 +8384,13 @@ definitions:
   github_com_Tencent_WeKnora_internal_types.WikiFolderCreateRequest:
     properties:
       name:
+        description: Folder name.
         type: string
+        x-agent: true
       parent_id:
+        description: Parent folder id; empty means the top level.
         type: string
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.WikiFolderListResponse:
     properties:
@@ -8222,18 +8411,24 @@ definitions:
         type: integer
       has_children:
         type: boolean
+        x-agent: true
       id:
         type: string
+        x-agent: folder_id
       knowledge_base_id:
         type: string
       name:
         type: string
+        x-agent: true
       page_count:
         type: integer
+        x-agent: true
       parent_id:
         type: string
+        x-agent: true
       path:
         type: string
+        x-agent: true
       sort_order:
         type: integer
       tenant_id:
@@ -8407,6 +8602,7 @@ definitions:
           recomputed from this folder's chain on every write so list/index/search
           queries don't have to join wiki_folders.
         type: string
+        x-agent: true
       id:
         description: Unique identifier (UUID)
         type: string
@@ -8441,6 +8637,7 @@ definitions:
       page_type:
         description: 'Page type: summary, entity, concept, index, synthesis, comparison'
         type: string
+        x-agent: true
       parent_slug:
         description: |-
           ParentSlug optionally points at the wiki page that should act as this
@@ -8452,6 +8649,7 @@ definitions:
           URL-friendly slug for addressing, e.g. "entity/acme-corp", "concept/rag"
           Unique within a knowledge base
         type: string
+        x-agent: true
       sort_order:
         description: |-
           SortOrder allows generated or manually edited pages to control sibling
@@ -8469,18 +8667,22 @@ definitions:
       status:
         description: 'Page status: draft, published, archived'
         type: string
+        x-agent: true
       summary:
         description: One-line summary for index listing
         type: string
+        x-agent: true
       tenant_id:
         description: Workspace ID for multi-workspace isolation
         type: integer
       title:
         description: Human-readable title
         type: string
+        x-agent: true
       updated_at:
         description: Last update time
         type: string
+        x-agent: true
       version:
         description: |-
           Version number. Incremented only when a user-visible content field
@@ -8489,6 +8691,7 @@ definitions:
           sync from background jobs) leave it untouched so it can be used as a
           real "the page was edited" signal.
         type: integer
+        x-agent: true
       wiki_path:
         description: |-
           WikiPath is a normalized, sortable path derived from page_type,
@@ -8543,6 +8746,7 @@ definitions:
           recomputed from this folder's chain on every write so list/index/search
           queries don't have to join wiki_folders.
         type: string
+        x-agent: true
       id:
         description: Unique identifier (UUID)
         type: string
@@ -8581,6 +8785,7 @@ definitions:
       page_type:
         description: 'Page type: summary, entity, concept, index, synthesis, comparison'
         type: string
+        x-agent: true
       parent_slug:
         description: |-
           ParentSlug optionally points at the wiki page that should act as this
@@ -8592,6 +8797,7 @@ definitions:
           URL-friendly slug for addressing, e.g. "entity/acme-corp", "concept/rag"
           Unique within a knowledge base
         type: string
+        x-agent: true
       sort_order:
         description: |-
           SortOrder allows generated or manually edited pages to control sibling
@@ -8609,18 +8815,22 @@ definitions:
       status:
         description: 'Page status: draft, published, archived'
         type: string
+        x-agent: true
       summary:
         description: One-line summary for index listing
         type: string
+        x-agent: true
       tenant_id:
         description: Workspace ID for multi-workspace isolation
         type: integer
       title:
         description: Human-readable title
         type: string
+        x-agent: true
       updated_at:
         description: Last update time
         type: string
+        x-agent: true
       version:
         description: |-
           Version number. Incremented only when a user-visible content field
@@ -8629,6 +8839,7 @@ definitions:
           sync from background jobs) leave it untouched so it can be used as a
           real "the page was edited" signal.
         type: integer
+        x-agent: true
       wiki_path:
         description: |-
           WikiPath is a normalized, sortable path derived from page_type,
@@ -8639,26 +8850,34 @@ definitions:
     properties:
       created_at:
         type: string
+        x-agent: true
       deleted_at:
         $ref: '#/definitions/gorm.DeletedAt'
       description:
         type: string
+        x-agent: true
       id:
         type: string
+        x-agent: issue_id
       issue_type:
         type: string
+        x-agent: true
       knowledge_base_id:
         type: string
       reported_by:
         type: string
+        x-agent: true
       slug:
         type: string
+        x-agent: true
       status:
         type: string
+        x-agent: true
       suspected_knowledge_ids:
         items:
           type: string
         type: array
+        x-agent: knowledge_ids
       tenant_id:
         type: integer
       updated_at:
@@ -8682,18 +8901,27 @@ definitions:
   github_com_Tencent_WeKnora_internal_types.WikiPageMoveRequest:
     properties:
       folder_id:
+        description: Target folder id; empty means the top level.
         type: string
+        x-agent: true
       slug:
+        description: Slug of the page to move.
         type: string
+        x-agent: true
     required:
     - slug
     type: object
   github_com_Tencent_WeKnora_internal_types.WikiPageRevertRequest:
     properties:
       slug:
+        description: Slug of the page to revert.
         type: string
+        x-agent: true
       version:
+        description: Revision to restore. Versions start at 1.
+        minimum: 1
         type: integer
+        x-agent: true
     required:
     - slug
     - version
@@ -8706,14 +8934,18 @@ definitions:
         type: array
       content:
         type: string
+        x-agent: true
+        x-agent-max-runes: "8000"
       created_at:
         type: string
       edit_source:
         description: Author of THIS version (same semantics as WikiPage.LastEditSource).
         type: string
+        x-agent: true
       edited_at:
         description: When this version was authored (the page's updated_at while current).
         type: string
+        x-agent: true
       editor_id:
         type: string
       id:
@@ -8730,23 +8962,28 @@ definitions:
         type: string
       summary:
         type: string
+        x-agent: true
       tenant_id:
         type: integer
       title:
         type: string
+        x-agent: true
       version:
         type: integer
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.WikiPageRevisionListResponse:
     properties:
       current_version:
         type: integer
+        x-agent: true
       revisions:
         items:
           $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.WikiPageRevision'
         type: array
       total:
         type: integer
+        x-agent: true
     type: object
   github_com_Tencent_WeKnora_internal_types.WikiPageUpdateRequest:
     properties:
@@ -8776,9 +9013,11 @@ definitions:
       is_active:
         description: whether wiki ingestion is currently running
         type: boolean
+        x-agent: true
       orphan_count:
         description: pages with no inbound links
         type: integer
+        x-agent: true
       pages_by_type:
         additionalProperties:
           format: int64
@@ -8787,9 +9026,11 @@ definitions:
       pending_issues:
         description: number of pending wiki issues
         type: integer
+        x-agent: true
       pending_tasks:
         description: number of documents waiting to be ingested
         type: integer
+        x-agent: true
       recent_updates:
         description: last N updated pages
         items:
@@ -8797,8 +9038,10 @@ definitions:
         type: array
       total_links:
         type: integer
+        x-agent: true
       total_pages:
         type: integer
+        x-agent: true
     type: object
   gorm.DeletedAt:
     properties:
@@ -8855,11 +9098,16 @@ definitions:
   internal_handler.BatchDeleteKnowledgeRequest:
     properties:
       ids:
+        description: Documents to delete.
         items:
           type: string
         type: array
+        x-agent: knowledge_ids
+        x-agent-maximum: "20"
       kb_id:
+        description: Knowledge base the documents belong to.
         type: string
+        x-agent: knowledge_base_id
     required:
     - ids
     - kb_id
@@ -8924,6 +9172,33 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  internal_handler.CreateKnowledgeFromURLRequest:
+    properties:
+      channel:
+        type: string
+      enable_multimodel:
+        type: boolean
+      file_name:
+        type: string
+      file_type:
+        type: string
+      process_config:
+        $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides'
+      tag_ids:
+        items:
+          type: string
+        type: array
+      title:
+        description: Title of the document; defaults to the fetched one.
+        type: string
+        x-agent: true
+      url:
+        description: Page or file URL to import.
+        type: string
+        x-agent: true
+    required:
+    - url
     type: object
   internal_handler.CreateModelRequest:
     properties:
@@ -9097,6 +9372,19 @@ definitions:
       truncated:
         type: boolean
     type: object
+  internal_handler.FAQEntryPage:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.FAQEntry'
+        type: array
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
   internal_handler.FabriTagResponse:
     properties:
       tags:
@@ -9124,8 +9412,10 @@ definitions:
     properties:
       folder_path:
         type: string
+        x-agent: true
       moved_count:
         type: integer
+        x-agent: true
     type: object
   internal_handler.GetAuthConfigResponse:
     properties:
@@ -9479,6 +9769,7 @@ definitions:
       chunk_count:
         description: Chunk count (not stored in database, calculated on query)
         type: integer
+        x-agent: true
       chunking_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ChunkingConfig'
@@ -9507,6 +9798,7 @@ definitions:
       description:
         description: Description of the knowledge base
         type: string
+        x-agent: true
       embedding_model_id:
         description: ID of the embedding model
         type: string
@@ -9529,6 +9821,7 @@ definitions:
       id:
         description: Unique identifier of the knowledge base
         type: string
+        x-agent: knowledge_base_id
       image_processing_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.ImageProcessingConfig'
@@ -9539,6 +9832,7 @@ definitions:
         description: |-
           IndexingStrategy controls which indexing pipelines are active for this knowledge base.
           Pipelines: vector search, keyword search, wiki generation, knowledge graph extraction.
+        x-agent: true
       is_pinned:
         description: |-
           IsPinned and PinnedAt are computed per-caller from user_kb_pins
@@ -9554,6 +9848,7 @@ definitions:
         description: IsProcessing indicates if there is a processing import task (for
           FAQ type knowledge bases)
         type: boolean
+        x-agent: true
       is_temporary:
         description: Whether this knowledge base is temporary (ephemeral) and should
           be hidden from UI
@@ -9561,6 +9856,7 @@ definitions:
       knowledge_count:
         description: Knowledge count (not stored in database, calculated on query)
         type: integer
+        x-agent: true
       my_permission:
         description: |-
           MyPermission is the caller's role on a knowledge base shared from
@@ -9570,9 +9866,11 @@ definitions:
         - editor
         - viewer
         type: string
+        x-agent: true
       name:
         description: Name of the knowledge base
         type: string
+        x-agent: true
       pinned_at:
         description: |-
           PinnedAt records when the current caller pinned this knowledge
@@ -9582,6 +9880,7 @@ definitions:
         description: ProcessingCount indicates the number of knowledge items being
           processed (for document type knowledge bases)
         type: integer
+        x-agent: true
       profile_config:
         allOf:
         - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeBaseProfileConfig'
@@ -9621,9 +9920,11 @@ definitions:
       type:
         description: Type of the knowledge base (document, faq, etc.)
         type: string
+        x-agent: true
       updated_at:
         description: Last updated time of the knowledge base
         type: string
+        x-agent: true
       vector_store_engine_type:
         type: string
       vector_store_id:
@@ -9669,6 +9970,7 @@ definitions:
     properties:
       code:
         type: string
+        x-agent: error_code
       error_code:
         type: string
       error_message:
@@ -9677,37 +9979,48 @@ definitions:
         type: string
       message:
         type: string
+        x-agent: error_message
       name:
         type: string
       stage:
         type: string
+        x-agent: failed_stage
     type: object
   internal_handler.KnowledgeSpansData:
     properties:
       attempt:
         description: Attempt is the attempt the trace describes; equals CurrentAttempt.
         type: integer
+        x-agent: true
       current_attempt:
         type: integer
       current_stage:
         description: CurrentStage is the stage running now, or the last one that ran.
         type: string
+        x-agent: true
       knowledge_id:
         type: string
+        x-agent: true
       last_activity_at:
         description: LastActivityAt is set while the parse is in flight.
         type: string
+        x-agent: true
       last_error:
-        $ref: '#/definitions/internal_handler.KnowledgeSpanError'
+        allOf:
+        - $ref: '#/definitions/internal_handler.KnowledgeSpanError'
+        x-agent: true
       latest_attempt:
         type: integer
+        x-agent: true
       parse_status:
         type: string
+        x-agent: true
       stall_state:
         description: |-
           StallState is types.StallStateQueued or types.StallStateStalled when an
           in-flight parse has gone quiet.
         type: string
+        x-agent: true
       trace:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.SpanTreeNode'
     type: object
@@ -9832,14 +10145,14 @@ definitions:
     properties:
       data:
         items:
-          additionalProperties: {}
-          type: object
+          $ref: '#/definitions/internal_handler.SharedKnowledgeBaseRow'
         type: array
       success:
         example: true
         type: boolean
       total:
         type: integer
+        x-agent: true
     type: object
   internal_handler.ListSkillsResponse:
     properties:
@@ -10020,19 +10333,29 @@ definitions:
   internal_handler.MoveKnowledgeRequest:
     properties:
       knowledge_ids:
+        description: Documents to move.
         items:
           type: string
         minItems: 1
         type: array
+        x-agent: true
+        x-agent-maximum: "20"
       mode:
+        description: reuse_vectors keeps the embeddings; reparse processes the documents
+          again.
         enum:
         - reuse_vectors
         - reparse
         type: string
+        x-agent: true
       source_kb_id:
+        description: Knowledge base the documents are in now.
         type: string
+        x-agent: source_knowledge_base_id
       target_kb_id:
+        description: Knowledge base to move them to.
         type: string
+        x-agent: knowledge_base_id
     required:
     - knowledge_ids
     - mode
@@ -10043,6 +10366,7 @@ definitions:
     properties:
       knowledge_count:
         type: integer
+        x-agent: true
       message:
         type: string
       source_kb_id:
@@ -10051,21 +10375,25 @@ definitions:
         type: string
       task_id:
         type: string
+        x-agent: true
     type: object
   internal_handler.MoveKnowledgeToFolderRequest:
     properties:
       folder_path:
-        description: |-
-          FolderPath is the destination folder; the empty string is the knowledge
-          base top level. It is deliberately not `binding:"required"` so documents
-          can be moved back out of every folder.
+        description: Target folder path; empty (allowed) means the knowledge base
+          top level.
         type: string
+        x-agent: true
       kb_id:
+        description: Knowledge base the documents belong to.
         type: string
+        x-agent: knowledge_base_id
       knowledge_ids:
+        description: Documents to move.
         items:
           type: string
         type: array
+        x-agent: true
     required:
     - kb_id
     - knowledge_ids
@@ -10075,13 +10403,16 @@ definitions:
       data: {}
       page:
         type: integer
+        x-agent: true
       page_size:
         type: integer
+        x-agent: true
       success:
         example: true
         type: boolean
       total:
         type: integer
+        x-agent: true
     type: object
   internal_handler.PlaceholderGroups:
     properties:
@@ -10292,9 +10623,13 @@ definitions:
   internal_handler.RenameKnowledgeFolderRequest:
     properties:
       from:
+        description: Current folder path.
         type: string
+        x-agent: from_path
       to:
+        description: New folder path.
         type: string
+        x-agent: to_path
     required:
     - from
     - to
@@ -10512,6 +10847,28 @@ definitions:
       user:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.UserInfo'
     type: object
+  internal_handler.SharedKnowledgeBaseRow:
+    properties:
+      knowledge_base:
+        allOf:
+        - $ref: '#/definitions/internal_handler.KnowledgeBaseView'
+        x-agent: true
+      org_name:
+        type: string
+        x-agent: true
+      organization_id:
+        type: string
+      permission:
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.OrgMemberRole'
+        x-agent: true
+      share_id:
+        type: string
+      shared_at:
+        type: string
+      source_tenant_id:
+        type: integer
+    type: object
   internal_handler.SkillInfoResponse:
     properties:
       description:
@@ -10566,8 +10923,10 @@ definitions:
     properties:
       deleted_count:
         type: integer
+        x-agent: true
       reparse_count:
         type: integer
+        x-agent: true
       task_id:
         type: string
     type: object
@@ -10594,6 +10953,7 @@ definitions:
       success:
         example: true
         type: boolean
+        x-agent: true
     type: object
   internal_handler.SuggestedQuestionsData:
     properties:
@@ -10614,10 +10974,27 @@ definitions:
     - event_type
     - suggestion_set_id
     type: object
+  internal_handler.TagPageResult:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeTagWithStats'
+        type: array
+      page:
+        type: integer
+        x-agent: true
+      page_size:
+        type: integer
+        x-agent: true
+      total:
+        type: integer
+        x-agent: true
+    type: object
   internal_handler.TaskIDData:
     properties:
       task_id:
         type: string
+        x-agent: true
     type: object
   internal_handler.TenantListData:
     properties:
@@ -10769,9 +11146,13 @@ definitions:
       custom_metadata:
         type: object
       description:
+        description: New summary; omit to keep it, empty clears it.
         type: string
+        x-agent: true
       title:
+        description: New title; omit to keep it.
         type: string
+        x-agent: true
     type: object
   internal_handler.UpdateKnowledgeResponse:
     properties:
@@ -10843,6 +11224,7 @@ definitions:
     properties:
       message:
         type: string
+        x-agent: true
     type: object
   internal_handler.WikiSearchHit:
     properties:
@@ -10885,10 +11267,12 @@ definitions:
   internal_handler.addSimilarQuestionsRequest:
     properties:
       similar_questions:
+        description: Phrasings to add to the entry.
         items:
           type: string
         minItems: 1
         type: array
+        x-agent: true
     required:
     - similar_questions
     type: object
@@ -10951,17 +11335,22 @@ definitions:
         description: NextCursor is the id of the last entry on this page, 0 when it
           is empty.
         type: integer
+        x-agent: true
       success:
         type: boolean
     type: object
   internal_handler.batchReparseKnowledgeRequest:
     properties:
       ids:
+        description: Documents to reparse.
         items:
           type: string
         type: array
+        x-agent: knowledge_ids
       kb_id:
+        description: Knowledge base the documents belong to.
         type: string
+        x-agent: knowledge_base_id
       process_config:
         $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides'
     required:
@@ -11000,6 +11389,19 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  internal_handler.faqDeleteRequest:
+    properties:
+      ids:
+        description: Entries to delete (entry_id).
+        items:
+          type: integer
+        minItems: 1
+        type: array
+        x-agent: entry_ids
+        x-agent-maximum: "20"
+    required:
+    - ids
     type: object
   internal_handler.imageListRequestBody:
     properties:
@@ -11385,6 +11787,11 @@ definitions:
         items:
           $ref: '#/definitions/internal_handler_session.MentionedItemRequest'
         type: array
+      page_context:
+        allOf:
+        - $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.PageContext'
+        description: PageContext is the WeKnora page the user has open (agent mode
+          only).
       query:
         description: Query text; may be empty only when an image or file is attached
         type: string
@@ -12759,12 +13166,15 @@ paths:
         name: knowledge_id
         required: true
         type: string
+        x-agent: true
       - default: 1
         description: 页码
         in: query
         minimum: 1
         name: page
         type: integer
+        x-agent: true
+        x-agent-maximum: "10000"
       - default: 10
         description: 每页数量
         in: query
@@ -12772,13 +13182,30 @@ paths:
         minimum: 1
         name: page_size
         type: integer
+        x-agent: true
+        x-agent-maximum: "20"
       - collectionFormat: multi
         description: 分块类型，可重复，缺省 text
         in: query
         items:
+          enum:
+          - text
+          - parent_text
+          - image_ocr
+          - image_caption
+          - image_vector
+          - summary
+          - entity
+          - relationship
+          - faq
+          - web_search
+          - table_summary
+          - table_column
+          - wiki_page
           type: string
         name: chunk_type
         type: array
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -12803,6 +13230,11 @@ paths:
       summary: 获取知识分块列表
       tags:
       - 分块管理
+      x-agent:
+        id: chunk.list
+        risk: read
+      x-agent-hint: The chunks a document was split into, in order; use it to check
+        how a document was parsed. meta.total counts every chunk.
   /chunks/{knowledge_id}/{id}:
     delete:
       consumes:
@@ -14224,6 +14656,12 @@ paths:
       summary: 获取知识库列表
       tags:
       - 知识库
+      x-agent:
+        id: knowledge_base.list
+        max_items: 200
+        risk: read
+      x-agent-hint: The workspace's own knowledge bases, up to 200. Ones shared from
+        other workspaces are in knowledge_base.list_shared.
     post:
       consumes:
       - application/json
@@ -14307,6 +14745,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 共享智能体 ID（用于校验智能体是否有权访问该知识库）
         in: query
         name: agent_id
@@ -14341,6 +14780,11 @@ paths:
       summary: 获取知识库详情
       tags:
       - 知识库
+      x-agent:
+        id: knowledge_base.get
+        risk: read
+      x-agent-hint: Check which indexes are enabled (vector, keyword, Wiki, graph)
+        and whether documents are processing.
     put:
       consumes:
       - application/json
@@ -14398,10 +14842,12 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 游标：返回 id 小于此值的记录
         in: query
         name: after_id
         type: integer
+        x-agent: cursor
       - default: 50
         description: 页大小
         in: query
@@ -14409,10 +14855,13 @@ paths:
         minimum: 1
         name: limit
         type: integer
+        x-agent: true
+        x-agent-maximum: "50"
       - description: 按 action 精确过滤，如 knowledge.deleted
         in: query
         name: action
         type: string
+        x-agent: true
       - description: 结果过滤
         enum:
         - success
@@ -14424,6 +14873,7 @@ paths:
         in: query
         name: outcome
         type: string
+        x-agent: true
       - description: 按 actor_user_id 精确过滤
         in: query
         name: actor
@@ -14448,6 +14898,11 @@ paths:
       summary: 获取知识库活动记录
       tags:
       - 知识库
+      x-agent:
+        id: knowledge_base.list_activity
+        risk: read
+      x-agent-hint: Newest first; only the creator or a workspace admin may read it.
+        Assistant actions carry via=agent.
   /knowledge-bases/{id}/duplicate:
     post:
       consumes:
@@ -14499,17 +14954,13 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 要删除的FAQ ID列表(seq_id)
         in: body
         name: request
         required: true
         schema:
-          properties:
-            ids:
-              items:
-                type: integer
-              type: array
-          type: object
+          $ref: '#/definitions/internal_handler.faqDeleteRequest'
       produces:
       - application/json
       responses:
@@ -14527,6 +14978,18 @@ paths:
       summary: 批量删除FAQ条目
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.delete_entries
+        items:
+          as: entry_id
+          label: standard_question
+          param: entry_ids
+          target: faq.get_entry
+        label: name
+        risk: destructive
+        target: knowledge_base.get
+      x-agent-hint: Removes up to 20 FAQ entries. Cannot be undone; the confirmation
+        lists every question.
     get:
       consumes:
       - application/json
@@ -14537,14 +15000,22 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 页码
         in: query
+        minimum: 1
         name: page
         type: integer
+        x-agent: true
+        x-agent-maximum: "10000"
       - description: 每页数量
         in: query
+        maximum: 1000
+        minimum: 1
         name: page_size
         type: integer
+        x-agent: true
+        x-agent-maximum: "50"
       - description: 标签ID筛选(seq_id)，兼容旧版单标签
         in: query
         name: tag_id
@@ -14553,23 +15024,33 @@ paths:
         in: query
         name: tag_ids
         type: string
+        x-agent: true
       - description: 关键词搜索
         in: query
         name: keyword
         type: string
-      - description: '搜索字段: standard_question(标准问题), similar_questions(相似问法), answers(答案),
-          默认搜索全部'
+        x-agent: true
+      - description: 搜索字段，默认搜索全部
+        enum:
+        - standard_question
+        - similar_questions
+        - answers
         in: query
         name: search_field
         type: string
+        x-agent: true
       - description: '排序方式: asc(按更新时间正序), 默认按更新时间倒序'
+        enum:
+        - asc
         in: query
         name: sort_order
         type: string
+        x-agent: true
       - description: 启用状态筛选；不传时返回全部
         in: query
         name: is_enabled
         type: boolean
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -14580,7 +15061,7 @@ paths:
             - $ref: '#/definitions/internal_handler.DataResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.PageResult'
+                  $ref: '#/definitions/internal_handler.FAQEntryPage'
               type: object
         "400":
           description: 请求参数错误
@@ -14592,6 +15073,12 @@ paths:
       summary: 获取FAQ条目列表
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.list_entries
+        risk: read
+        root: data.data
+      x-agent-hint: FAQ entries of an FAQ knowledge base, newest first; keyword searches
+        questions and answers.
     post:
       consumes:
       - application/json
@@ -14644,11 +15131,13 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: FAQ条目ID(seq_id)
         in: path
         name: entry_id
         required: true
         type: integer
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -14675,6 +15164,9 @@ paths:
       summary: 获取FAQ条目详情
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.get_entry
+        risk: read
     put:
       consumes:
       - application/json
@@ -14685,11 +15177,13 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: FAQ条目ID(seq_id)
         in: path
         name: entry_id
         required: true
         type: integer
+        x-agent: true
       - description: FAQ条目
         in: body
         name: request
@@ -14718,6 +15212,16 @@ paths:
       summary: 更新FAQ条目
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.update_entry
+        label: standard_question
+        require_complete_target: true
+        risk: write
+        target: faq.get_entry
+      x-agent-hint: Replaces the whole entry. Read it with faq.get_entry first and
+        send every field, changed or not, or the rest is lost. Updates are refused
+        if the current entry is truncated; use the FAQ editor for entries beyond the
+        complete-read limits. To only add phrasings, use faq.add_similar_questions.
   /knowledge-bases/{id}/faq/entries/{entry_id}/similar-questions:
     post:
       consumes:
@@ -14729,11 +15233,13 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: FAQ条目ID(seq_id)
         in: path
         name: entry_id
         required: true
         type: integer
+        x-agent: true
       - description: 相似问列表
         in: body
         name: request
@@ -14766,6 +15272,12 @@ paths:
       summary: 添加相似问
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.add_similar_questions
+        label: standard_question
+        risk: write
+        target: faq.get_entry
+      x-agent-hint: Adds phrasings to an entry and keeps everything else.
   /knowledge-bases/{id}/faq/entries/export:
     get:
       consumes:
@@ -14878,6 +15390,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: FAQ条目
         in: body
         name: request
@@ -14906,6 +15419,13 @@ paths:
       summary: 创建单个FAQ条目
       tags:
       - FAQ管理
+      x-agent:
+        id: faq.create_entry
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Adds one FAQ entry. Questions already used by another entry are
+        refused.
   /knowledge-bases/{id}/faq/import/last-result/display:
     put:
       consumes:
@@ -15237,12 +15757,15 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - default: 1
         description: 页码
         in: query
         minimum: 1
         name: page
         type: integer
+        x-agent: true
+        x-agent-maximum: "10000"
       - default: 20
         description: 每页数量
         in: query
@@ -15250,18 +15773,23 @@ paths:
         minimum: 1
         name: page_size
         type: integer
+        x-agent: true
+        x-agent-maximum: "50"
       - description: 标签ID筛选，逗号分隔（OR语义）
         in: query
         name: tag_ids
         type: string
+        x-agent: true
       - description: 关键词搜索
         in: query
         name: keyword
         type: string
+        x-agent: true
       - description: 文件类型筛选
         in: query
         name: file_type
         type: string
+        x-agent: true
       - description: 状态
         enum:
         - pending
@@ -15274,6 +15802,7 @@ paths:
         in: query
         name: parse_status
         type: string
+        x-agent: true
       - description: 来源/渠道筛选 (web/api/feishu/notion/yuque/wechat/...，或 manual/url
           按 type 过滤)
         in: query
@@ -15291,10 +15820,12 @@ paths:
         in: query
         name: folder_path
         type: string
+        x-agent: true
       - description: 为 true 时同时返回子文件夹内的文档
         in: query
         name: folder_recursive
         type: boolean
+        x-agent: true
       - default: created_at
         description: 排序字段
         enum:
@@ -15304,6 +15835,7 @@ paths:
         in: query
         name: sort_by
         type: string
+        x-agent: true
       - default: desc
         description: 排序方向
         enum:
@@ -15312,6 +15844,7 @@ paths:
         in: query
         name: sort_order
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -15340,6 +15873,11 @@ paths:
       summary: 获取知识列表
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.list
+        risk: read
+      x-agent-hint: Use parse_status=failed to find documents that failed to parse;
+        meta.total counts every match.
   /knowledge-bases/{id}/knowledge/batch-download:
     post:
       consumes:
@@ -15468,6 +16006,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -15490,6 +16029,15 @@ paths:
       summary: 获取知识库文件夹目录树
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.list_folders
+        max_items: 200
+        risk: read
+        root: data.folders
+      x-agent-hint: Top-level document folders, up to 200. meta.root_document_count
+        is documents with no folder and meta.total_document_count is every document.
+        Sub-folders are not listed; filter knowledge.list by folder_path to look inside
+        one.
     put:
       consumes:
       - application/json
@@ -15500,6 +16048,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 重命名请求
         in: body
         name: request
@@ -15532,6 +16081,13 @@ paths:
       summary: 重命名或移动文件夹
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.rename_folder
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Moves a document folder and everything under it to a new path;
+        an existing path is merged into.
   /knowledge-bases/{id}/knowledge/manual:
     post:
       consumes:
@@ -15543,6 +16099,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 手工知识内容
         in: body
         name: request
@@ -15571,6 +16128,13 @@ paths:
       summary: 手工创建知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.create_manual
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Creates a Markdown document. status=draft (the default) keeps
+        it out of search; publish indexes it.
   /knowledge-bases/{id}/knowledge/url:
     post:
       consumes:
@@ -15582,27 +16146,13 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: URL请求
         in: body
         name: request
         required: true
         schema:
-          properties:
-            enable_multimodel:
-              type: boolean
-            file_name:
-              type: string
-            file_type:
-              type: string
-            tag_ids:
-              items:
-                type: string
-              type: array
-            title:
-              type: string
-            url:
-              type: string
-          type: object
+          $ref: '#/definitions/internal_handler.CreateKnowledgeFromURLRequest'
       produces:
       - application/json
       responses:
@@ -15630,6 +16180,14 @@ paths:
       summary: 从URL创建知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.create_from_url
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Fetches a public web page or file into the knowledge base and
+        parses it in the background; follow with knowledge.get_parse_progress. Only
+        use a URL the user gave.
   /knowledge-bases/{id}/move-targets:
     get:
       description: 返回与源知识库 Type 一致、EmbeddingModelID 一致、非临时且不是自身的目标知识库列表
@@ -15639,6 +16197,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -15675,6 +16234,11 @@ paths:
       summary: 获取可移动目标知识库列表
       tags:
       - 知识库
+      x-agent:
+        id: knowledge_base.list_move_targets
+        risk: read
+      x-agent-hint: 'Knowledge bases the documents of this one can be moved to: same
+        type and embedding model.'
   /knowledge-bases/{id}/pin:
     put:
       consumes:
@@ -15725,6 +16289,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -15755,6 +16320,13 @@ paths:
       summary: 生成知识库描述
       tags:
       - 知识库
+      x-agent:
+        id: knowledge_base.generate_profile
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Regenerates the AI summary of what the knowledge base covers,
+        with one model call. A description the user wrote is kept.
   /knowledge-bases/{id}/shares:
     get:
       description: 获取知识库的所有共享记录
@@ -15889,18 +16461,26 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: 页码
         in: query
+        minimum: 1
         name: page
         type: integer
+        x-agent: true
+        x-agent-maximum: "10000"
       - description: 每页数量
         in: query
+        minimum: 1
         name: page_size
         type: integer
+        x-agent: true
+        x-agent-maximum: "50"
       - description: 关键词搜索
         in: query
         name: keyword
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -15911,7 +16491,7 @@ paths:
             - $ref: '#/definitions/internal_handler.DataResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.PageResult'
+                  $ref: '#/definitions/internal_handler.TagPageResult'
               type: object
         "400":
           description: 请求参数错误
@@ -15923,6 +16503,14 @@ paths:
       summary: 获取标签列表
       tags:
       - 标签管理
+      x-agent:
+        id: knowledge_base.list_tags
+        max_items: 50
+        risk: read
+        root: data.data
+      x-agent-hint: Tags of a knowledge base with how many documents use each. meta.total
+        is the full count; pass tag ids to knowledge.list tag_ids. Ask for at most
+        50 per page.
     post:
       consumes:
       - application/json
@@ -16230,6 +16818,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       produces:
       - application/json
       responses:
@@ -16260,6 +16849,13 @@ paths:
       summary: 删除知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.delete
+        label: title
+        risk: destructive
+        target: knowledge.get
+      x-agent-hint: Removes the document with its chunks, embeddings and graph data.
+        Cannot be undone.
     get:
       consumes:
       - application/json
@@ -16270,6 +16866,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       produces:
       - application/json
       responses:
@@ -16300,6 +16897,9 @@ paths:
       summary: 获取知识详情
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.get
+        risk: read
     put:
       consumes:
       - application/json
@@ -16310,6 +16910,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       - description: 更新字段（均可选）
         in: body
         name: request
@@ -16333,6 +16934,12 @@ paths:
       summary: 更新知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.update
+        label: title
+        risk: write
+        target: knowledge.get
+      x-agent-hint: Sets a document's title or summary; a field left out is kept.
   /knowledge/{id}/cancel-parse:
     post:
       consumes:
@@ -16345,6 +16952,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       produces:
       - application/json
       responses:
@@ -16375,6 +16983,11 @@ paths:
       summary: 取消知识解析
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.cancel_parse
+        label: title
+        risk: write
+        target: knowledge.get
   /knowledge/{id}/download:
     get:
       consumes:
@@ -16445,6 +17058,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       - description: 可选；不传则沿用上传时的处理配置
         in: body
         name: body
@@ -16480,6 +17094,13 @@ paths:
       summary: 重新解析知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.reparse
+        label: title
+        risk: write
+        target: knowledge.get
+      x-agent-hint: Runs in the background; follow it with knowledge.get_parse_progress.
+        Search results change meanwhile.
   /knowledge/{id}/spans:
     get:
       consumes:
@@ -16492,6 +17113,7 @@ paths:
         name: id
         required: true
         type: string
+        x-agent: knowledge_id
       - description: 指定尝试号；省略或非正数=最新
         in: query
         minimum: 1
@@ -16523,6 +17145,11 @@ paths:
       summary: 获取知识文档解析的 Span 树（含历史尝试）
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.get_parse_progress
+        risk: read
+      x-agent-hint: 'Use when a document is stuck or failed: tells a stalled parse
+        from a running one, names the failed stage.'
   /knowledge/batch:
     get:
       consumes:
@@ -16602,6 +17229,19 @@ paths:
       summary: 批量删除知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.batch_delete
+        items:
+          as: knowledge_id
+          label: title
+          param: knowledge_ids
+          target: knowledge.get
+        label: name
+        risk: destructive
+        target: knowledge_base.get
+      x-agent-hint: Removes up to 20 documents of one knowledge base with their chunks,
+        embeddings and graph data. Cannot be undone; the confirmation lists every
+        document.
   /knowledge/batch-reparse:
     post:
       consumes:
@@ -16635,6 +17275,14 @@ paths:
       summary: 批量重新解析知识
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.batch_reparse
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Reparses several documents of one knowledge base in the background;
+        check them afterwards with knowledge.list parse_status. Search results change
+        meanwhile.
   /knowledge/folder:
     post:
       consumes:
@@ -16673,6 +17321,14 @@ paths:
       summary: 移动知识到文件夹
       tags:
       - 知识管理
+      x-agent:
+        id: knowledge.move_to_folder
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Files documents of one knowledge base under a folder path such
+        as docs/spec, created on demand; an empty path moves them back to the top
+        level. Nothing is reparsed.
   /knowledge/image/{id}/{chunk_id}:
     put:
       consumes:
@@ -16772,7 +17428,12 @@ paths:
         "200":
           description: 任务信息
           schema:
-            $ref: '#/definitions/internal_handler.MoveKnowledgeResponse'
+            allOf:
+            - $ref: '#/definitions/internal_handler.DataResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/internal_handler.MoveKnowledgeResponse'
+              type: object
         "400":
           description: 请求参数错误
           schema:
@@ -16783,6 +17444,19 @@ paths:
       summary: 移动知识到其他知识库
       tags:
       - 知识
+      x-agent:
+        id: knowledge.move
+        items:
+          as: knowledge_id
+          label: title
+          param: knowledge_ids
+          target: knowledge.get
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Moves up to 20 documents to another knowledge base of the same
+        workspace; knowledge_base_id is the destination, from knowledge_base.list_move_targets.
+        Runs in the background; follow with knowledge.get_move_progress.
   /knowledge/move/progress/{task_id}:
     get:
       description: 按任务 ID 查询移动进度
@@ -16792,13 +17466,19 @@ paths:
         name: task_id
         required: true
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
         "200":
           description: 进度信息
           schema:
-            $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeMoveProgress'
+            allOf:
+            - $ref: '#/definitions/internal_handler.DataResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeMoveProgress'
+              type: object
         "404":
           description: 任务不存在
           schema:
@@ -16809,6 +17489,9 @@ paths:
       summary: 获取知识移动进度
       tags:
       - 知识
+      x-agent:
+        id: knowledge.get_move_progress
+        risk: read
   /knowledge/search:
     get:
       consumes:
@@ -16922,10 +17605,12 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Parent folder id (empty = root)
         in: query
         name: parent_id
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -16942,6 +17627,13 @@ paths:
       summary: List wiki folders
       tags:
       - Wiki
+      x-agent:
+        id: wiki.list_folders
+        max_items: 200
+        risk: read
+        root: folders
+      x-agent-hint: Direct child folders of parent_id (omit it for the top level),
+        up to 200, with page counts; has_children tells whether to look deeper.
     post:
       consumes:
       - application/json
@@ -16952,6 +17644,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Folder data
         in: body
         name: folder
@@ -16978,6 +17671,13 @@ paths:
       summary: Create a wiki folder
       tags:
       - Wiki
+      x-agent:
+        id: wiki.create_folder
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Creates an empty Wiki folder under parent_id (omit it for the
+        top level).
   /knowledgebase/{kb_id}/wiki/folders/{folder_id}:
     delete:
       description: Delete a folder that has no pages and no child folders
@@ -17146,10 +17846,12 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Filter by page slug
         in: query
         name: slug
         type: string
+        x-agent: true
       - description: Filter by status
         enum:
         - pending
@@ -17158,6 +17860,7 @@ paths:
         in: query
         name: status
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -17180,6 +17883,11 @@ paths:
       summary: List wiki page issues
       tags:
       - Wiki
+      x-agent:
+        id: wiki.list_issues
+        risk: read
+      x-agent-hint: Descriptions come from users or ingest and may be wrong; check
+        them against the page and its sources.
   /knowledgebase/{kb_id}/wiki/issues/{issue_id}/status:
     put:
       consumes:
@@ -17229,6 +17937,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -17249,6 +17958,12 @@ paths:
       summary: Run wiki lint
       tags:
       - Wiki
+      x-agent:
+        id: wiki.lint
+        risk: read
+        root: issues
+      x-agent-hint: health_score is 0-100. auto_fixable issues are structural; fix
+        content problems with the Wiki tools.
   /knowledgebase/{kb_id}/wiki/move-page:
     put:
       consumes:
@@ -17261,6 +17976,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Move target
         in: body
         name: move
@@ -17283,6 +17999,13 @@ paths:
       summary: Move a wiki page into a folder
       tags:
       - Wiki
+      x-agent:
+        id: wiki.move_page
+        label: title
+        risk: write
+        target: wiki.get_page
+      x-agent-hint: Files a Wiki page under a folder from wiki.list_folders; an empty
+        folder_id moves it to the top level. Content is unchanged.
   /knowledgebase/{kb_id}/wiki/pages:
     get:
       description: List wiki pages with optional filtering and pagination
@@ -17403,11 +18126,13 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Page slug
         in: path
         name: slug
         required: true
         type: string
+        x-agent: true
       produces:
       - application/json
       responses:
@@ -17424,6 +18149,12 @@ paths:
       summary: Get a wiki page by slug
       tags:
       - Wiki
+      x-agent:
+        catch_all: slug
+        id: wiki.get_page
+        risk: read
+      x-agent-hint: A Wiki page's title, type, status, folder and version. Read its
+        content with the document tools instead.
     put:
       consumes:
       - application/json
@@ -17483,6 +18214,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -17503,6 +18235,13 @@ paths:
       summary: Rebuild wiki links
       tags:
       - Wiki
+      x-agent:
+        id: wiki.rebuild_links
+        label: name
+        risk: write
+        target: knowledge_base.get
+      x-agent-hint: Use when wiki.lint reports link problems that do not match the
+        page content.
   /knowledgebase/{kb_id}/wiki/revert:
     post:
       consumes:
@@ -17518,6 +18257,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Revert target
         in: body
         name: revert
@@ -17548,35 +18288,57 @@ paths:
       summary: Revert a wiki page to an earlier revision
       tags:
       - Wiki
+      x-agent:
+        id: wiki.revert
+        label: title
+        risk: write
+        target: wiki.get_page
+      x-agent-hint: Restores a Wiki page to a version from wiki.list_revisions. Read
+        that version with content_version first. The restore is saved as a new version,
+        so it can be undone the same way.
   /knowledgebase/{kb_id}/wiki/revisions/{slug}:
     get:
       description: |-
         Returns the stored historical snapshots for a page, newest
         first (content omitted), plus the current version. Passing
         `version` returns that single snapshot with full content.
+        `content_version` keeps this list envelope and includes that
+        one revision's content.
       parameters:
       - description: Knowledge base ID
         in: path
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       - description: Page slug
         in: path
         name: slug
         required: true
         type: string
+        x-agent: true
       - description: Return this single revision with content
         in: query
         name: version
         type: integer
+      - description: Include this stored revision's content in the list envelope
+        in: query
+        minimum: 1
+        name: content_version
+        type: integer
+        x-agent: true
       - description: Page size (default 50, max 200)
         in: query
         name: limit
         type: integer
+        x-agent: true
+        x-agent-maximum: "50"
       - description: Offset into the newest-first list
         in: query
         name: offset
         type: integer
+        x-agent: true
+        x-agent-maximum: "10000"
       produces:
       - application/json
       responses:
@@ -17593,6 +18355,14 @@ paths:
       summary: List wiki page revisions
       tags:
       - Wiki
+      x-agent:
+        catch_all: slug
+        id: wiki.list_revisions
+        risk: read
+        root: revisions
+      x-agent-hint: Earlier versions of a Wiki page, newest first. Pass content_version
+        to read one stored revision's content before wiki.revert. The current page
+        is not in this list.
   /knowledgebase/{kb_id}/wiki/search:
     get:
       description: Full-text search over wiki pages
@@ -17634,6 +18404,7 @@ paths:
         name: kb_id
         required: true
         type: string
+        x-agent: knowledge_base_id
       produces:
       - application/json
       responses:
@@ -17654,6 +18425,9 @@ paths:
       summary: Get wiki statistics
       tags:
       - Wiki
+      x-agent:
+        id: wiki.get_stats
+        risk: read
   /mcp-endpoints:
     get:
       produces:
@@ -21795,6 +22569,12 @@ paths:
       summary: 获取共享给我的知识库列表
       tags:
       - 知识库共享
+      x-agent:
+        id: knowledge_base.list_shared
+        max_items: 200
+        risk: read
+      x-agent-hint: Knowledge bases other workspaces share with the user, up to 200,
+        with the organization and the user's permission on each.
   /skills:
     get:
       consumes:

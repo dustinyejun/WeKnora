@@ -322,7 +322,7 @@ type KnowledgeBaseView struct {
 	VectorStoreStatus     string `json:"vector_store_status,omitempty"`
 	// MyPermission is the caller's role on a knowledge base shared from
 	// another workspace; GET /knowledge-bases/{id} sets it.
-	MyPermission string `json:"my_permission,omitempty" enums:"admin,editor,viewer"`
+	MyPermission string `json:"my_permission,omitempty" enums:"admin,editor,viewer" extensions:"x-agent"`
 }
 
 // HybridSearchResponse is the hybrid-search body. meta is set only when the
@@ -539,7 +539,7 @@ func (h *KnowledgeBaseHandler) validateAndGetKnowledgeBase(
 // @Tags         知识库
 // @Accept       json
 // @Produce      json
-// @Param        id         path      string  true   "知识库ID"
+// @Param        id         path      string  true   "知识库ID"  extensions(x-agent=knowledge_base_id)
 // @Param        agent_id   query     string  false  "共享智能体 ID（用于校验智能体是否有权访问该知识库）"
 // @Success      200  {object}  handler.DataResponse{data=handler.KnowledgeBaseView}  "知识库详情"
 // @Failure      400  {object}  errors.AppError  "请求参数错误"
@@ -547,6 +547,8 @@ func (h *KnowledgeBaseHandler) validateAndGetKnowledgeBase(
 // @Failure      404  {object}  errors.AppError  "知识库不存在"
 // @Security     Bearer
 // @Security     ApiKeyAuth
+// @x-agent      {"id":"knowledge_base.get","risk":"read"}
+// @x-agent-hint "Check which indexes are enabled (vector, keyword, Wiki, graph) and whether documents are processing."
 // @Router       /knowledge-bases/{id} [get]
 func (h *KnowledgeBaseHandler) GetKnowledgeBase(c *gin.Context) {
 	// Validate and get the knowledge base
@@ -582,6 +584,8 @@ func (h *KnowledgeBaseHandler) GetKnowledgeBase(c *gin.Context) {
 // @Failure      500       {object}  errors.AppError                                         "服务器错误"
 // @Security     Bearer
 // @Security     ApiKeyAuth
+// @x-agent      {"id":"knowledge_base.list","risk":"read","max_items":200}
+// @x-agent-hint "The workspace's own knowledge bases, up to 200. Ones shared from other workspaces are in knowledge_base.list_shared."
 // @Router       /knowledge-bases [get]
 func (h *KnowledgeBaseHandler) ListKnowledgeBases(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -888,13 +892,15 @@ func (h *KnowledgeBaseHandler) UpdateKnowledgeBase(c *gin.Context) {
 // @Description  基于文档画像聚合，立即重新生成知识库的 AI 描述（不覆盖手写描述）
 // @Tags         知识库
 // @Produce      json
-// @Param        id   path      string  true  "知识库ID"
+// @Param        id   path      string  true  "知识库ID"  extensions(x-agent=knowledge_base_id)
 // @Success      200  {object}  handler.DataResponse{data=types.KnowledgeBaseProfile}  "生成的知识库画像"
 // @Failure      400  {object}  errors.AppError                                       "知识库类型不支持或未配置模型"
 // @Failure      403  {object}  errors.AppError                                       "无权限"
 // @Failure      404  {object}  errors.AppError                                       "知识库不存在"
 // @Security     Bearer
 // @Security     ApiKeyAuth
+// @x-agent      {"id":"knowledge_base.generate_profile","risk":"write","target":"knowledge_base.get","label":"name"}
+// @x-agent-hint "Regenerates the AI summary of what the knowledge base covers, with one model call. A description the user wrote is kept."
 // @Router       /knowledge-bases/{id}/profile/generate [post]
 func (h *KnowledgeBaseHandler) GenerateKnowledgeBaseProfile(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -1347,7 +1353,7 @@ func validateKnowledgeBasePromptInstructions(kb *types.KnowledgeBase) error {
 // @Description  返回与源知识库 Type 一致、EmbeddingModelID 一致、非临时且不是自身的目标知识库列表
 // @Tags         知识库
 // @Produce      json
-// @Param        id   path      string                  true  "源知识库 ID"
+// @Param        id   path      string                  true  "源知识库 ID"  extensions(x-agent=knowledge_base_id)
 // @Success      200  {object}  handler.DataResponse{data=[]types.KnowledgeBase}  "可移动目标列表"
 // @Failure      400  {object}  errors.AppError                                   "请求参数错误"
 // @Failure      401  {object}  errors.AppError                                   "未认证"
@@ -1355,6 +1361,8 @@ func validateKnowledgeBasePromptInstructions(kb *types.KnowledgeBase) error {
 // @Failure      404  {object}  errors.AppError                                   "知识库不存在"
 // @Security     Bearer
 // @Security     ApiKeyAuth
+// @x-agent      {"id":"knowledge_base.list_move_targets","risk":"read"}
+// @x-agent-hint "Knowledge bases the documents of this one can be moved to: same type and embedding model."
 // @Router       /knowledge-bases/{id}/move-targets [get]
 func (h *KnowledgeBaseHandler) ListMoveTargets(c *gin.Context) {
 	ctx := c.Request.Context()

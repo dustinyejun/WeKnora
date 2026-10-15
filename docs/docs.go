@@ -1940,6 +1940,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "知识ID",
                         "name": "knowledge_id",
                         "in": "path",
@@ -1949,6 +1950,8 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 1,
+                        "x-agent": true,
+                        "x-agent-maximum": "10000",
                         "description": "页码",
                         "name": "page",
                         "in": "query"
@@ -1958,6 +1961,8 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 10,
+                        "x-agent": true,
+                        "x-agent-maximum": "20",
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
@@ -1965,9 +1970,25 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
+                            "enum": [
+                                "text",
+                                "parent_text",
+                                "image_ocr",
+                                "image_caption",
+                                "image_vector",
+                                "summary",
+                                "entity",
+                                "relationship",
+                                "faq",
+                                "web_search",
+                                "table_summary",
+                                "table_column",
+                                "wiki_page"
+                            ],
                             "type": "string"
                         },
                         "collectionFormat": "multi",
+                        "x-agent": true,
                         "description": "分块类型，可重复，缺省 text",
                         "name": "chunk_type",
                         "in": "query"
@@ -2001,7 +2022,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "chunk.list",
+                    "risk": "read"
+                },
+                "x-agent-hint": "The chunks a document was split into, in order; use it to check how a document was parsed. meta.total counts every chunk."
             },
             "delete": {
                 "security": [
@@ -4196,7 +4222,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.list",
+                    "max_items": 200,
+                    "risk": "read"
+                },
+                "x-agent-hint": "The workspace's own knowledge bases, up to 200. Ones shared from other workspaces are in knowledge_base.list_shared."
             },
             "post": {
                 "security": [
@@ -4423,6 +4455,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -4472,7 +4505,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.get",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Check which indexes are enabled (vector, keyword, Wiki, graph) and whether documents are processing."
             },
             "put": {
                 "security": [
@@ -4626,6 +4664,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -4633,6 +4672,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "x-agent": "cursor",
                         "description": "游标：返回 id 小于此值的记录",
                         "name": "after_id",
                         "in": "query"
@@ -4642,12 +4682,15 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 50,
+                        "x-agent": true,
+                        "x-agent-maximum": "50",
                         "description": "页大小",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "按 action 精确过滤，如 knowledge.deleted",
                         "name": "action",
                         "in": "query"
@@ -4662,6 +4705,7 @@ const docTemplate = `{
                             "canceled"
                         ],
                         "type": "string",
+                        "x-agent": true,
                         "description": "结果过滤",
                         "name": "outcome",
                         "in": "query"
@@ -4692,7 +4736,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.list_activity",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Newest first; only the creator or a workspace admin may read it. Assistant actions carry via=agent."
             }
         },
         "/knowledge-bases/{id}/duplicate": {
@@ -4786,19 +4835,27 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "10000",
                         "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
+                        "maximum": 1000,
+                        "minimum": 1,
                         "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "50",
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
@@ -4811,30 +4868,43 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "标签UUID筛选，逗号分隔（OR语义）",
                         "name": "tag_ids",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "关键词搜索",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "standard_question",
+                            "similar_questions",
+                            "answers"
+                        ],
                         "type": "string",
-                        "description": "搜索字段: standard_question(标准问题), similar_questions(相似问法), answers(答案), 默认搜索全部",
+                        "x-agent": true,
+                        "description": "搜索字段，默认搜索全部",
                         "name": "search_field",
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "asc"
+                        ],
                         "type": "string",
+                        "x-agent": true,
                         "description": "排序方式: asc(按更新时间正序), 默认按更新时间倒序",
                         "name": "sort_order",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
+                        "x-agent": true,
                         "description": "启用状态筛选；不传时返回全部",
                         "name": "is_enabled",
                         "in": "query"
@@ -4852,7 +4922,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.PageResult"
+                                            "$ref": "#/definitions/internal_handler.FAQEntryPage"
                                         }
                                     }
                                 }
@@ -4865,7 +4935,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "faq.list_entries",
+                    "risk": "read",
+                    "root": "data.data"
+                },
+                "x-agent-hint": "FAQ entries of an FAQ knowledge base, newest first; keyword searches questions and answers."
             },
             "post": {
                 "security": [
@@ -4955,6 +5031,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -4966,15 +5043,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "ids": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "integer"
-                                    }
-                                }
-                            }
+                            "$ref": "#/definitions/internal_handler.faqDeleteRequest"
                         }
                     }
                 ],
@@ -4991,7 +5060,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "faq.delete_entries",
+                    "items": {
+                        "as": "entry_id",
+                        "label": "standard_question",
+                        "param": "entry_ids",
+                        "target": "faq.get_entry"
+                    },
+                    "label": "name",
+                    "risk": "destructive",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Removes up to 20 FAQ entries. Cannot be undone; the confirmation lists every question."
             }
         },
         "/knowledge-bases/{id}/faq/entries/export": {
@@ -5181,6 +5263,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -5188,6 +5271,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "x-agent": true,
                         "description": "FAQ条目ID(seq_id)",
                         "name": "entry_id",
                         "in": "path",
@@ -5225,6 +5309,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
+                },
+                "x-agent": {
+                    "id": "faq.get_entry",
+                    "risk": "read"
                 }
             },
             "put": {
@@ -5250,6 +5338,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -5257,6 +5346,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "x-agent": true,
                         "description": "FAQ条目ID(seq_id)",
                         "name": "entry_id",
                         "in": "path",
@@ -5297,7 +5387,15 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "faq.update_entry",
+                    "label": "standard_question",
+                    "require_complete_target": true,
+                    "risk": "write",
+                    "target": "faq.get_entry"
+                },
+                "x-agent-hint": "Replaces the whole entry. Read it with faq.get_entry first and send every field, changed or not, or the rest is lost. Updates are refused if the current entry is truncated; use the FAQ editor for entries beyond the complete-read limits. To only add phrasings, use faq.add_similar_questions."
             }
         },
         "/knowledge-bases/{id}/faq/entries/{entry_id}/similar-questions": {
@@ -5324,6 +5422,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -5331,6 +5430,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "x-agent": true,
                         "description": "FAQ条目ID(seq_id)",
                         "name": "entry_id",
                         "in": "path",
@@ -5377,7 +5477,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "faq.add_similar_questions",
+                    "label": "standard_question",
+                    "risk": "write",
+                    "target": "faq.get_entry"
+                },
+                "x-agent-hint": "Adds phrasings to an entry and keeps everything else."
             }
         },
         "/knowledge-bases/{id}/faq/entry": {
@@ -5404,6 +5511,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -5444,7 +5552,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "faq.create_entry",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Adds one FAQ entry. Questions already used by another entry are refused."
             }
         },
         "/knowledge-bases/{id}/faq/import/last-result/display": {
@@ -5932,6 +6047,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -5941,6 +6057,8 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 1,
+                        "x-agent": true,
+                        "x-agent-maximum": "10000",
                         "description": "页码",
                         "name": "page",
                         "in": "query"
@@ -5950,24 +6068,29 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "default": 20,
+                        "x-agent": true,
+                        "x-agent-maximum": "50",
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "标签ID筛选，逗号分隔（OR语义）",
                         "name": "tag_ids",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "关键词搜索",
                         "name": "keyword",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "文件类型筛选",
                         "name": "file_type",
                         "in": "query"
@@ -5983,6 +6106,7 @@ const docTemplate = `{
                             "deleting"
                         ],
                         "type": "string",
+                        "x-agent": true,
                         "description": "状态",
                         "name": "parse_status",
                         "in": "query"
@@ -6007,12 +6131,14 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "文件夹路径筛选，空字符串表示知识库根目录；不传该参数则不按文件夹过滤",
                         "name": "folder_path",
                         "in": "query"
                     },
                     {
                         "type": "boolean",
+                        "x-agent": true,
                         "description": "为 true 时同时返回子文件夹内的文档",
                         "name": "folder_recursive",
                         "in": "query"
@@ -6025,6 +6151,7 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "default": "created_at",
+                        "x-agent": true,
                         "description": "排序字段",
                         "name": "sort_by",
                         "in": "query"
@@ -6036,6 +6163,7 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "default": "desc",
+                        "x-agent": true,
                         "description": "排序方向",
                         "name": "sort_order",
                         "in": "query"
@@ -6075,7 +6203,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.list",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Use parse_status=failed to find documents that failed to parse; meta.total counts every match."
             },
             "delete": {
                 "security": [
@@ -6339,6 +6472,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -6370,7 +6504,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.list_folders",
+                    "max_items": 200,
+                    "risk": "read",
+                    "root": "data.folders"
+                },
+                "x-agent-hint": "Top-level document folders, up to 200. meta.root_document_count is documents with no folder and meta.total_document_count is every document. Sub-folders are not listed; filter knowledge.list by folder_path to look inside one."
             },
             "put": {
                 "security": [
@@ -6395,6 +6536,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -6441,7 +6583,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.rename_folder",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Moves a document folder and everything under it to a new path; an existing path is merged into."
             }
         },
         "/knowledge-bases/{id}/knowledge/manual": {
@@ -6468,6 +6617,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -6508,7 +6658,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.create_manual",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Creates a Markdown document. status=draft (the default) keeps it out of search; publish indexes it."
             }
         },
         "/knowledge-bases/{id}/knowledge/url": {
@@ -6535,6 +6692,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -6546,30 +6704,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "enable_multimodel": {
-                                    "type": "boolean"
-                                },
-                                "file_name": {
-                                    "type": "string"
-                                },
-                                "file_type": {
-                                    "type": "string"
-                                },
-                                "tag_ids": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                },
-                                "title": {
-                                    "type": "string"
-                                },
-                                "url": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/internal_handler.CreateKnowledgeFromURLRequest"
                         }
                     }
                 ],
@@ -6605,7 +6740,14 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.create_from_url",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Fetches a public web page or file into the knowledge base and parses it in the background; follow with knowledge.get_parse_progress. Only use a URL the user gave."
             }
         },
         "/knowledge-bases/{id}/move-targets": {
@@ -6629,6 +6771,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "源知识库 ID",
                         "name": "id",
                         "in": "path",
@@ -6681,7 +6824,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.list_move_targets",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Knowledge bases the documents of this one can be moved to: same type and embedding model."
             }
         },
         "/knowledge-bases/{id}/pin": {
@@ -6775,6 +6923,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
@@ -6818,7 +6967,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.generate_profile",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Regenerates the AI summary of what the knowledge base covers, with one model call. A description the user wrote is kept."
             }
         },
         "/knowledge-bases/{id}/shares": {
@@ -7042,25 +7198,33 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "知识库ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "10000",
                         "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "50",
                         "description": "每页数量",
                         "name": "page_size",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "关键词搜索",
                         "name": "keyword",
                         "in": "query"
@@ -7078,7 +7242,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.PageResult"
+                                            "$ref": "#/definitions/internal_handler.TagPageResult"
                                         }
                                     }
                                 }
@@ -7091,7 +7255,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.list_tags",
+                    "max_items": 50,
+                    "risk": "read",
+                    "root": "data.data"
+                },
+                "x-agent-hint": "Tags of a knowledge base with how many documents use each. meta.total is the full count; pass tag ids to knowledge.list tag_ids. Ask for at most 50 per page."
             },
             "post": {
                 "security": [
@@ -7569,7 +7740,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.batch_delete",
+                    "items": {
+                        "as": "knowledge_id",
+                        "label": "title",
+                        "param": "knowledge_ids",
+                        "target": "knowledge.get"
+                    },
+                    "label": "name",
+                    "risk": "destructive",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Removes up to 20 documents of one knowledge base with their chunks, embeddings and graph data. Cannot be undone; the confirmation lists every document."
             }
         },
         "/knowledge/batch-reparse": {
@@ -7623,7 +7807,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.batch_reparse",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Reparses several documents of one knowledge base in the background; check them afterwards with knowledge.list parse_status. Search results change meanwhile."
             }
         },
         "/knowledge/folder": {
@@ -7689,7 +7880,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.move_to_folder",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Files documents of one knowledge base under a folder path such as docs/spec, created on demand; an empty path moves them back to the top level. Nothing is reparsed."
             }
         },
         "/knowledge/image/{id}/{chunk_id}": {
@@ -7862,7 +8060,19 @@ const docTemplate = `{
                     "200": {
                         "description": "任务信息",
                         "schema": {
-                            "$ref": "#/definitions/internal_handler.MoveKnowledgeResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_handler.DataResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/internal_handler.MoveKnowledgeResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -7871,7 +8081,20 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.move",
+                    "items": {
+                        "as": "knowledge_id",
+                        "label": "title",
+                        "param": "knowledge_ids",
+                        "target": "knowledge.get"
+                    },
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Moves up to 20 documents to another knowledge base of the same workspace; knowledge_base_id is the destination, from knowledge_base.list_move_targets. Runs in the background; follow with knowledge.get_move_progress."
             }
         },
         "/knowledge/move/progress/{task_id}": {
@@ -7895,6 +8118,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "移动任务 ID",
                         "name": "task_id",
                         "in": "path",
@@ -7905,7 +8129,19 @@ const docTemplate = `{
                     "200": {
                         "description": "进度信息",
                         "schema": {
-                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeMoveProgress"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_handler.DataResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeMoveProgress"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "404": {
@@ -7914,6 +8150,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
+                },
+                "x-agent": {
+                    "id": "knowledge.get_move_progress",
+                    "risk": "read"
                 }
             }
         },
@@ -8067,6 +8307,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8110,6 +8351,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
+                },
+                "x-agent": {
+                    "id": "knowledge.get",
+                    "risk": "read"
                 }
             },
             "put": {
@@ -8135,6 +8380,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8163,7 +8409,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.update",
+                    "label": "title",
+                    "risk": "write",
+                    "target": "knowledge.get"
+                },
+                "x-agent-hint": "Sets a document's title or summary; a field left out is kept."
             },
             "delete": {
                 "security": [
@@ -8188,6 +8441,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8231,7 +8485,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.delete",
+                    "label": "title",
+                    "risk": "destructive",
+                    "target": "knowledge.get"
+                },
+                "x-agent-hint": "Removes the document with its chunks, embeddings and graph data. Cannot be undone."
             }
         },
         "/knowledge/{id}/cancel-parse": {
@@ -8258,6 +8519,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8301,6 +8563,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
+                },
+                "x-agent": {
+                    "id": "knowledge.cancel_parse",
+                    "label": "title",
+                    "risk": "write",
+                    "target": "knowledge.get"
                 }
             }
         },
@@ -8423,6 +8691,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8474,7 +8743,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.reparse",
+                    "label": "title",
+                    "risk": "write",
+                    "target": "knowledge.get"
+                },
+                "x-agent-hint": "Runs in the background; follow it with knowledge.get_parse_progress. Search results change meanwhile."
             }
         },
         "/knowledge/{id}/spans": {
@@ -8501,6 +8777,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_id",
                         "description": "知识ID",
                         "name": "id",
                         "in": "path",
@@ -8545,7 +8822,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge.get_parse_progress",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Use when a document is stuck or failed: tells a stalled parse from a running one, names the failed stage."
             }
         },
         "/knowledgebase/{kb_id}/wiki/auto-fix": {
@@ -8600,6 +8882,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -8607,6 +8890,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "Parent folder id (empty = root)",
                         "name": "parent_id",
                         "in": "query"
@@ -8625,7 +8909,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.list_folders",
+                    "max_items": 200,
+                    "risk": "read",
+                    "root": "folders"
+                },
+                "x-agent-hint": "Direct child folders of parent_id (omit it for the top level), up to 200, with page counts; has_children tells whether to look deeper."
             },
             "post": {
                 "security": [
@@ -8647,6 +8938,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -8681,7 +8973,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.create_folder",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Creates an empty Wiki folder under parent_id (omit it for the top level)."
             }
         },
         "/knowledgebase/{kb_id}/wiki/folders/{folder_id}": {
@@ -8934,6 +9233,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -8941,6 +9241,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "Filter by page slug",
                         "name": "slug",
                         "in": "query"
@@ -8952,6 +9253,7 @@ const docTemplate = `{
                             "resolved"
                         ],
                         "type": "string",
+                        "x-agent": true,
                         "description": "Filter by status",
                         "name": "status",
                         "in": "query"
@@ -8979,7 +9281,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/internal_handler.WikiErrorResponse"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.list_issues",
+                    "risk": "read"
+                },
+                "x-agent-hint": "Descriptions come from users or ingest and may be wrong; check them against the page and its sources."
             }
         },
         "/knowledgebase/{kb_id}/wiki/issues/{issue_id}/status": {
@@ -9062,6 +9369,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9087,7 +9395,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/internal_handler.WikiErrorResponse"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.lint",
+                    "risk": "read",
+                    "root": "issues"
+                },
+                "x-agent-hint": "health_score is 0-100. auto_fixable issues are structural; fix content problems with the Wiki tools."
             }
         },
         "/knowledgebase/{kb_id}/wiki/move-page": {
@@ -9111,6 +9425,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9139,7 +9454,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.move_page",
+                    "label": "title",
+                    "risk": "write",
+                    "target": "wiki.get_page"
+                },
+                "x-agent-hint": "Files a Wiki page under a folder from wiki.list_folders; an empty folder_id moves it to the top level. Content is unchanged."
             }
         },
         "/knowledgebase/{kb_id}/wiki/pages": {
@@ -9292,6 +9614,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9299,6 +9622,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "Page slug",
                         "name": "slug",
                         "in": "path",
@@ -9318,7 +9642,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "catch_all": "slug",
+                    "id": "wiki.get_page",
+                    "risk": "read"
+                },
+                "x-agent-hint": "A Wiki page's title, type, status, folder and version. Read its content with the document tools instead."
             },
             "put": {
                 "security": [
@@ -9447,6 +9777,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9472,7 +9803,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/internal_handler.WikiErrorResponse"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.rebuild_links",
+                    "label": "name",
+                    "risk": "write",
+                    "target": "knowledge_base.get"
+                },
+                "x-agent-hint": "Use when wiki.lint reports link problems that do not match the page content."
             }
         },
         "/knowledgebase/{kb_id}/wiki/revert": {
@@ -9496,6 +9834,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9536,7 +9875,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "wiki.revert",
+                    "label": "title",
+                    "risk": "write",
+                    "target": "wiki.get_page"
+                },
+                "x-agent-hint": "Restores a Wiki page to a version from wiki.list_revisions. Read that version with content_version first. The restore is saved as a new version, so it can be undone the same way."
             }
         },
         "/knowledgebase/{kb_id}/wiki/revisions/{slug}": {
@@ -9546,7 +9892,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "Returns the stored historical snapshots for a page, newest\nfirst (content omitted), plus the current version. Passing\n` + "`" + `version` + "`" + ` returns that single snapshot with full content.",
+                "description": "Returns the stored historical snapshots for a page, newest\nfirst (content omitted), plus the current version. Passing\n` + "`" + `version` + "`" + ` returns that single snapshot with full content.\n` + "`" + `content_version` + "`" + ` keeps this list envelope and includes that\none revision's content.",
                 "produces": [
                     "application/json"
                 ],
@@ -9557,6 +9903,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9564,6 +9911,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "x-agent": true,
                         "description": "Page slug",
                         "name": "slug",
                         "in": "path",
@@ -9576,13 +9924,25 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "minimum": 1,
                         "type": "integer",
+                        "x-agent": true,
+                        "description": "Include this stored revision's content in the list envelope",
+                        "name": "content_version",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "50",
                         "description": "Page size (default 50, max 200)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "x-agent": true,
+                        "x-agent-maximum": "10000",
                         "description": "Offset into the newest-first list",
                         "name": "offset",
                         "in": "query"
@@ -9601,7 +9961,14 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_errors.AppError"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "catch_all": "slug",
+                    "id": "wiki.list_revisions",
+                    "risk": "read",
+                    "root": "revisions"
+                },
+                "x-agent-hint": "Earlier versions of a Wiki page, newest first. Pass content_version to read one stored revision's content before wiki.revert. The current page is not in this list."
             }
         },
         "/knowledgebase/{kb_id}/wiki/search": {
@@ -9672,6 +10039,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "x-agent": "knowledge_base_id",
                         "description": "Knowledge base ID",
                         "name": "kb_id",
                         "in": "path",
@@ -9697,6 +10065,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/internal_handler.WikiErrorResponse"
                         }
                     }
+                },
+                "x-agent": {
+                    "id": "wiki.get_stats",
+                    "risk": "read"
                 }
             }
         },
@@ -16434,7 +16806,13 @@ const docTemplate = `{
                             "$ref": "#/definitions/internal_handler.ListSharedKnowledgeBasesResponse"
                         }
                     }
-                }
+                },
+                "x-agent": {
+                    "id": "knowledge_base.list_shared",
+                    "max_items": 200,
+                    "risk": "read"
+                },
+                "x-agent-hint": "Knowledge bases other workspaces share with the user, up to 200, with the organization and the user's permission on each."
             }
         },
         "/skills": {
@@ -21193,23 +21571,37 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "auto_fixable": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "page_slug": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "slug"
                 },
                 "severity": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueSeverity"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueSeverity"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "target_slug": {
                     "description": "TargetSlug identifies the other page involved in the issue (e.g. the\nbroken link target, or the entity slug for a missing cross-ref). It is\nthe structured field used by AutoFix instead of parsing Description.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "type": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueType"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_application_service.WikiLintIssueType"
+                        }
+                    ],
+                    "x-agent": true
                 }
             }
         },
@@ -21250,7 +21642,8 @@ const docTemplate = `{
             "properties": {
                 "health_score": {
                     "description": "0-100",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "issues": {
                     "type": "array",
@@ -21265,7 +21658,8 @@ const docTemplate = `{
                     "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.WikiStats"
                 },
                 "summary": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -22708,25 +23102,40 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AuditAction"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AuditAction"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "actor_role": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "actor_user_id": {
                     "type": "string"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "details": {
-                    "type": "object"
+                    "type": "object",
+                    "x-agent": true,
+                    "x-agent-keys": "title|trigger|via|processing_status"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": "event_id"
                 },
                 "outcome": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AuditOutcome"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AuditOutcome"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "request_method": {
                     "type": "string"
@@ -22744,7 +23153,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "target_type": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "target_user_id": {
                     "type": "string"
@@ -22979,7 +23389,8 @@ const docTemplate = `{
             "properties": {
                 "chunk_index": {
                     "description": "Index position of the chunk in the original document",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "chunk_type": {
                     "description": "Chunk 类型，用于区分不同类型的 Chunk",
@@ -22987,11 +23398,13 @@ const docTemplate = `{
                         {
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.ChunkType"
                         }
-                    ]
+                    ],
+                    "x-agent": true
                 },
                 "content": {
                     "description": "Actual text content of the chunk",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "content_hash": {
                     "description": "ContentHash 存储内容的 hash 值，用于快速匹配（主要用于 FAQ）",
@@ -23015,7 +23428,8 @@ const docTemplate = `{
                 },
                 "end_at": {
                     "description": "Ending character position in the original text",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "flags": {
                     "description": "Flags 存储多个布尔状态的位标志（如推荐状态等）\n默认值为 ChunkFlagRecommended (1)，表示默认可推荐",
@@ -23027,7 +23441,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "Unique identifier of the chunk, using UUID format",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "chunk_id"
                 },
                 "image_info": {
                     "description": "图片信息，存储为 JSON",
@@ -23046,7 +23461,8 @@ const docTemplate = `{
                 },
                 "is_enabled": {
                     "description": "Whether the chunk is enabled, can be used to temporarily disable certain chunks",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "knowledge_base_id": {
                     "description": "ID of the knowledge base, for quick location",
@@ -23096,7 +23512,8 @@ const docTemplate = `{
                 },
                 "start_at": {
                     "description": "Starting character position in the original text",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "status": {
                     "description": "Status of the chunk",
@@ -24148,13 +24565,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "answer_strategy": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "answers": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-runes": "8000"
                 },
                 "chunk_id": {
                     "type": "string"
@@ -24166,16 +24590,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": "entry_id"
                 },
                 "index_mode": {
                     "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.FAQIndexMode"
                 },
                 "is_enabled": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "is_recommended": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "knowledge_base_id": {
                     "type": "string"
@@ -24194,7 +24621,9 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-runes": "8000"
                 },
                 "score": {
                     "type": "number"
@@ -24203,19 +24632,26 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-runes": "8000"
                 },
                 "standard_question": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true,
+                    "x-agent-max-runes": "8000"
                 },
                 "tag_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": "tag_seq_id"
                 },
                 "tag_name": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -24266,41 +24702,74 @@ const docTemplate = `{
             ],
             "properties": {
                 "answer_strategy": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy"
+                    "description": "all returns every answer; random returns one.",
+                    "enum": [
+                        "all",
+                        "random"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.AnswerStrategy"
+                        }
+                    ],
+                    "x-agent": true,
+                    "x-agent-required": true
                 },
                 "answers": {
+                    "description": "Answers; one is picked by answer_strategy.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-bytes": "32000",
+                    "x-agent-required": true
                 },
                 "id": {
                     "description": "ID 可选，用于数据迁移时指定 seq_id（必须小于自增起始值 100000000）",
                     "type": "integer"
                 },
                 "is_enabled": {
-                    "type": "boolean"
+                    "description": "Whether the entry is served; omit to keep the current or default value.",
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "is_recommended": {
-                    "type": "boolean"
+                    "description": "Whether the entry is recommended; omit to keep the current or default value.",
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "negative_questions": {
+                    "description": "Phrasings that must not match; [] for none.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-bytes": "32000",
+                    "x-agent-required": true
                 },
                 "similar_questions": {
+                    "description": "Other phrasings that should match; [] for none.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-max-bytes": "32000",
+                    "x-agent-required": true
                 },
                 "standard_question": {
-                    "type": "string"
+                    "description": "The question the entry answers.",
+                    "type": "string",
+                    "x-agent": true,
+                    "x-agent-max-bytes": "32000"
                 },
                 "tag_id": {
-                    "type": "integer"
+                    "description": "Tag seq id (tag_seq_id from knowledge_base.list_tags); 0 for none.",
+                    "type": "integer",
+                    "x-agent": "tag_seq_id",
+                    "x-agent-required": true
                 },
                 "tag_name": {
                     "type": "string"
@@ -24996,19 +25465,23 @@ const docTemplate = `{
             "properties": {
                 "graph_enabled": {
                     "description": "GraphEnabled enables knowledge graph entity/relation extraction",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "keyword_enabled": {
                     "description": "KeywordEnabled enables keyword-based (BM25) search",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "vector_enabled": {
                     "description": "VectorEnabled enables semantic vector embedding and search",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "wiki_enabled": {
                     "description": "WikiEnabled enables automatic wiki page generation from documents",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 }
             }
         },
@@ -25259,11 +25732,13 @@ const docTemplate = `{
             "properties": {
                 "channel": {
                     "description": "Channel indicates through which channel the knowledge was ingested (web, api, browser_extension, wechat, etc.)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "created_at": {
                     "description": "Creation time of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "custom_metadata": {
                     "description": "CustomMetadata is user-authored descriptive metadata. It is deliberately\nseparate from Metadata, which contains internal ingestion state and IDs.",
@@ -25287,11 +25762,13 @@ const docTemplate = `{
                 },
                 "enable_status": {
                     "description": "Enable status of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "error_message": {
                     "description": "Error message of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "file_hash": {
                     "description": "File hash of the knowledge",
@@ -25299,7 +25776,8 @@ const docTemplate = `{
                 },
                 "file_name": {
                     "description": "File name of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "file_path": {
                     "description": "File path of the knowledge",
@@ -25307,31 +25785,38 @@ const docTemplate = `{
                 },
                 "file_size": {
                     "description": "File size of the knowledge",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "file_type": {
                     "description": "File type of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "folder_path": {
                     "description": "FolderPath is the canonical relative directory this entry belongs to\ninside the knowledge base, e.g. \"docs/spec\" for a folder upload of\n\"docs/spec/design.md\". Empty means the knowledge base root. It is a\ndisplay/navigation concern only: it never affects where the file is\nphysically stored (see FilePath).",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "id": {
                     "description": "Unique identifier of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "knowledge_id"
                 },
                 "knowledge_base_id": {
                     "description": "ID of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "knowledge_base_name": {
                     "description": "Knowledge base name (not stored in database, populated on query)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "last_activity_at": {
                     "description": "Most recent processing progress (row or span write) for an in-flight\nrow, so clients can tell a slow stage from a stalled one. Not stored.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "last_faq_import_result": {
                     "description": "Last FAQ import result (for FAQ type knowledge only)",
@@ -25343,7 +25828,8 @@ const docTemplate = `{
                 },
                 "parse_status": {
                     "description": "Parse status of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "pending_subtasks_count": {
                     "description": "PendingSubtasksCount is the outstanding enrichment subtask count\n(summary + question + graph chunks). Only meaningful while\nParseStatus == \"finalizing\"; defaults to 0 in any terminal state.",
@@ -25351,7 +25837,8 @@ const docTemplate = `{
                 },
                 "processed_at": {
                     "description": "Processed time of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "profile": {
                     "description": "Profile is the structured companion of Description: a one-line gist,\ntopic keywords, a document type and one typical question. It is produced\nby the same model call as the summary and feeds the knowledge-base\nlevel description aggregation. nil when no summary has been generated.",
@@ -25363,11 +25850,13 @@ const docTemplate = `{
                 },
                 "source": {
                     "description": "Source of the knowledge (e.g. URL address for url type, \"manual\" for manual type)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "stall_state": {
                     "description": "Verdict on an in-flight row gone quiet: StallStateQueued (its work is\nstill queued, i.e. backlogged) or StallStateStalled (nothing left to\nrun it). Empty while it is progressing or the probe failed. Not stored.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "storage_size": {
                     "description": "Storage size of the knowledge",
@@ -25375,7 +25864,8 @@ const docTemplate = `{
                 },
                 "summary_status": {
                     "description": "Summary status for async summary generation",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "tags": {
                     "description": "Tags holds the tags associated with this knowledge (populated on query, not persisted directly).",
@@ -25390,15 +25880,18 @@ const docTemplate = `{
                 },
                 "title": {
                     "description": "Title of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "type": {
                     "description": "Type of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "Last updated time of the knowledge",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -25423,7 +25916,8 @@ const docTemplate = `{
                 },
                 "chunk_count": {
                     "description": "Chunk count (not stored in database, calculated on query)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "chunking_config": {
                     "description": "Chunking configuration",
@@ -25455,7 +25949,8 @@ const docTemplate = `{
                 },
                 "description": {
                     "description": "Description of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "embedding_model_id": {
                     "description": "ID of the embedding model",
@@ -25487,7 +25982,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "Unique identifier of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 },
                 "image_processing_config": {
                     "description": "Image processing configuration",
@@ -25503,7 +25999,8 @@ const docTemplate = `{
                         {
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.IndexingStrategy"
                         }
-                    ]
+                    ],
+                    "x-agent": true
                 },
                 "is_pinned": {
                     "description": "IsPinned and PinnedAt are computed per-caller from user_kb_pins\n(see migration 000050). They used to be stored on the row itself,\nwhich made pinning a workspace-wide ordering decision gated behind\nthe kb-edit RBAC guard. The columns are still present in legacy\nschemas for rollback safety but are no longer read or written by\nthe application — both fields are tagged ` + "`" + `gorm:\"-\"` + "`" + ` so GORM\nignores them on every CRUD call and the list handler stamps them\nafter enriching with the caller's pin set.",
@@ -25511,7 +26008,8 @@ const docTemplate = `{
                 },
                 "is_processing": {
                     "description": "IsProcessing indicates if there is a processing import task (for FAQ type knowledge bases)",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "is_temporary": {
                     "description": "Whether this knowledge base is temporary (ephemeral) and should be hidden from UI",
@@ -25519,11 +26017,13 @@ const docTemplate = `{
                 },
                 "knowledge_count": {
                     "description": "Knowledge count (not stored in database, calculated on query)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "name": {
                     "description": "Name of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "pinned_at": {
                     "description": "PinnedAt records when the current caller pinned this knowledge\nbase; nil when they have not.",
@@ -25531,7 +26031,8 @@ const docTemplate = `{
                 },
                 "processing_count": {
                     "description": "ProcessingCount indicates the number of knowledge items being processed (for document type knowledge bases)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "profile_config": {
                     "description": "ProfileConfig controls automatic generation of the knowledge-base\ndescription from per-document profiles (document knowledge bases only).",
@@ -25583,11 +26084,13 @@ const docTemplate = `{
                 },
                 "type": {
                     "description": "Type of the knowledge base (document, faq, etc.)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "Last updated time of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "vector_store_id": {
                     "description": "VectorStoreID references the VectorStore this knowledge base is bound to.\nWhen nil, the KB falls back to the workspace's effective engines derived from\nthe RETRIEVE_DRIVER environment variable (env store flow).\nThis field is set once at creation time and must not be modified afterwards;\nenforcement lives at the GORM layer (` + "`" + `\u003c-:create` + "`" + `) plus the service-layer\nKB update path, which omits this field from its update DTO.",
@@ -25681,15 +26184,18 @@ const docTemplate = `{
                 },
                 "error": {
                     "description": "Error holds the last generation error when Status is failed.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "profile_error"
                 },
                 "generated_at": {
                     "description": "GeneratedAt records when the text was produced.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "gist": {
                     "description": "Gist is a short statement of what the knowledge base covers.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "model_id": {
                     "description": "ModelID records which chat model produced the text.",
@@ -25705,21 +26211,24 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "Status is one of the KnowledgeBaseProfileStatus* values.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "profile_status"
                 },
                 "topics": {
                     "description": "Topics is the merged topic list (at most KnowledgeBaseProfileMaxTopics).",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true
                 },
                 "typical_questions": {
                     "description": "TypicalQuestions lists questions this knowledge base can answer.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true
                 }
             }
         },
@@ -25922,19 +26431,23 @@ const docTemplate = `{
                 },
                 "document_count": {
                     "description": "DocumentCount counts entries whose folder_path equals Path.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "name": {
                     "description": "Name is the last segment of Path, used as the tree row label.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "path": {
                     "description": "Path is the canonical folder path, e.g. \"docs/spec\".",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "folder_path"
                 },
                 "total_count": {
                     "description": "TotalCount counts entries in Path and in all descendant folders.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -25950,11 +26463,13 @@ const docTemplate = `{
                 },
                 "root_document_count": {
                     "description": "RootDocumentCount counts entries that live at the knowledge base root\n(folder_path = \"\"), i.e. documents that were not uploaded as part of a\nfolder.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "total_document_count": {
                     "description": "TotalDocumentCount counts every entry in the knowledge base, matching\nthe unfiltered document list total.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -25967,29 +26482,39 @@ const docTemplate = `{
                 },
                 "error": {
                     "description": "错误信息",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "failed": {
                     "description": "失败数",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "message": {
                     "description": "状态消息",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "processed": {
                     "description": "已处理数",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "progress": {
                     "description": "0-100",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "source_kb_id": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KBCloneTaskStatus"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KBCloneTaskStatus"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "target_kb_id": {
                     "type": "string"
@@ -25999,7 +26524,8 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总知识数",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "最后更新时间",
@@ -26103,7 +26629,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "Unique identifier of the tag (UUID)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "tag_id"
                 },
                 "knowledge_base_id": {
                     "description": "Knowledge base ID that this tag belongs to",
@@ -26111,11 +26638,64 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "Tag name, unique within the same knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "seq_id": {
                     "description": "SeqID is an auto-increment integer ID for external API usage",
+                    "type": "integer",
+                    "x-agent": "tag_seq_id"
+                },
+                "sort_order": {
+                    "description": "Sort order within the same knowledge base",
                     "type": "integer"
+                },
+                "tenant_id": {
+                    "description": "Workspace ID",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "Last updated time",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_Tencent_WeKnora_internal_types.KnowledgeTagWithStats": {
+            "type": "object",
+            "properties": {
+                "chunk_count": {
+                    "type": "integer"
+                },
+                "color": {
+                    "description": "Optional display color",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "Creation time",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique identifier of the tag (UUID)",
+                    "type": "string",
+                    "x-agent": "tag_id"
+                },
+                "knowledge_base_id": {
+                    "description": "Knowledge base ID that this tag belongs to",
+                    "type": "string"
+                },
+                "knowledge_count": {
+                    "type": "integer",
+                    "x-agent": true
+                },
+                "name": {
+                    "description": "Tag name, unique within the same knowledge base",
+                    "type": "string",
+                    "x-agent": true
+                },
+                "seq_id": {
+                    "description": "SeqID is an auto-increment integer ID for external API usage",
+                    "type": "integer",
+                    "x-agent": "tag_seq_id"
                 },
                 "sort_order": {
                     "description": "Sort order within the same knowledge base",
@@ -26527,13 +27107,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "content": {
-                    "type": "string"
+                    "description": "Markdown content. The assistant may send a full document; the API limit\nis 200000 runes, and x-agent-max-bytes covers that in UTF-8.",
+                    "type": "string",
+                    "x-agent": true,
+                    "x-agent-max-bytes": "800000"
                 },
                 "process_config": {
                     "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides"
                 },
                 "status": {
-                    "type": "string"
+                    "description": "draft keeps the document out of search; publish indexes it.",
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "publish"
+                    ],
+                    "x-agent": true
                 },
                 "tag_ids": {
                     "type": "array",
@@ -26542,7 +27131,9 @@ const docTemplate = `{
                     }
                 },
                 "title": {
-                    "type": "string"
+                    "description": "Document title.",
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -28019,23 +28610,23 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Tencent_WeKnora_internal_types.PageResult": {
+        "github_com_Tencent_WeKnora_internal_types.PageContext": {
             "type": "object",
             "properties": {
-                "data": {
-                    "description": "Data"
+                "knowledge_base_id": {
+                    "type": "string"
                 },
-                "page": {
-                    "description": "Current page number",
-                    "type": "integer"
+                "knowledge_id": {
+                    "type": "string"
                 },
-                "page_size": {
-                    "description": "Page size",
-                    "type": "integer"
+                "wiki_issue_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "total": {
-                    "description": "Total number of records",
-                    "type": "integer"
+                "wiki_slug": {
+                    "type": "string"
                 }
             }
         },
@@ -31261,19 +31852,23 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "folder_id"
                 },
                 "knowledge_base_id": {
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "parent_id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "path": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "sort_order": {
                     "type": "integer"
@@ -31290,10 +31885,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "description": "Folder name.",
+                    "type": "string",
+                    "x-agent": true
                 },
                 "parent_id": {
-                    "type": "string"
+                    "description": "Parent folder id; empty means the top level.",
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -31324,25 +31923,31 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "has_children": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "folder_id"
                 },
                 "knowledge_base_id": {
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "page_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "parent_id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "path": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "sort_order": {
                     "type": "integer"
@@ -31571,7 +32176,8 @@ const docTemplate = `{
                 },
                 "folder_id": {
                     "description": "FolderID is the single source of truth for where this page sits in the\ndirectory tree — a reference to wiki_folders.id (\"\" = wiki root). The\nCategoryPath / WikiPath / Depth fields below are denormalized caches\nrecomputed from this folder's chain on every write so list/index/search\nqueries don't have to join wiki_folders.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "id": {
                     "description": "Unique identifier (UUID)",
@@ -31609,7 +32215,8 @@ const docTemplate = `{
                 },
                 "page_type": {
                     "description": "Page type: summary, entity, concept, index, synthesis, comparison",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "parent_slug": {
                     "description": "ParentSlug optionally points at the wiki page that should act as this\npage's semantic parent in the directory tree. The parent may be empty\nwhen the page is grouped only by FolderID.",
@@ -31617,7 +32224,8 @@ const docTemplate = `{
                 },
                 "slug": {
                     "description": "URL-friendly slug for addressing, e.g. \"entity/acme-corp\", \"concept/rag\"\nUnique within a knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "sort_order": {
                     "description": "SortOrder allows generated or manually edited pages to control sibling\nordering before falling back to title.",
@@ -31632,11 +32240,13 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "Page status: draft, published, archived",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "summary": {
                     "description": "One-line summary for index listing",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "tenant_id": {
                     "description": "Workspace ID for multi-workspace isolation",
@@ -31644,15 +32254,18 @@ const docTemplate = `{
                 },
                 "title": {
                     "description": "Human-readable title",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "Last update time",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "version": {
                     "description": "Version number. Incremented only when a user-visible content field\n(title, content, summary, page_type, status) actually changes; pure\nbookkeeping writes (link maintenance, same-content re-ingest, status\nsync from background jobs) leave it untouched so it can be used as a\nreal \"the page was edited\" signal.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "wiki_path": {
                     "description": "WikiPath is a normalized, sortable path derived from page_type,\ncategory_path, and title. It keeps large directory listings cheap to sort.",
@@ -31706,7 +32319,8 @@ const docTemplate = `{
                 },
                 "folder_id": {
                     "description": "FolderID is the single source of truth for where this page sits in the\ndirectory tree — a reference to wiki_folders.id (\"\" = wiki root). The\nCategoryPath / WikiPath / Depth fields below are denormalized caches\nrecomputed from this folder's chain on every write so list/index/search\nqueries don't have to join wiki_folders.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "id": {
                     "description": "Unique identifier (UUID)",
@@ -31750,7 +32364,8 @@ const docTemplate = `{
                 },
                 "page_type": {
                     "description": "Page type: summary, entity, concept, index, synthesis, comparison",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "parent_slug": {
                     "description": "ParentSlug optionally points at the wiki page that should act as this\npage's semantic parent in the directory tree. The parent may be empty\nwhen the page is grouped only by FolderID.",
@@ -31758,7 +32373,8 @@ const docTemplate = `{
                 },
                 "slug": {
                     "description": "URL-friendly slug for addressing, e.g. \"entity/acme-corp\", \"concept/rag\"\nUnique within a knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "sort_order": {
                     "description": "SortOrder allows generated or manually edited pages to control sibling\nordering before falling back to title.",
@@ -31773,11 +32389,13 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "Page status: draft, published, archived",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "summary": {
                     "description": "One-line summary for index listing",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "tenant_id": {
                     "description": "Workspace ID for multi-workspace isolation",
@@ -31785,15 +32403,18 @@ const docTemplate = `{
                 },
                 "title": {
                     "description": "Human-readable title",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "Last update time",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "version": {
                     "description": "Version number. Incremented only when a user-visible content field\n(title, content, summary, page_type, status) actually changes; pure\nbookkeeping writes (link maintenance, same-content re-ingest, status\nsync from background jobs) leave it untouched so it can be used as a\nreal \"the page was edited\" signal.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "wiki_path": {
                     "description": "WikiPath is a normalized, sortable path derived from page_type,\ncategory_path, and title. It keeps large directory listings cheap to sort.",
@@ -31805,37 +32426,45 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "deleted_at": {
                     "$ref": "#/definitions/gorm.DeletedAt"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "issue_id"
                 },
                 "issue_type": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "knowledge_base_id": {
                     "type": "string"
                 },
                 "reported_by": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "slug": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "status": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "suspected_knowledge_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": "knowledge_ids"
                 },
                 "tenant_id": {
                     "type": "integer"
@@ -31875,10 +32504,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "folder_id": {
-                    "type": "string"
+                    "description": "Target folder id; empty means the top level.",
+                    "type": "string",
+                    "x-agent": true
                 },
                 "slug": {
-                    "type": "string"
+                    "description": "Slug of the page to move.",
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -31890,10 +32523,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "slug": {
-                    "type": "string"
+                    "description": "Slug of the page to revert.",
+                    "type": "string",
+                    "x-agent": true
                 },
                 "version": {
-                    "type": "integer"
+                    "description": "Revision to restore. Versions start at 1.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "x-agent": true
                 }
             }
         },
@@ -31907,18 +32545,22 @@ const docTemplate = `{
                     }
                 },
                 "content": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true,
+                    "x-agent-max-runes": "8000"
                 },
                 "created_at": {
                     "type": "string"
                 },
                 "edit_source": {
                     "description": "Author of THIS version (same semantics as WikiPage.LastEditSource).",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "edited_at": {
                     "description": "When this version was authored (the page's updated_at while current).",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "editor_id": {
                     "type": "string"
@@ -31942,16 +32584,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "summary": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "tenant_id": {
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "version": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -31959,7 +32604,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "current_version": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "revisions": {
                     "type": "array",
@@ -31968,7 +32614,8 @@ const docTemplate = `{
                     }
                 },
                 "total": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -32007,11 +32654,13 @@ const docTemplate = `{
             "properties": {
                 "is_active": {
                     "description": "whether wiki ingestion is currently running",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "orphan_count": {
                     "description": "pages with no inbound links",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "pages_by_type": {
                     "type": "object",
@@ -32022,11 +32671,13 @@ const docTemplate = `{
                 },
                 "pending_issues": {
                     "description": "number of pending wiki issues",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "pending_tasks": {
                     "description": "number of documents waiting to be ingested",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "recent_updates": {
                     "description": "last N updated pages",
@@ -32036,10 +32687,12 @@ const docTemplate = `{
                     }
                 },
                 "total_links": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "total_pages": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -32131,13 +32784,18 @@ const docTemplate = `{
             ],
             "properties": {
                 "ids": {
+                    "description": "Documents to delete.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": "knowledge_ids",
+                    "x-agent-maximum": "20"
                 },
                 "kb_id": {
-                    "type": "string"
+                    "description": "Knowledge base the documents belong to.",
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 }
             }
         },
@@ -32231,6 +32889,45 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_handler.CreateKnowledgeFromURLRequest": {
+            "type": "object",
+            "required": [
+                "url"
+            ],
+            "properties": {
+                "channel": {
+                    "type": "string"
+                },
+                "enable_multimodel": {
+                    "type": "boolean"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "file_type": {
+                    "type": "string"
+                },
+                "process_config": {
+                    "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides"
+                },
+                "tag_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "description": "Title of the document; defaults to the fetched one.",
+                    "type": "string",
+                    "x-agent": true
+                },
+                "url": {
+                    "description": "Page or file URL to import.",
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -32488,6 +33185,26 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handler.FAQEntryPage": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.FAQEntry"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_handler.FabriTagResponse": {
             "type": "object",
             "properties": {
@@ -32528,10 +33245,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "folder_path": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "moved_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -33050,7 +33769,8 @@ const docTemplate = `{
                 },
                 "chunk_count": {
                     "description": "Chunk count (not stored in database, calculated on query)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "chunking_config": {
                     "description": "Chunking configuration",
@@ -33082,7 +33802,8 @@ const docTemplate = `{
                 },
                 "description": {
                     "description": "Description of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "embedding_model_id": {
                     "description": "ID of the embedding model",
@@ -33114,7 +33835,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "Unique identifier of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 },
                 "image_processing_config": {
                     "description": "Image processing configuration",
@@ -33130,7 +33852,8 @@ const docTemplate = `{
                         {
                             "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.IndexingStrategy"
                         }
-                    ]
+                    ],
+                    "x-agent": true
                 },
                 "is_pinned": {
                     "description": "IsPinned and PinnedAt are computed per-caller from user_kb_pins\n(see migration 000050). They used to be stored on the row itself,\nwhich made pinning a workspace-wide ordering decision gated behind\nthe kb-edit RBAC guard. The columns are still present in legacy\nschemas for rollback safety but are no longer read or written by\nthe application — both fields are tagged ` + "`" + `gorm:\"-\"` + "`" + ` so GORM\nignores them on every CRUD call and the list handler stamps them\nafter enriching with the caller's pin set.",
@@ -33138,7 +33861,8 @@ const docTemplate = `{
                 },
                 "is_processing": {
                     "description": "IsProcessing indicates if there is a processing import task (for FAQ type knowledge bases)",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "x-agent": true
                 },
                 "is_temporary": {
                     "description": "Whether this knowledge base is temporary (ephemeral) and should be hidden from UI",
@@ -33146,7 +33870,8 @@ const docTemplate = `{
                 },
                 "knowledge_count": {
                     "description": "Knowledge count (not stored in database, calculated on query)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "my_permission": {
                     "description": "MyPermission is the caller's role on a knowledge base shared from\nanother workspace; GET /knowledge-bases/{id} sets it.",
@@ -33155,11 +33880,13 @@ const docTemplate = `{
                         "admin",
                         "editor",
                         "viewer"
-                    ]
+                    ],
+                    "x-agent": true
                 },
                 "name": {
                     "description": "Name of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "pinned_at": {
                     "description": "PinnedAt records when the current caller pinned this knowledge\nbase; nil when they have not.",
@@ -33167,7 +33894,8 @@ const docTemplate = `{
                 },
                 "processing_count": {
                     "description": "ProcessingCount indicates the number of knowledge items being processed (for document type knowledge bases)",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "profile_config": {
                     "description": "ProfileConfig controls automatic generation of the knowledge-base\ndescription from per-document profiles (document knowledge bases only).",
@@ -33219,11 +33947,13 @@ const docTemplate = `{
                 },
                 "type": {
                     "description": "Type of the knowledge base (document, faq, etc.)",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "updated_at": {
                     "description": "Last updated time of the knowledge base",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "vector_store_engine_type": {
                     "type": "string"
@@ -33284,7 +34014,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "error_code"
                 },
                 "error_code": {
                     "type": "string"
@@ -33296,13 +34027,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "error_message"
                 },
                 "name": {
                     "type": "string"
                 },
                 "stage": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": "failed_stage"
                 }
             }
         },
@@ -33311,34 +34044,46 @@ const docTemplate = `{
             "properties": {
                 "attempt": {
                     "description": "Attempt is the attempt the trace describes; equals CurrentAttempt.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "current_attempt": {
                     "type": "integer"
                 },
                 "current_stage": {
                     "description": "CurrentStage is the stage running now, or the last one that ran.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "knowledge_id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "last_activity_at": {
                     "description": "LastActivityAt is set while the parse is in flight.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "last_error": {
-                    "$ref": "#/definitions/internal_handler.KnowledgeSpanError"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/internal_handler.KnowledgeSpanError"
+                        }
+                    ],
+                    "x-agent": true
                 },
                 "latest_attempt": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "parse_status": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "stall_state": {
                     "description": "StallState is types.StallStateQueued or types.StallStateStalled when an\nin-flight parse has gone quiet.",
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 },
                 "trace": {
                     "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.SpanTreeNode"
@@ -33527,8 +34272,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "additionalProperties": {}
+                        "$ref": "#/definitions/internal_handler.SharedKnowledgeBaseRow"
                     }
                 },
                 "success": {
@@ -33536,7 +34280,8 @@ const docTemplate = `{
                     "example": true
                 },
                 "total": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -33795,24 +34540,33 @@ const docTemplate = `{
             ],
             "properties": {
                 "knowledge_ids": {
+                    "description": "Documents to move.",
                     "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true,
+                    "x-agent-maximum": "20"
                 },
                 "mode": {
+                    "description": "reuse_vectors keeps the embeddings; reparse processes the documents again.",
                     "type": "string",
                     "enum": [
                         "reuse_vectors",
                         "reparse"
-                    ]
+                    ],
+                    "x-agent": true
                 },
                 "source_kb_id": {
-                    "type": "string"
+                    "description": "Knowledge base the documents are in now.",
+                    "type": "string",
+                    "x-agent": "source_knowledge_base_id"
                 },
                 "target_kb_id": {
-                    "type": "string"
+                    "description": "Knowledge base to move them to.",
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 }
             }
         },
@@ -33820,7 +34574,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "knowledge_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "message": {
                     "type": "string"
@@ -33832,7 +34587,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task_id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -33844,17 +34600,22 @@ const docTemplate = `{
             ],
             "properties": {
                 "folder_path": {
-                    "description": "FolderPath is the destination folder; the empty string is the knowledge\nbase top level. It is deliberately not ` + "`" + `binding:\"required\"` + "`" + ` so documents\ncan be moved back out of every folder.",
-                    "type": "string"
+                    "description": "Target folder path; empty (allowed) means the knowledge base top level.",
+                    "type": "string",
+                    "x-agent": true
                 },
                 "kb_id": {
-                    "type": "string"
+                    "description": "Knowledge base the documents belong to.",
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 },
                 "knowledge_ids": {
+                    "description": "Documents to move.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true
                 }
             }
         },
@@ -33863,17 +34624,20 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "page": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "page_size": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "success": {
                     "type": "boolean",
                     "example": true
                 },
                 "total": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 }
             }
         },
@@ -34182,10 +34946,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "from": {
-                    "type": "string"
+                    "description": "Current folder path.",
+                    "type": "string",
+                    "x-agent": "from_path"
                 },
                 "to": {
-                    "type": "string"
+                    "description": "New folder path.",
+                    "type": "string",
+                    "x-agent": "to_path"
                 }
             }
         },
@@ -34492,6 +35260,43 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handler.SharedKnowledgeBaseRow": {
+            "type": "object",
+            "properties": {
+                "knowledge_base": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/internal_handler.KnowledgeBaseView"
+                        }
+                    ],
+                    "x-agent": true
+                },
+                "org_name": {
+                    "type": "string",
+                    "x-agent": true
+                },
+                "organization_id": {
+                    "type": "string"
+                },
+                "permission": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.OrgMemberRole"
+                        }
+                    ],
+                    "x-agent": true
+                },
+                "share_id": {
+                    "type": "string"
+                },
+                "shared_at": {
+                    "type": "string"
+                },
+                "source_tenant_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_handler.SkillInfoResponse": {
             "type": "object",
             "properties": {
@@ -34571,10 +35376,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "deleted_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "reparse_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "task_id": {
                     "type": "string"
@@ -34613,6 +35420,7 @@ const docTemplate = `{
             "properties": {
                 "success": {
                     "type": "boolean",
+                    "x-agent": true,
                     "example": true
                 }
             }
@@ -34646,11 +35454,35 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_handler.TagPageResult": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeTagWithStats"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "x-agent": true
+                },
+                "page_size": {
+                    "type": "integer",
+                    "x-agent": true
+                },
+                "total": {
+                    "type": "integer",
+                    "x-agent": true
+                }
+            }
+        },
         "internal_handler.TaskIDData": {
             "type": "object",
             "properties": {
                 "task_id": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -34873,10 +35705,14 @@ const docTemplate = `{
                     "type": "object"
                 },
                 "description": {
-                    "type": "string"
+                    "description": "New summary; omit to keep it, empty clears it.",
+                    "type": "string",
+                    "x-agent": true
                 },
                 "title": {
-                    "type": "string"
+                    "description": "New title; omit to keep it.",
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -34981,7 +35817,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "x-agent": true
                 }
             }
         },
@@ -35050,11 +35887,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "similar_questions": {
+                    "description": "Phrasings to add to the entry.",
                     "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": true
                 }
             }
         },
@@ -35141,7 +35980,8 @@ const docTemplate = `{
                 },
                 "next_cursor": {
                     "description": "NextCursor is the id of the last entry on this page, 0 when it is empty.",
-                    "type": "integer"
+                    "type": "integer",
+                    "x-agent": true
                 },
                 "success": {
                     "type": "boolean"
@@ -35156,13 +35996,17 @@ const docTemplate = `{
             ],
             "properties": {
                 "ids": {
+                    "description": "Documents to reparse.",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "x-agent": "knowledge_ids"
                 },
                 "kb_id": {
-                    "type": "string"
+                    "description": "Knowledge base the documents belong to.",
+                    "type": "string",
+                    "x-agent": "knowledge_base_id"
                 },
                 "process_config": {
                     "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.KnowledgeProcessOverrides"
@@ -35215,6 +36059,24 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 128,
                     "minLength": 1
+                }
+            }
+        },
+        "internal_handler.faqDeleteRequest": {
+            "type": "object",
+            "required": [
+                "ids"
+            ],
+            "properties": {
+                "ids": {
+                    "description": "Entries to delete (entry_id).",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "integer"
+                    },
+                    "x-agent": "entry_ids",
+                    "x-agent-maximum": "20"
                 }
             }
         },
@@ -35754,6 +36616,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/internal_handler_session.MentionedItemRequest"
                     }
+                },
+                "page_context": {
+                    "description": "PageContext is the WeKnora page the user has open (agent mode only).",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_Tencent_WeKnora_internal_types.PageContext"
+                        }
+                    ]
                 },
                 "query": {
                     "description": "Query text; may be empty only when an image or file is attached",
