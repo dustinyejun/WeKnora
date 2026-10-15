@@ -943,11 +943,6 @@ func initDatabase(cfg *config.Config) (*gorm.DB, error) {
 			)
 		}
 
-		// Idempotent, outside the numbered migrations (see database.EnsureConversationShareSchema).
-		if err := database.EnsureConversationShareSchema(db); err != nil {
-			logger.Errorf(context.Background(), "Ensure conversation share schema failed: %v", err)
-		}
-
 		// Post-migration: resolve __pending_env__ storage provider markers for historical KBs.
 		// The SQL migration marks KBs that have documents but no provider with "__pending_env__";
 		// we replace that with the actual STORAGE_TYPE from the environment.
@@ -963,6 +958,13 @@ func initDatabase(cfg *config.Config) (*gorm.DB, error) {
 		}
 	} else {
 		logger.Infof(context.Background(), "Auto-migration is disabled (AUTO_MIGRATE=false)")
+	}
+
+	// Conversation share tables are idempotent DDL outside the numbered
+	// migrations, so they are created even when AUTO_MIGRATE=false and the
+	// numbered migrations are applied by hand (see database.EnsureConversationShareSchema).
+	if err := database.EnsureConversationShareSchema(db); err != nil {
+		logger.Errorf(context.Background(), "Ensure conversation share schema failed: %v", err)
 	}
 
 	// Get underlying SQL DB object

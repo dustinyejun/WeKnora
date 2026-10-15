@@ -59,6 +59,7 @@ interface Laid {
   h: number
   x: number
   cy: number
+  span: number
   children: Laid[]
 }
 
@@ -79,6 +80,7 @@ function build(node: MindNode, depth: number, color: string, colorOf?: (i: numbe
     h: lines.length * lineH + PAD_Y * 2,
     x: 0,
     cy: 0,
+    span: 0,
     children,
   }
 }
@@ -96,20 +98,40 @@ export function renderMindTreeSvg(root: MindNode): string {
   const colX: number[] = [MARGIN]
   for (let d = 1; d < colW.length; d++) colX[d] = colX[d - 1] + colW[d - 1] + COL_GAP
 
-  // Leaves stack top to bottom; a parent centres on its first and last child.
-  let cursor = MARGIN
-  const placeY = (n: Laid) => {
-    if (!n.children.length) {
-      n.cy = cursor + n.h / 2
-      cursor += n.h + ROW_GAP
-    } else {
-      n.children.forEach(placeY)
-      n.cy = (n.children[0].cy + n.children[n.children.length - 1].cy) / 2
-    }
-    n.x = colX[n.depth]
+  // Each subtree reserves the taller of its own box and its stacked children,
+  // so a parent whose wrapped title is taller than its children cannot overlap
+  // the next sibling in its column or spill above the top margin.
+  const measure = (n: Laid): number => {
+    const kids = n.children.reduce((sum, c, i) => sum + measure(c) + (i ? ROW_GAP : 0), 0)
+    n.span = Math.max(n.h, kids)
+    return n.span
   }
-  placeY(laid)
-  const height = cursor - ROW_GAP + MARGIN
+  measure(laid)
+  const placeY = (n: Laid, top: number) => {
+    n.x = colX[n.depth]
+    if (!n.children.length) {
+      n.cy = top + n.span / 2
+      return
+    }
+    const kids = n.children.reduce((sum, c, i) => sum + c.span + (i ? ROW_GAP : 0), 0)
+    let y = top + (n.span - kids) / 2
+    for (const c of n.children) {
+      placeY(c, y)
+      y += c.span + ROW_GAP
+    }
+    // Centre on the children, but keep the box inside the subtree's own band.
+    const mid = (n.children[0].cy + n.children[n.children.length - 1].cy) / 2
+    n.cy = Math.min(Math.max(mid, top + n.h / 2), top + n.span - n.h / 2)
+  }
+  placeY(laid, MARGIN)
+  // The canvas follows the real bounding box rather than a leaf cursor.
+  let bottom = 0
+  const walkBounds = (n: Laid) => {
+    bottom = Math.max(bottom, n.cy + n.h / 2)
+    n.children.forEach(walkBounds)
+  }
+  walkBounds(laid)
+  const height = bottom + MARGIN
   const width = colX[colW.length - 1] + colW[colW.length - 1] + MARGIN
 
   const paths: string[] = []

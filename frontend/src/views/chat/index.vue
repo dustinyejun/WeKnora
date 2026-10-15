@@ -161,22 +161,22 @@
                 </div>
             </div>
             <div v-if="shareMode" class="share-bar">
-                <t-checkbox class="share-bar__all" :checked="shareAllSelected" :indeterminate="shareSomeSelected" @change="toggleShareAll">全选</t-checkbox>
+                <t-checkbox class="share-bar__all" :checked="shareAllSelected" :indeterminate="shareSomeSelected" @change="toggleShareAll">{{ t('chat.conversationShare.selectAll') }}</t-checkbox>
                 <div class="share-bar__actions">
                     <button v-for="a in shareActions" :key="a.key" class="share-tile" :disabled="shareBusy || !shareSelectedIds.length"
                         @click="a.run()">
-                        <span class="share-tile__icon"><t-icon :name="a.icon" /></span>
-                        <span class="share-tile__label">{{ a.label }}</span>
+                        <span class="share-tile__icon"><t-icon :name="a.icon" size="22px" /></span>
+                        <span class="share-tile__label">{{ t(a.label) }}</span>
                     </button>
                 </div>
-                <t-button class="share-bar__close" variant="text" shape="circle" title="退出分享" @click="exitShare"><t-icon name="close" /></t-button>
+                <t-button class="share-bar__close" variant="text" shape="circle" :title="t('chat.conversationShare.exit')" @click="exitShare"><t-icon name="close" /></t-button>
             </div>
             <t-dialog v-model:visible="shareQrVisible" :header="shareQrTitle" :footer="false" width="360px">
                 <div class="share-qr">
                     <t-qrcode :value="shareLink" :size="200" />
                     <p>{{ shareQrHint }}</p>
                     <p class="share-qr__url">{{ shareLink }}</p>
-                    <t-button variant="outline" @click="copyShareLink">复制链接</t-button>
+                    <t-button variant="outline" @click="copyShareLink">{{ t('chat.conversationShare.copyLink') }}</t-button>
                 </div>
             </t-dialog>
             <div v-show="!shareMode" ref="composerElement" class="chat_composer">
@@ -1876,7 +1876,7 @@ async function ensureShareLink() {
         shareLinkKey = key;
         return shareLink.value;
     } catch (e) {
-        MessagePlugin.error(e?.message || '生成分享链接失败');
+        MessagePlugin.error(e?.message || t('chat.conversationShare.createFailed'));
         return '';
     } finally {
         shareBusy.value = false;
@@ -1895,7 +1895,7 @@ async function copyText(text) {
         document.body.removeChild(ta);
     }
 }
-const shareQrTitle = ref('分享到微信');
+const shareQrTitle = ref('');
 const shareQrHint = ref('');
 // A web page cannot drive the WeChat client, so the WeChat tile shows the link as a QR code.
 async function showShareQr(title, hint) {
@@ -1904,17 +1904,18 @@ async function showShareQr(title, hint) {
     shareQrHint.value = hint;
     shareQrVisible.value = true;
 }
+// Labels are i18n keys resolved in the template, so the tiles follow locale switches.
 const shareActions = [
-    { key: 'wechat', icon: 'logo-wechat-stroke', label: '分享到微信',
-        run: () => showShareQr('分享到微信', '用手机微信扫码打开，再点右上角「···」转发给好友') },
-    { key: 'copy', icon: 'link', label: '复制链接', run: () => copyShareLink() },
-    { key: 'browser', icon: 'internet', label: '浏览器打开', run: () => openShareInBrowser() },
+    { key: 'wechat', icon: 'logo-wechat-stroke', label: 'chat.conversationShare.wechat',
+        run: () => showShareQr(t('chat.conversationShare.wechat'), t('chat.conversationShare.wechatHint')) },
+    { key: 'copy', icon: 'link', label: 'chat.conversationShare.copyLink', run: () => copyShareLink() },
+    { key: 'browser', icon: 'internet', label: 'chat.conversationShare.openInBrowser', run: () => openShareInBrowser() },
 ];
 async function copyShareLink() {
     const url = await ensureShareLink();
     if (!url) return;
     await copyText(url);
-    MessagePlugin.success('链接已复制');
+    MessagePlugin.success(t('chat.conversationShare.linkCopied'));
 }
 async function openShareInBrowser() {
     // Open synchronously so the popup blocker treats it as the click's window.
@@ -1944,14 +1945,14 @@ async function openShareInBrowser() {
 }
 .share-tile:disabled { cursor: not-allowed; opacity: .45; }
 .share-tile__icon {
-    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    background: var(--td-bg-color-secondarycontainer); font-size: 22px; transition: background .15s;
+    width: 48px; height: 48px; border-radius: var(--app-radius-xl); display: flex; align-items: center; justify-content: center;
+    background: var(--td-bg-color-secondarycontainer); transition: background var(--app-motion-fast);
 }
 .share-tile:not(:disabled):hover .share-tile__icon { background: var(--td-bg-color-component-hover); }
-.share-tile__label { font-size: 12px; color: var(--td-text-color-secondary); white-space: nowrap; }
+.share-tile__label { font-size: var(--app-text-sm); color: var(--td-text-color-secondary); white-space: nowrap; }
 .share-qr { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
-.share-qr p { margin: 0; color: var(--td-text-color-secondary); font-size: 13px; }
-.share-qr__url { word-break: break-all; font-size: 12px !important; }
+.share-qr p { margin: 0; color: var(--td-text-color-secondary); font-size: var(--app-text-md); }
+.share-qr .share-qr__url { word-break: break-all; font-size: var(--app-text-sm); }
 
 .chat {
     // 水平方向不留 padding，让滚动条贴到内容区最右缘；
