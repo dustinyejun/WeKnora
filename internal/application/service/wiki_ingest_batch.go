@@ -1138,6 +1138,7 @@ func (s *wikiIngestService) ProcessWikiFinalize(ctx context.Context, t *asynq.Ta
 	// we can drain the lane even on the KB-disabled short-circuit below.
 	ids := make([]int64, 0, len(rows))
 	pruneRowIDs := make([]int64, 0)
+	var changeRowIDs []int64
 	affectedSet := make(map[string]struct{}, len(rows))
 	var affectedSlugs []string
 	var freshRefs []linkRef
@@ -1161,6 +1162,7 @@ func (s *wikiIngestService) ProcessWikiFinalize(ctx context.Context, t *asynq.Ta
 			continue
 		}
 		if row.Change != nil {
+			changeRowIDs = append(changeRowIDs, r.ID)
 			if row.Change.Action == wikiFinalizeRemoved {
 				fmt.Fprintf(&changeDesc, "<document_removed>\n<title>%s</title>\n<summary>%s</summary>\n</document_removed>\n\n", row.Change.DocTitle, row.Change.DocSummary)
 			} else {
@@ -1220,6 +1222,22 @@ func (s *wikiIngestService) ProcessWikiFinalize(ctx context.Context, t *asynq.Ta
 		}
 	}
 
+	// A failed intro rebuild used to be dropped, so a deleted document could
+	// stay named in the index intro for good (e.g. a delete during an
+	// upstream 429 burst). Keep the document change rows for another finalize
+	// pass, up to wikiMaxFailRetries attempts each.
+	retryChangeRows := make(map[int64]struct{})
+	if changeDesc.Len() > 0 && synthesisModelID != "" && !indexRebuilt {
+		for _, id := range changeRowIDs {
+			count, cErr := s.pendingRepo.IncrFailCount(ctx, id)
+			if cErr != nil || count <= wikiMaxFailRetries {
+				retryChangeRows[id] = struct{}{}
+			} else {
+				logger.Warnf(ctx, "wiki finalize: dropping index change row %d after %d failed rebuilds", id, count)
+			}
+		}
+	}
+
 	if len(affectedSlugs) > 0 {
 		s.cleanDeadLinks(ctx, payload.KnowledgeBaseID, affectedSlugs, batchCtx)
 		s.injectCrossLinks(ctx, payload.KnowledgeBaseID, affectedSlugs, freshRefs, batchCtx)
@@ -1251,13 +1269,17 @@ func (s *wikiIngestService) ProcessWikiFinalize(ctx context.Context, t *asynq.Ta
 		}
 	}
 
-	// Drain the processed rows. Best-effort convergence mirrors the legacy
-	// in-batch behaviour: a failed index rebuild is logged (not retried),
-	// so we delete regardless to avoid re-doing the whole pass forever.
+	// Drain the processed rows, except deferred folder prunes and document
+	// changes whose index rebuild failed (bounded retry above).
 	idsToTrim := ids
-	if pruneDeferred && len(pruneRowIDs) > 0 {
-		deferred := make(map[int64]struct{}, len(pruneRowIDs))
-		for _, id := range pruneRowIDs {
+	if (pruneDeferred && len(pruneRowIDs) > 0) || len(retryChangeRows) > 0 {
+		deferred := make(map[int64]struct{}, len(pruneRowIDs)+len(retryChangeRows))
+		if pruneDeferred {
+			for _, id := range pruneRowIDs {
+				deferred[id] = struct{}{}
+			}
+		}
+		for id := range retryChangeRows {
 			deferred[id] = struct{}{}
 		}
 		idsToTrim = idsToTrim[:0:0]
@@ -1277,12 +1299,12 @@ func (s *wikiIngestService) ProcessWikiFinalize(ctx context.Context, t *asynq.Ta
 	// If more finalize rows landed while we were working, reschedule so they
 	// get their own convergence pass.
 	rescheduled := false
-	if pruneDeferred {
+	if pruneDeferred || len(retryChangeRows) > 0 {
 		s.scheduleFinalizeRetry(ctx, payload)
 		rescheduled = true
 	}
 	if n, cErr := s.pendingRepo.PendingCount(ctx, wikiFinalizeTaskType, wikiTaskScope, payload.KnowledgeBaseID); cErr == nil && n > 0 {
-		if !pruneDeferred {
+		if !pruneDeferred && len(retryChangeRows) == 0 {
 			s.scheduleFinalize(ctx, payload)
 		}
 		rescheduled = true
