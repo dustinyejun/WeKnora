@@ -166,12 +166,12 @@ make model-catalog-generate   # 重新生成模型目录；make model-catalog-ch
 - 新的产品或开发说明放 `website-docs/`，不要再往 `docs/` 放。
 - `cli/` 有独立的风格约定（Options + 窄接口 Service 模式、testify、不在 Go 源码里用 em-dash），改 CLI 前读 `cli/AGENTS.md`。
 
-## 分支与定制（custom_dev）
+## 分支与定制
 
-本仓库是 Tencent/WeKnora 的 fork。`main` 只做上游镜像，所有自己的改动都提交到 `custom_dev`。
+本仓库是 Tencent/WeKnora 的 fork。`main` 只做上游镜像，所有自己的改动都提交到当前所在的定制分支。
 
-- 同步上游：在 `custom_dev` 上运行 `git sync-upstream`（仓库级 alias，`gh repo sync` 之后 merge `origin/main`）。只 merge，不 rebase，不 force push，不往 `main` 提交。
+- 同步上游：在定制分支上运行 `git sync-upstream`（仓库级 alias，`gh repo sync` 之后把 `origin/main` merge 进当前分支）。只 merge，不 rebase，不 force push，不往 `main` 提交。
 - 定制内容只放在上游不会碰的独立文件：`GNUmakefile`、`scripts/dev-custom.sh`、`docker-compose.dev.custom.yml`、`docker-compose.override.yml`、`CUSTOM_DEV.md`、`CUSTOM_LOCAL_RUN.md`。除 `.dockerignore` 和 `docker/Dockerfile.app` 的小改动外不修改官方文件，以减少合并冲突。
-- `AGENTS.md`（本文件）也是定制文件，随 `custom_dev` 提交。`CLAUDE.md` 只是引用入口，被上游 `.gitignore` 的 `Claude.md` 规则忽略（macOS 文件系统不区分大小写），只存在于本机，不入库。
+- `AGENTS.md`（本文件）也是定制文件，随定制分支提交。`CLAUDE.md` 只是引用入口，被上游 `.gitignore` 的 `Claude.md` 规则忽略（macOS 文件系统不区分大小写），只存在于本机，不入库。
 - `GNUmakefile` 会拦截 `dev-start`、`dev-local`、`dev-docker`、`dev-docreader`、`dev-stop`、`dev-restart`、`dev-logs`、`dev-status` 转给 `scripts/dev-custom.sh`，其余目标（含 `dev-app`、`dev-frontend`）仍走上游 `Makefile`。一条 make 命令里不要混用两类目标。
 - 开发环境与正式环境（`docker compose up`）共用 compose 项目名和 postgres 数据卷，不能同时运行。Neo4j 用正式环境的 `WeKnora-neo4j` 容器，开发命令不要加 `--neo4j`。详见 `CUSTOM_DEV.md`。
