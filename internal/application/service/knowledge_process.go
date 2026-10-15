@@ -4026,6 +4026,10 @@ func (s *knowledgeService) ProcessDocument(ctx context.Context, t *asynq.Task) e
 	sanitizeReadResult(convertResult)
 	if convertResult != nil {
 		convertResult.MarkdownContent = chunker.NormalizeLineEndings(convertResult.MarkdownContent)
+		convertResult.MarkdownContent = docparser.JoinCJKSpaces(convertResult.MarkdownContent)
+		if strings.EqualFold(strings.TrimPrefix(payload.FileType, "."), "pdf") {
+			convertResult.MarkdownContent = docparser.JoinCJKLineWraps(convertResult.MarkdownContent)
+		}
 		if convertResult.MarkdownContent != "" {
 			convertResult.MarkdownContent = docparser.NormalizeHTMLTables(convertResult.MarkdownContent)
 		}
