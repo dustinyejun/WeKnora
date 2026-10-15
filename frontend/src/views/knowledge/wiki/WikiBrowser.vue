@@ -67,11 +67,6 @@
             })
             }}</span>
           </div>
-          <t-button size="small" variant="outline" class="wiki-health-check-btn graph-health-check-btn"
-            @click="runHealthCheck">
-            <template #icon><t-icon name="heart" /></template>
-            {{ $t('knowledgeEditor.wikiBrowser.healthCheck') }}
-          </t-button>
         </div>
 
         <!-- Legend Overlay -->
@@ -214,10 +209,10 @@
                 stats.pending_issues
             }) }}</span>
           </div>
-          <t-button size="small" variant="outline" block class="wiki-health-check-btn" @click="runHealthCheck">
-            <template #icon><t-icon name="heart" /></template>
-            {{ $t('knowledgeEditor.wikiBrowser.healthCheck') }}
-          </t-button>
+          <div class="wiki-global-issues-status wiki-health-check-status" @click="runHealthCheck">
+            <t-icon name="heart" />
+            <span class="queue-text">{{ $t('knowledgeEditor.wikiBrowser.healthCheck') }}</span>
+          </div>
           <t-input v-model="searchQuery" :placeholder="$t('knowledgeEditor.wikiBrowser.searchPlaceholder')" clearable
             @enter="doSearch" @clear="searchResults = null">
             <template #prefixIcon><t-icon name="search" /></template>
@@ -1096,8 +1091,7 @@ function healthIssueText(issue: WikiLintIssue): string {
 
 async function openHealthIssuePage(slug: string) {
   showHealthDrawer.value = false
-  if (props.view === 'graph') handleGraphSearchSelect(slug)
-  else await navigateToSlug(slug)
+  await navigateToSlug(slug)
 }
 const currentFixSessionId = ref('')
 const stats = ref<WikiStats | null>(null)
@@ -6702,9 +6696,14 @@ span.graph-focus-name {
   opacity: 0.95;
 }
 
-.graph-health-check-btn {
-  box-shadow: var(--td-shadow-1);
-  background: var(--td-bg-color-container);
+// Same box as the pending-issues badge; neutral colours since it is an action.
+.wiki-health-check-status {
+  background: var(--td-bg-color-secondarycontainer);
+  color: var(--td-text-color-primary);
+
+  .t-icon {
+    color: var(--td-brand-color);
+  }
 }
 
 .wiki-health-loading {
