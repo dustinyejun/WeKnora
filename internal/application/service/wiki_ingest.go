@@ -2242,6 +2242,12 @@ const indexIntroSummaryCap = 200
 //
 // The intro is written to both Content and Summary so legacy readers
 // that fall through to Summary stay in sync.
+//
+// Generation failures propagate: the finalize caller treats a non-nil error
+// as "index not rebuilt" and keeps the document change rows for a bounded
+// retry (see wiki_ingest_batch.go). Swallowing the error here and re-saving
+// the old intro used to make that retry unreachable for the most common
+// failure — the LLM call itself being rate-limited.
 func (s *wikiIngestService) rebuildIndexPage(ctx context.Context, chatModel chat.Chat, payload WikiIngestPayload,
 	changeDesc, lang, customInstructions string,
 ) error {
@@ -2304,10 +2310,9 @@ func (s *wikiIngestService) rebuildIndexPage(ctx context.Context, chatModel chat
 			"InstructionScope":   "wiki_content",
 		})
 		if genErr != nil {
-			intro = "# Wiki Index\n\nThis wiki contains knowledge extracted from uploaded documents.\n"
-		} else {
-			intro = strings.TrimSpace(generatedIntro)
+			return fmt.Errorf("generate index intro: %w", genErr)
 		}
+		intro = strings.TrimSpace(generatedIntro)
 	case changeDesc != "":
 		// Incremental update: only the existing intro + this batch's
 		// change description go into the prompt. We deliberately stop
@@ -2324,10 +2329,9 @@ func (s *wikiIngestService) rebuildIndexPage(ctx context.Context, chatModel chat
 			"InstructionScope":   "wiki_content",
 		})
 		if genErr != nil {
-			intro = existingIntro // keep existing on error
-		} else {
-			intro = strings.TrimSpace(updatedIntro)
+			return fmt.Errorf("update index intro: %w", genErr)
 		}
+		intro = strings.TrimSpace(updatedIntro)
 	default:
 		// No change description and an existing intro: leave it as-is so
 		// we don't bump the version for a no-op.
