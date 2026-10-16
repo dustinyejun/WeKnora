@@ -1,4 +1,4 @@
-# custom_dev 的开发环境覆盖配置，由 scripts/dev-custom.sh 与 docker-compose.dev.yml 一起加载。
+# 本仓库定制的开发环境覆盖配置，由 scripts/dev-custom.sh 与 docker-compose.dev.yml 一起加载。
 # 上游文件保持原样以减少同步冲突；相对路径以 docker-compose.dev.yml 所在目录为准。
 services:
   app:

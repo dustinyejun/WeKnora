@@ -1,4 +1,4 @@
-# custom_dev：不带 -f 运行 docker compose 时会自动合并本文件，上游 docker-compose.yml 保持原样。
+# 本仓库定制：不带 -f 运行 docker compose 时会自动合并本文件，上游 docker-compose.yml 保持原样。
 services:
   neo4j:
     # 小型部署默认预留 768 MiB 给 JVM 堆外、线程和数据库原生内存。
@@ -19,6 +19,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - docker-sock-shared:/shared
+    # app 的入口脚本只在启动时检查一次 socket，晚于它出现就拿不到组权限，所以 app 要等 socket 就绪再启动。
+    healthcheck:
+      test: ["CMD-SHELL", "test -S /shared/docker.sock"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+      start_period: 2s
     restart: always
 
   app:
@@ -26,6 +33,9 @@ services:
       - DOCKER_HOST=unix:///var/run/docker-proxy/docker.sock
     volumes:
       - docker-sock-shared:/var/run/docker-proxy
+    depends_on:
+      docker-sock-proxy:
+        condition: service_healthy
 
   # 会话分享外网访问：cpolar 只穿透 share-gateway，网关只放行分享页所需路径。
   share-gateway:

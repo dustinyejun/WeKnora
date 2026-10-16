@@ -1,5 +1,5 @@
 #!/bin/bash
-# custom_dev 开发环境脚本：叠加 docker-compose.dev.custom.yml 编排容器，
+# 本仓库定制的开发环境脚本：叠加 docker-compose.dev.custom.yml 编排容器，
 # 默认本机 Go/Vite + Docker 基础服务，--docker 启用完整容器模式。
 # app / frontend 命令直接交给上游 scripts/dev.sh，上游脚本保持原样以减少同步冲突。
 
@@ -59,7 +59,7 @@ compose() {
 
 # 显示帮助信息
 show_help() {
-    printf "%b\n" "${GREEN}WeKnora 开发环境脚本（custom_dev）${NC}"
+    printf "%b\n" "${GREEN}WeKnora 开发环境脚本（本仓库定制）${NC}"
     echo "用法: $0 [命令] [选项]"
     echo ""
     echo "命令:"

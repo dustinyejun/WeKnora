@@ -1830,7 +1830,11 @@ export default {
       shellExec: '執行沙箱命令',
       dataAnalysis: '資料分析',
       dataSchema: '資料結構',
-      databaseQuery: '資料庫查詢'
+      databaseQuery: '資料庫查詢',
+      findOperations: '查找操作',
+      runOperation: '執行操作',
+      searchWeKnoraDocs: '搜尋產品文件',
+      readWeKnoraDoc: '閱讀產品文件'
     },
     skillFiles: {
       heading: '技能檔案',
@@ -1871,6 +1875,35 @@ export default {
       truncated: '輸出已截斷',
       killed: '已超時終止',
       binarySuppressed: '二進位輸出已省略，請將檔案寫入產物目錄後下載'
+    },
+    operations: {
+      found: '{count} 個可執行操作',
+      unavailableCount: '{count} 個目前不可用',
+      empty: '沒有符合的操作',
+      unavailableHeading: '目前不可用',
+      parameters: '參數',
+      required: '必填',
+      enum: '可選值',
+      range: '範圍 {min}–{max}',
+      risk: {
+        read: '唯讀',
+        write: '寫入',
+        destructive: '不可恢復'
+      },
+      truncated: '結果已截斷',
+      emptyResult: '沒有傳回資料',
+      failed: '操作失敗',
+      meta: '附加資訊'
+    },
+    weknoraDocs: {
+      pages: '{count} 篇文件',
+      hits: '符合 {count} 個章節',
+      empty: '沒有符合的文件',
+      outline: '目錄',
+      content: '正文',
+      truncated: '正文未讀完，可以繼續讀取',
+      failed: '讀取失敗',
+      openDoc: '在文件站開啟'
     },
     mcpOAuth: {
       waiting: '等待授權 · {target}',
@@ -1936,7 +1969,47 @@ export default {
       invalidJson: '參數不是合法 JSON',
       submitted: '已提交',
       submitFailed: '提交失敗',
-      userRejected: '使用者拒絕'
+      userRejected: '使用者拒絕',
+      detail: {
+        type: '類型',
+        embeddingModel: '嵌入模型',
+        summaryModel: '摘要模型',
+        captionModel: '圖片描述',
+        speechModel: '語音識別',
+        storage: '儲存',
+        indexes: '索引',
+        name: '名稱',
+        title: '標題',
+        status: '狀態',
+        summary: '簡介',
+        model: '模型',
+        mode: '模式',
+        url: '連結',
+        from: '從',
+        to: '到',
+        folder: '目錄',
+        page: '頁面',
+        version: '版本',
+        documents: '文件',
+        knowledgeBases: '知識庫',
+        mcpServices: 'MCP 服務',
+        skills: '技能',
+        webSearch: '聯網搜尋',
+        multiTurn: '多輪對話'
+      },
+      value: {
+        document: '文件',
+        faq: '問答',
+        wiki: 'Wiki',
+        on: '開',
+        off: '關',
+        vector: '向量',
+        keyword: '關鍵詞',
+        graph: '圖譜',
+        quickAnswer: '快速問答',
+        smartReasoning: '智能推理',
+        indexSep: '、'
+      }
     }
   },
   kbSettings: {
@@ -2050,6 +2123,94 @@ export default {
     todoWrite: '制定計劃',
     askUser: '向使用者提問'
   },
+  assistant: {
+    title: 'WeKnora 助手',
+    newConversation: '新對話',
+    history: '歷史對話',
+    untitledConversation: '未命名對話',
+    historyEmpty: '尚無歷史對話',
+    historyFailed: '無法載入歷史對話',
+    loadMore: '載入更多',
+    resize: '調整助手寬度',
+    layout: {
+      dock: '固定在右側',
+      float: '改為懸浮',
+    },
+    welcomeTitle: '有什麼可以幫你？',
+    agentWelcomeDesc: '可以檢查這個智慧代理的設定、調整模型或查看它能檢索的知識庫。',
+    welcomeDesc: '我可以解答 WeKnora 的用法，也可以檢視和處理你空間裡的文件解析、知識庫動態和 Wiki 問題，還能幫你建立和設定智慧代理。變更前是否先請你確認，由輸入框下方的權限等級決定。',
+    startFailed: '啟動助手失敗，請重試',
+    askAboutDocument: '問 {name}',
+    access: {
+      title: '權限等級',
+      capped: '空間管理員未開放這一等級',
+      levels: {
+        read_only: {
+          label: '唯讀',
+          desc: '只檢視，不做任何變更'
+        },
+        confirm: {
+          label: '變更前確認',
+          desc: '每次變更或刪除前都先請你確認'
+        },
+        auto_write: {
+          label: '自動執行',
+          desc: '可復原的變更直接執行，刪除仍需確認'
+        }
+      }
+    },
+    context: {
+      currentPage: '目前頁面',
+      detach: '不附帶目前頁面',
+      attachedTip: '已附帶目前頁面：{path}',
+      detachedTip: '點擊附帶目前頁面：{path}'
+    },
+    starters: {
+      agentConfig: '檢查這個智慧代理的設定',
+      agentModel: '幫它換個模型',
+      agentKnowledge: '它能檢索哪些知識庫？',
+      wikiIssues: '這個頁面有哪些待處理的問題？',
+      wikiSummary: '總結一下這個 Wiki 頁面',
+      documentStatus: '這個文件的解析狀態如何？',
+      documentSummary: '總結一下這個文件',
+      failedDocuments: '這個知識庫有哪些解析失敗的文件？',
+      recentActivity: '這個知識庫最近有哪些變動？',
+      formats: 'WeKnora 支援哪些文件格式？',
+      createWiki: '怎樣建立 Wiki 知識庫？',
+      agents: '我有哪些智慧代理？分別用的什麼模型？'
+    }
+  },
+  assistantSettings: {
+    title: '助手',
+    description: '設定 {name} 的入口、開啟方式和權限等級。',
+    introTitle: '助手只能做你本人有權限做的事',
+    introDescription: '助手以你的身分操作，能看到和變更的範圍與你在空間裡的角色一致。權限等級只會在此基礎上進一步收緊，不會放寬。',
+    personalGroup: '個人偏好',
+    accessLabel: '權限等級',
+    accessDescription: '決定助手變更內容前是否先請你確認。也可以在助手輸入框下方隨時切換。',
+    accessCeilingHint: '空間管理員將最高等級設為「{level}」。',
+    entryLabel: '入口位置',
+    entryDescription: '無論選哪種，都可以在命令面板（{shortcut}）中開啟助手。',
+    entries: {
+      sidebar: '側邊欄',
+      launcher: '頁面右側',
+      palette: '僅命令面板'
+    },
+    layoutLabel: '開啟方式',
+    layoutDescription: '固定在右側時會擠壓頁面內容，懸浮時蓋在頁面上方。視窗較窄時總是懸浮。',
+    layouts: {
+      docked: '固定在右側',
+      floating: '懸浮'
+    },
+    workspaceGroup: '空間設定',
+    adminOnly: '僅管理員可修改',
+    nameLabel: '助手名稱',
+    nameDescription: '空間內所有成員看到的名稱，留空使用預設名稱。',
+    ceilingLabel: '最高權限等級',
+    ceilingDescription: '成員能選擇的最高等級。設為「唯讀」後，助手在這個空間裡不會做任何變更。',
+    saved: '已儲存',
+    saveFailed: '儲存失敗：{message}'
+  },
   commandPalette: {
     placeholder: '搜尋知識庫、檔案、對話…',
     clearRecent: '清除',
@@ -2073,7 +2234,8 @@ export default {
       agents: '打開智慧代理',
       organizations: '打開共享空間',
       settings: '打開設定',
-      productTour: '新手引導'
+      productTour: '新手引導',
+      assistant: '開啟 {name}'
     },
     match: {
       vector: '向量',
@@ -4034,6 +4196,25 @@ export default {
     fallbackHint: '未從知識庫中檢索到相關內容，以上為模型直接回答',
     truncatedHint: '回答在模型單次輸出上限處被截斷，以上為截斷前已生成的內容',
     mindmap: { button: '生成腦圖', empty: '暫無可生成腦圖的內容', generating: '生成腦圖中，請稍候…', renderFailed: '腦圖生成失敗', localFallback: '已用本地結構生成（模型暫時不可用）' },
+    conversationShare: {
+      button: '分享',
+      selectAll: '全選',
+      exit: '退出分享',
+      copyLink: '複製連結',
+      linkCopied: '連結已複製',
+      createFailed: '產生分享連結失敗',
+      wechat: '分享到微信',
+      wechatHint: '用手機微信掃碼開啟，再點右上角「···」轉發給好友',
+      openInBrowser: '在瀏覽器開啟',
+      pageTitle: '對話分享',
+      loading: '載入中…',
+      aiNotice: '內容由 AI 產生，請核實重要資訊',
+      defaultAgent: 'AI 助手',
+      wechatFileHint: '點擊檔案可預覽；如需儲存或轉發，開啟後點右上角「···」',
+      footer: '分享於 {time} · KnowPulse',
+      notFound: '分享不存在或已失效',
+      loadFailed: '載入失敗',
+    },
     rewind: {
       tooltip: '回滾到這裡',
       confirmTitle: '回滾到這裡？',
@@ -4781,12 +4962,10 @@ export default {
       },
       issuePagePrefix: '頁面: ',
       issueGoFix: '去處理',
-      fixAssistantTitle: 'Wiki 智慧修復助手',
       issueFixSuggestions: '內容最佳化建議 ({count})',
       issueFixSingle: '修復',
-      fixStartError: '啟動修復助手失敗',
-      issueFixPromptSingle: '請修復頁面 [[{slug}]] 上的問題 (ID: {id})。',
-      issueFixPromptAutoStart: '請修復頁面 [[{slug}]] 上的以下問題：'
+      issueFixPromptSingle: '修復這個 Wiki 問題：{description}',
+      issueFixPromptAll: '修復目前頁面的 {count} 個待處理問題'
     },
     indexing: {
       title: '索引策略',
@@ -4896,6 +5075,7 @@ export default {
       systemActor: '系統觸發',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
+      viaAssistant: '經 WeKnora 助手',
       knowledgeBase: '知識庫',
       countItems: '共 {count} 項',
       titleWithCount: '{title} 等 {count} 項',
@@ -5001,6 +5181,8 @@ export default {
         actorId: '發起人 ID',
         apiKeyName: 'API Key 名稱',
         apiKeyId: 'API Key ID',
+        agentSessionId: '助手對話 ID',
+        agentOperation: '助手操作',
         details: '詳情'
       },
       columns: {
@@ -5238,6 +5420,9 @@ export default {
     notConfigured: '未設定',
     sharedAgentModelLabel: '共享智慧代理設定的模型',
     noModel: '暫無可用模型',
+    modelAuto: '預設',
+    modelFollowDefault: '跟隨預設',
+    modelAutoHint: '目前知識庫設定的對話模型；不在知識庫頁面或知識庫未設定時，使用第一個可用的對話模型',
     stopGeneration: '停止生成',
     send: '傳送',
     steerCurrent: '補充當前任務',
@@ -6803,6 +6988,8 @@ export default {
       capabilityUnconfigured: '未設定'
     },
     editor: {
+      assistantChanged: '助手已修改此智慧代理，請重新開啟以查看最新設定。',
+      assistantDeleted: '助手已刪除此智慧代理。',
       reasoningEffortUnsupported: '當前所選模型不支持思考，除「關閉」外的選項將被忽略。',
       reasoningEffortAlwaysOn: '當前所選模型始終開啟思考，無法關閉，只能調整思考強度。',
       createTitle: '建立智慧代理',

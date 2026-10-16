@@ -1830,7 +1830,11 @@ export default {
       shellExec: '执行沙箱命令',
       dataAnalysis: '数据分析',
       dataSchema: '数据结构',
-      databaseQuery: '数据库查询'
+      databaseQuery: '数据库查询',
+      findOperations: '查找操作',
+      runOperation: '执行操作',
+      searchWeKnoraDocs: '搜索产品文档',
+      readWeKnoraDoc: '阅读产品文档'
     },
     skillFiles: {
       heading: '技能文件',
@@ -1871,6 +1875,35 @@ export default {
       truncated: '输出已截断',
       killed: '已超时终止',
       binarySuppressed: '二进制输出已省略，请将文件写入产物目录后下载'
+    },
+    operations: {
+      found: '{count} 个可执行操作',
+      unavailableCount: '{count} 个当前不可用',
+      empty: '没有匹配的操作',
+      unavailableHeading: '当前不可用',
+      parameters: '参数',
+      required: '必填',
+      enum: '可选值',
+      range: '范围 {min}–{max}',
+      risk: {
+        read: '只读',
+        write: '写入',
+        destructive: '不可恢复'
+      },
+      truncated: '结果已截断',
+      emptyResult: '没有返回数据',
+      failed: '操作失败',
+      meta: '附加信息'
+    },
+    weknoraDocs: {
+      pages: '{count} 篇文档',
+      hits: '匹配 {count} 个章节',
+      empty: '没有匹配的文档',
+      outline: '目录',
+      content: '正文',
+      truncated: '正文未读完，可以继续读取',
+      failed: '读取失败',
+      openDoc: '在文档站打开'
     },
     mcpOAuth: {
       waiting: '等待授权 · {target}',
@@ -1936,7 +1969,47 @@ export default {
       invalidJson: '参数不是合法 JSON',
       submitted: '已提交',
       submitFailed: '提交失败',
-      userRejected: '用户拒绝'
+      userRejected: '用户拒绝',
+      detail: {
+        type: '类型',
+        embeddingModel: '嵌入模型',
+        summaryModel: '摘要模型',
+        captionModel: '图片描述',
+        speechModel: '语音识别',
+        storage: '存储',
+        indexes: '索引',
+        name: '名称',
+        title: '标题',
+        status: '状态',
+        summary: '简介',
+        model: '模型',
+        mode: '模式',
+        url: '链接',
+        from: '从',
+        to: '到',
+        folder: '目录',
+        page: '页面',
+        version: '版本',
+        documents: '文档',
+        knowledgeBases: '知识库',
+        mcpServices: 'MCP 服务',
+        skills: '技能',
+        webSearch: '联网搜索',
+        multiTurn: '多轮对话'
+      },
+      value: {
+        document: '文档',
+        faq: '问答',
+        wiki: 'Wiki',
+        on: '开',
+        off: '关',
+        vector: '向量',
+        keyword: '关键词',
+        graph: '图谱',
+        quickAnswer: '快速问答',
+        smartReasoning: '智能推理',
+        indexSep: '、'
+      }
     }
   },
   kbSettings: {
@@ -2050,6 +2123,94 @@ export default {
     todoWrite: '制定计划',
     askUser: '向用户提问'
   },
+  assistant: {
+    title: 'WeKnora 助手',
+    newConversation: '新对话',
+    history: '历史对话',
+    untitledConversation: '未命名对话',
+    historyEmpty: '暂无历史对话',
+    historyFailed: '加载历史对话失败',
+    loadMore: '加载更多',
+    resize: '调整助手宽度',
+    layout: {
+      dock: '固定在右侧',
+      float: '改为悬浮',
+    },
+    welcomeTitle: '有什么可以帮你？',
+    agentWelcomeDesc: '可以检查这个智能体的配置、调整模型或查看它能检索的知识库。',
+    welcomeDesc: '我可以解答 WeKnora 的用法，也可以查看和处理你空间里的文档解析、知识库动态和 Wiki 问题，还能帮你创建和配置智能体。改动前是否先请你确认，由输入框下方的权限等级决定。',
+    startFailed: '启动助手失败，请重试',
+    askAboutDocument: '问 {name}',
+    access: {
+      title: '权限等级',
+      capped: '空间管理员未开放这一等级',
+      levels: {
+        read_only: {
+          label: '只读',
+          desc: '只查看，不做任何修改'
+        },
+        confirm: {
+          label: '修改前确认',
+          desc: '每次修改或删除前都先请你确认'
+        },
+        auto_write: {
+          label: '自动执行',
+          desc: '可恢复的修改直接执行，删除仍需确认'
+        }
+      }
+    },
+    context: {
+      currentPage: '当前页面',
+      detach: '不附带当前页面',
+      attachedTip: '已附带当前页面：{path}',
+      detachedTip: '点击附带当前页面：{path}'
+    },
+    starters: {
+      agentConfig: '检查这个智能体的配置',
+      agentModel: '给它换个模型',
+      agentKnowledge: '它能检索哪些知识库？',
+      wikiIssues: '这个页面有哪些待处理的问题？',
+      wikiSummary: '总结一下这个 Wiki 页面',
+      documentStatus: '这个文档的解析状态怎么样？',
+      documentSummary: '总结一下这个文档',
+      failedDocuments: '这个知识库有哪些解析失败的文档？',
+      recentActivity: '这个知识库最近有哪些变动？',
+      formats: 'WeKnora 支持哪些文档格式？',
+      createWiki: '怎样创建 Wiki 知识库？',
+      agents: '我有哪些智能体？分别用的什么模型？'
+    }
+  },
+  assistantSettings: {
+    title: '助手',
+    description: '设置 {name} 的入口、打开方式和权限等级。',
+    introTitle: '助手只能做你本人有权限做的事',
+    introDescription: '助手以你的身份操作，能看到和修改的范围与你在空间里的角色一致。权限等级只会在此基础上进一步收紧，不会放宽。',
+    personalGroup: '个人偏好',
+    accessLabel: '权限等级',
+    accessDescription: '决定助手修改内容前是否先请你确认。也可以在助手输入框下方随时切换。',
+    accessCeilingHint: '空间管理员将最高等级设为「{level}」。',
+    entryLabel: '入口位置',
+    entryDescription: '无论选哪种，都可以在命令面板（{shortcut}）中打开助手。',
+    entries: {
+      sidebar: '侧边栏',
+      launcher: '页面右侧',
+      palette: '仅命令面板'
+    },
+    layoutLabel: '打开方式',
+    layoutDescription: '固定在右侧时会挤压页面内容，悬浮时盖在页面上方。窗口较窄时总是悬浮。',
+    layouts: {
+      docked: '固定在右侧',
+      floating: '悬浮'
+    },
+    workspaceGroup: '空间设置',
+    adminOnly: '仅管理员可修改',
+    nameLabel: '助手名称',
+    nameDescription: '空间内所有成员看到的名称，留空使用默认名称。',
+    ceilingLabel: '最高权限等级',
+    ceilingDescription: '成员能选择的最高等级。设为「只读」后，助手在这个空间里不会做任何修改。',
+    saved: '已保存',
+    saveFailed: '保存失败：{message}'
+  },
   commandPalette: {
     placeholder: '搜索知识库、文件、对话…',
     clearRecent: '清除',
@@ -2073,7 +2234,8 @@ export default {
       agents: '打开智能体',
       organizations: '打开共享空间',
       settings: '打开设置',
-      productTour: '新手引导'
+      productTour: '新手引导',
+      assistant: '打开 {name}'
     },
     match: {
       vector: '向量',
@@ -4034,6 +4196,25 @@ export default {
     fallbackHint: '未从知识库中检索到相关内容，以上为模型直接回答',
     truncatedHint: '回答在模型单次输出上限处被截断，以上为截断前已生成的内容',
     mindmap: { button: '生成脑图', empty: '暂无可生成脑图的内容', generating: '生成脑图中，请稍候…', renderFailed: '脑图生成失败', localFallback: '已用本地结构生成（模型暂不可用）' },
+    conversationShare: {
+      button: '分享',
+      selectAll: '全选',
+      exit: '退出分享',
+      copyLink: '复制链接',
+      linkCopied: '链接已复制',
+      createFailed: '生成分享链接失败',
+      wechat: '分享到微信',
+      wechatHint: '用手机微信扫码打开，再点右上角「···」转发给好友',
+      openInBrowser: '浏览器打开',
+      pageTitle: '对话分享',
+      loading: '加载中…',
+      aiNotice: '内容由 AI 生成，请核实重要信息',
+      defaultAgent: 'AI 助手',
+      wechatFileHint: '点击文件可预览；如需保存或转发，打开后点右上角「···」',
+      footer: '分享于 {time} · KnowPulse',
+      notFound: '分享不存在或已失效',
+      loadFailed: '加载失败',
+    },
     rewind: {
       tooltip: '回滚到这里',
       confirmTitle: '回滚到这里？',
@@ -4781,12 +4962,10 @@ export default {
       },
       issuePagePrefix: '页面: ',
       issueGoFix: '去处理',
-      fixAssistantTitle: 'Wiki 智能修复助手',
       issueFixSuggestions: '内容优化建议 ({count})',
       issueFixSingle: '修复',
-      fixStartError: '启动修复助手失败',
-      issueFixPromptSingle: '请修复页面 [[{slug}]] 上的问题 (ID: {id})。',
-      issueFixPromptAutoStart: '请修复页面 [[{slug}]] 上的以下问题：'
+      issueFixPromptSingle: '修复这个 Wiki 问题：{description}',
+      issueFixPromptAll: '修复当前页面的 {count} 个待处理问题'
     },
     indexing: {
       title: '索引策略',
@@ -4896,6 +5075,7 @@ export default {
       systemActor: '系统触发',
       actorWithAPIKey: '{actor} · API Key · {name}',
       actorAPIKey: 'API Key · {name}',
+      viaAssistant: '经 WeKnora 助手',
       knowledgeBase: '知识库',
       countItems: '共 {count} 项',
       titleWithCount: '{title} 等 {count} 项',
@@ -5001,6 +5181,8 @@ export default {
         actorId: '发起人 ID',
         apiKeyName: 'API Key 名称',
         apiKeyId: 'API Key ID',
+        agentSessionId: '助手会话 ID',
+        agentOperation: '助手操作',
         details: '详情'
       },
       columns: {
@@ -5238,6 +5420,9 @@ export default {
     notConfigured: '未配置',
     sharedAgentModelLabel: '共享智能体配置的模型',
     noModel: '暂无可用模型',
+    modelAuto: '默认',
+    modelFollowDefault: '跟随默认',
+    modelAutoHint: '当前知识库配置的对话模型；不在知识库页面或知识库未配置时，使用第一个可用的对话模型',
     stopGeneration: '停止生成',
     send: '发送',
     steerCurrent: '补充当前任务',
@@ -6803,6 +6988,8 @@ export default {
       capabilityUnconfigured: '未配置'
     },
     editor: {
+      assistantChanged: '助手已修改此智能体，请重新打开以查看最新设置。',
+      assistantDeleted: '助手已删除此智能体。',
       reasoningEffortUnsupported: '当前所选模型不支持思考，除「关闭」外的选项将被忽略。',
       reasoningEffortAlwaysOn: '当前所选模型始终开启思考，无法关闭，只能调整思考强度。',
       createTitle: '创建智能体',

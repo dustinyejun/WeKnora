@@ -257,12 +257,39 @@ func (h *Handler) DownloadPublicShareFile(c *gin.Context) {
 	// WeChat's in-app browser cannot save attachments (it shows a 0 B stub), so
 	// the share page asks for inline delivery there and WeChat previews the file.
 	if c.Query("inline") == "1" {
-		disposition = "inline" + strings.TrimPrefix(disposition, "attachment")
-		if strings.HasPrefix(contentType, "text/") {
-			contentType = "text/plain; charset=utf-8"
+		if inlineType, ok := shareInlineContentType(f.FileName, contentType); ok {
+			disposition = "inline" + strings.TrimPrefix(disposition, "attachment")
+			contentType = inlineType
+		} else {
+			contentType = "application/octet-stream"
 		}
 	}
 	c.Header("Content-Disposition", disposition)
+	c.Header("X-Content-Type-Options", "nosniff")
 	c.Header("Cache-Control", "private, no-store")
 	c.Data(http.StatusOK, contentType, f.Content)
+}
+
+// shareInlineContentType decides whether a share file may be displayed inline
+// and which content type to send then. The public share routes live on the app
+// origin, so active content (SVG, HTML, XML, scripts) must never render inline:
+// an SVG script would run same-origin and could read the login token. Such
+// files keep the attachment disposition; other text is shown as plain text.
+func shareInlineContentType(name, contentType string) (string, bool) {
+	safeType, inline := secutils.SafeContentTypeByFilename(name)
+	if !inline {
+		return "", false
+	}
+	if contentType == "" || contentType == "application/octet-stream" {
+		contentType = safeType
+	}
+	mediaType := strings.ToLower(strings.TrimSpace(strings.SplitN(contentType, ";", 2)[0]))
+	switch {
+	case strings.HasSuffix(mediaType, "+xml"), strings.HasSuffix(mediaType, "/xml"),
+		strings.Contains(mediaType, "html"), strings.Contains(mediaType, "script"):
+		return "", false
+	case strings.HasPrefix(mediaType, "text/"):
+		return "text/plain; charset=utf-8", true
+	}
+	return contentType, true
 }

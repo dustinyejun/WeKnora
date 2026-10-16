@@ -109,7 +109,7 @@
                     </t-button>
                     <span v-if="hasArtifacts" class="answer-toolbar__artifact-count" aria-hidden="true">{{ artifactCount }}</span>
                 </span>
-                <t-button v-if="!embeddedMode" size="small" variant="outline" shape="round" title="分享"
+                <t-button v-if="!embeddedMode" size="small" variant="outline" shape="round" :title="$t('chat.conversationShare.button')"
                     @click.stop="emitShare">
                     <t-icon name="share" />
                 </t-button>

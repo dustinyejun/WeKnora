@@ -71,6 +71,8 @@ type qaRequestContext struct {
 	attachmentMetas       types.MessageAttachments // Metadata-only view of attachmentIDs for the persisted user message
 	suggestionAttribution *types.SuggestionAttribution
 	questionOrigin        *types.QuestionOrigin
+	pageContext           *types.PageContext
+	assistantAccess       types.AssistantAccessLevel
 	// resourceRewriter turns internal storage references in the outbound stream
 	// into directly loadable URLs when the caller asks for `resource_urls=public`.
 	// Disabled (a pass-through) in the default handle mode.
@@ -137,6 +139,8 @@ func (rc *qaRequestContext) buildQARequest() *types.QARequest {
 		LocalBrowserEnabled: rc.localBrowserEnabled,
 		Attachments:         rc.attachments,
 		QuestionOrigin:      rc.questionOrigin,
+		PageContext:         rc.pageContext,
+		AssistantAccess:     rc.assistantAccess,
 		TurnLeaseHeld:       rc.turnLeaseHeld,
 		// Only a caller that can answer the prompt later may leave the run
 		// suspended; an API-key caller would get a turn with no answer.
@@ -266,11 +270,11 @@ func (h *Handler) parseQARequest(c *gin.Context, logPrefix string) (*qaRequestCo
 		return nil, nil, err
 	}
 
-	// The built-in wiki fixer is invoked from a KB page, not from a tenant's
-	// regular agent picker. When the KB is shared, run it in the source tenant
-	// only if the caller has edit permission, so KB-scoped models/tools resolve
-	// without granting viewers write capability.
-	if customAgent != nil && customAgent.ID == types.BuiltinWikiFixerID {
+	// KB-anchored built-in agents (wiki fixer, assistant) are opened from a KB
+	// page, not from a tenant's regular agent picker. When the KB is shared,
+	// run them in the source tenant only if the caller has edit permission, so
+	// KB-scoped models/tools resolve without granting viewers write capability.
+	if types.RunsInSharedKBWorkspace(customAgent) {
 		if scopedAgent, scopedTenantID := h.resolveWikiFixerTenantScope(
 			ctx,
 			customAgent,
@@ -498,6 +502,8 @@ func (h *Handler) parseQARequest(c *gin.Context, logPrefix string) (*qaRequestCo
 		attachmentMetas:       attachmentMetas,
 		suggestionAttribution: request.SuggestionAttribution,
 		questionOrigin:        request.QuestionOrigin,
+		pageContext:           request.PageContext,
+		assistantAccess:       request.AssistantAccess,
 		reqAgentEnabled:       request.AgentEnabled,
 		reqAgentID:            request.AgentID,
 		resourceRewriter:      resourceRewriter,

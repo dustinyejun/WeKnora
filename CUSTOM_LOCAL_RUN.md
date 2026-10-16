@@ -89,7 +89,7 @@ make dev-docker DEV_ARGS=--no-langfuse
 
 ## 常见问题
 
-- **8080 或 5173 端口被占用**：运行 `lsof -i :8080` 查看占用端口的进程。常见原因是另一种方式还没停，或者正式环境（`docker compose up`）还在运行。开发环境和正式环境不能同时运行，详见 `CUSTOM_DEV.md`。
+- **8080 或 5173 端口被占用**：运行 `lsof -i :8080` 查看占用端口的进程。常见原因是另一种方式还没停，或者正式环境（`docker compose up`）还在运行。开发环境和正式环境不能同时运行，详见 `CUSTOM.md`。
 - **后端连不上 Neo4j**：`WeKnora-neo4j` 没在运行，按上文 [Neo4j](#neo4j) 启动它。
 - **`make help` 里没有 `dev-docker` 等命令**：这些是定制命令，`make help` 显示的是官方帮助。全部选项见 `./scripts/dev-custom.sh help`。
 - **一条 make 命令里不要混入其他目标**：比如 `make dev-stop build` 会整体交给官方 `Makefile` 处理，其中的 `dev-stop` 也会变成官方版本。分开运行就没问题。
