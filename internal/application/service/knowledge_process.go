@@ -4026,8 +4026,12 @@ func (s *knowledgeService) ProcessDocument(ctx context.Context, t *asynq.Task) e
 	sanitizeReadResult(convertResult)
 	if convertResult != nil {
 		convertResult.MarkdownContent = chunker.NormalizeLineEndings(convertResult.MarkdownContent)
-		convertResult.MarkdownContent = docparser.JoinCJKSpaces(convertResult.MarkdownContent)
+		// Both CJK cleanups are for PDF extraction artifacts only. In uploaded
+		// markdown (or other authored sources) a space between CJK runs is
+		// content: code spans like "cp 中文 文件" and link targets like
+		// "images/测试 图片.png" must stay byte-exact.
 		if strings.EqualFold(strings.TrimPrefix(payload.FileType, "."), "pdf") {
+			convertResult.MarkdownContent = docparser.JoinCJKSpaces(convertResult.MarkdownContent)
 			convertResult.MarkdownContent = docparser.JoinCJKLineWraps(convertResult.MarkdownContent)
 		}
 		if convertResult.MarkdownContent != "" {
