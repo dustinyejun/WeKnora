@@ -718,6 +718,7 @@
 </template>
 
 <script setup lang="ts">
+import { useAssistantDataChange } from '@/utils/assistantDataChange'
 import { onMounted, onUnmounted, ref, computed, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { MessagePlugin, Icon as TIcon } from 'tdesign-vue-next'
@@ -1192,6 +1193,8 @@ watch(creatorFilter, () => {
   fetchList(true)
 })
 
+useAssistantDataChange(() => { void fetchList(true) }, { areas: ['knowledge_base'] })
+
 onMounted(() => {
   fetchList().then(() => {
     // 检查路由参数中是否有需要高亮的知识库ID
@@ -1273,7 +1276,8 @@ function canManageKBCard(kb: KB): boolean {
   // admin/creator fallbacks either.
   if ((kb as any).isMine === false) return false
   const userId = authStore.user?.id || ''
-  if (kb.creator_id && userId && kb.creator_id === userId) return true
+  // A creator demoted to Viewer no longer manages it (access.CreatorRoleFloor).
+  if (kb.creator_id && userId && kb.creator_id === userId && authStore.hasRole('contributor')) return true
   return authStore.hasRole('admin')
 }
 

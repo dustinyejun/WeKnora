@@ -62,13 +62,11 @@ type QuestionOrigin struct {
 // MaxPageContextIssues bounds how many Wiki issues one page context names.
 const MaxPageContextIssues = 20
 
-// PageContext is the WeKnora page the user has open while asking: a
-// knowledge base, optionally a document, a Wiki page or Wiki issues in it.
-// It tells the agent what "this" refers to. Like QuestionOrigin it is only a
-// hint inside the turn's resolved scope: anything outside the search targets
-// is dropped, never added to them.
+// PageContext identifies the open page. Knowledge-base resources must be in
+// the resolved search targets; agents are checked independently in the current tenant.
 type PageContext struct {
-	KnowledgeBaseID string   `json:"knowledge_base_id"`
+	AgentID         string   `json:"agent_id,omitempty"`
+	KnowledgeBaseID string   `json:"knowledge_base_id,omitempty"`
 	KnowledgeID     string   `json:"knowledge_id,omitempty"`
 	WikiSlug        string   `json:"wiki_slug,omitempty"`
 	WikiIssueIDs    []string `json:"wiki_issue_ids,omitempty"`
@@ -99,6 +97,9 @@ type QARequest struct {
 	Attachments         MessageAttachments // File attachments (processed and ready for prompt injection)
 	QuestionOrigin      *QuestionOrigin    // Source of a picked suggested question; a retrieval hint only
 	PageContext         *PageContext       // Page the user has open; a hint inside the resolved scope only
+	// AssistantAccess is the access level the user picked for the WeKnora
+	// assistant; the workspace ceiling still caps it. Ignored by other agents.
+	AssistantAccess AssistantAccessLevel
 	// SteerSink, when set, enables mid-run message injection for this run:
 	// the engine drains user-appended messages at every round boundary and
 	// persists accepted ones through this sink. A structural interface so

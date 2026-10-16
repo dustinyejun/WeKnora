@@ -1828,7 +1828,11 @@ export default {
       shellExec: '샌드박스 명령 실행',
       dataAnalysis: '데이터 분석',
       dataSchema: '데이터 구조',
-      databaseQuery: '데이터베이스 조회'
+      databaseQuery: '데이터베이스 조회',
+      findOperations: '작업 찾기',
+      runOperation: '작업 실행',
+      searchWeKnoraDocs: '제품 문서 검색',
+      readWeKnoraDoc: '제품 문서 읽기'
     },
     skillFiles: {
       heading: '스킬 파일',
@@ -1869,6 +1873,35 @@ export default {
       truncated: '출력이 잘림',
       killed: '시간 초과로 종료됨',
       binarySuppressed: '바이너리 출력은 생략되었습니다. 파일은 산출물 디렉터리에 저장한 뒤 다운로드하세요.'
+    },
+    operations: {
+      found: '실행 가능 {count}개',
+      unavailableCount: '현재 사용 불가 {count}개',
+      empty: '일치하는 작업이 없습니다',
+      unavailableHeading: '현재 사용 불가',
+      parameters: '매개변수',
+      required: '필수',
+      enum: '허용 값',
+      range: '범위 {min}–{max}',
+      risk: {
+        read: '읽기',
+        write: '쓰기',
+        destructive: '되돌릴 수 없음'
+      },
+      truncated: '결과가 잘렸습니다',
+      emptyResult: '반환된 데이터가 없습니다',
+      failed: '작업 실패',
+      meta: '추가 정보'
+    },
+    weknoraDocs: {
+      pages: '문서 {count}편',
+      hits: '일치하는 섹션 {count}개',
+      empty: '일치하는 문서가 없습니다',
+      outline: '목차',
+      content: '본문',
+      truncated: '본문이 이어집니다',
+      failed: '읽기 실패',
+      openDoc: '문서 사이트에서 열기'
     },
     mcpOAuth: {
       waiting: '인증 대기 · {target}',
@@ -1934,7 +1967,47 @@ export default {
       invalidJson: '유효한 JSON이 아닙니다',
       submitted: '제출됨',
       submitFailed: '제출 실패',
-      userRejected: '사용자 거부'
+      userRejected: '사용자 거부',
+      detail: {
+        type: '유형',
+        embeddingModel: '임베딩 모델',
+        summaryModel: '요약 모델',
+        captionModel: '이미지 설명',
+        speechModel: '음성 인식',
+        storage: '스토리지',
+        indexes: '인덱스',
+        name: '이름',
+        title: '제목',
+        status: '상태',
+        summary: '설명',
+        model: '모델',
+        mode: '모드',
+        url: '링크',
+        from: '출발',
+        to: '도착',
+        folder: '폴더',
+        page: '페이지',
+        version: '버전',
+        documents: '문서',
+        knowledgeBases: '지식베이스',
+        mcpServices: 'MCP 서비스',
+        skills: '스킬',
+        webSearch: '웹 검색',
+        multiTurn: '멀티턴'
+      },
+      value: {
+        document: '문서',
+        faq: 'FAQ',
+        wiki: 'Wiki',
+        on: '켜짐',
+        off: '꺼짐',
+        vector: '벡터',
+        keyword: '키워드',
+        graph: '그래프',
+        quickAnswer: '빠른 답변',
+        smartReasoning: '스마트 추론',
+        indexSep: ', '
+      }
     }
   },
   kbSettings: {
@@ -2051,10 +2124,39 @@ export default {
   assistant: {
     title: 'WeKnora 어시스턴트',
     newConversation: '새 대화',
+    history: '대화 기록',
+    untitledConversation: '제목 없는 대화',
+    historyEmpty: '아직 대화 기록이 없습니다',
+    historyFailed: '대화 기록을 불러오지 못했습니다',
+    loadMore: '더 불러오기',
+    resize: '어시스턴트 너비 조정',
+    layout: {
+      dock: '오른쪽에 고정',
+      float: '떠 있는 창으로 전환',
+    },
     welcomeTitle: '무엇을 도와드릴까요?',
-    welcomeDesc: 'WeKnora 사용법을 안내하고, 워크스페이스의 문서 파싱, 지식 베이스 활동, Wiki 문제를 확인하고 처리할 수 있습니다. 삭제 같은 작업은 먼저 확인을 요청합니다.',
+    agentWelcomeDesc: '이 에이전트의 설정을 확인하고, 모델을 변경하거나 검색할 수 있는 지식 베이스를 확인할 수 있습니다.',
+    welcomeDesc: 'WeKnora 사용법을 안내하고, 워크스페이스의 문서 파싱, 지식 베이스 활동, Wiki 문제를 확인하고 처리하며, 에이전트를 만들고 설정할 수도 있습니다. 변경 전에 확인을 요청할지는 입력창 아래의 권한 수준에 따라 정해집니다.',
     startFailed: '어시스턴트를 시작하지 못했습니다. 다시 시도해 주세요.',
-    askAboutDocument: 'WeKnora 어시스턴트에게 묻기',
+    askAboutDocument: '{name}에게 묻기',
+    access: {
+      title: '권한 수준',
+      capped: '워크스페이스 관리자가 허용하지 않았습니다',
+      levels: {
+        read_only: {
+          label: '읽기 전용',
+          desc: '확인만 하고 아무것도 변경하지 않습니다'
+        },
+        confirm: {
+          label: '변경 전 확인',
+          desc: '변경하거나 삭제할 때마다 먼저 확인을 요청합니다'
+        },
+        auto_write: {
+          label: '자동 실행',
+          desc: '되돌릴 수 있는 변경은 바로 실행하고, 삭제는 여전히 확인합니다'
+        }
+      }
+    },
     context: {
       currentPage: '현재 페이지',
       detach: '현재 페이지 포함하지 않기',
@@ -2062,6 +2164,9 @@ export default {
       detachedTip: '클릭하여 현재 페이지 포함: {path}'
     },
     starters: {
+      agentConfig: '이 에이전트의 설정 확인하기',
+      agentModel: '모델 변경하기',
+      agentKnowledge: '어떤 지식 베이스를 검색할 수 있나요?',
       wikiIssues: '이 페이지에 처리할 문제가 있나요?',
       wikiSummary: '이 Wiki 페이지를 요약해 줘',
       documentStatus: '이 문서의 파싱 상태는 어떤가요?',
@@ -2069,8 +2174,40 @@ export default {
       failedDocuments: '이 지식 베이스에서 파싱에 실패한 문서는?',
       recentActivity: '이 지식 베이스에 최근 어떤 변경이 있었나요?',
       formats: 'WeKnora는 어떤 문서 형식을 지원하나요?',
-      createWiki: 'Wiki 지식 베이스는 어떻게 만드나요?'
+      createWiki: 'Wiki 지식 베이스는 어떻게 만드나요?',
+      agents: '어떤 에이전트가 있고, 각각 어떤 모델을 쓰나요?'
     }
+  },
+  assistantSettings: {
+    title: '어시스턴트',
+    description: '{name}의 진입점, 열기 방식, 권한 수준을 설정합니다.',
+    introTitle: '어시스턴트는 내가 할 수 있는 일만 합니다',
+    introDescription: '어시스턴트는 내 계정으로 동작하므로, 볼 수 있고 변경할 수 있는 범위가 워크스페이스 역할과 같습니다. 권한 수준은 이 범위를 더 좁힐 뿐 넓히지 않습니다.',
+    personalGroup: '개인 설정',
+    accessLabel: '권한 수준',
+    accessDescription: '어시스턴트가 무언가를 변경하기 전에 확인을 요청할지 정합니다. 어시스턴트 입력창 아래에서도 언제든 바꿀 수 있습니다.',
+    accessCeilingHint: '워크스페이스 관리자가 최고 수준을 "{level}"(으)로 제한했습니다.',
+    entryLabel: '진입점',
+    entryDescription: '어느 것을 선택해도 명령 팔레트({shortcut})에서 어시스턴트를 열 수 있습니다.',
+    entries: {
+      sidebar: '사이드바',
+      launcher: '화면 오른쪽',
+      palette: '명령 팔레트만'
+    },
+    layoutLabel: '열기 방식',
+    layoutDescription: '오른쪽에 고정하면 페이지가 좁아지고, 플로팅이면 페이지 위에 겹쳐 표시됩니다. 창이 좁으면 항상 플로팅으로 열립니다.',
+    layouts: {
+      docked: '오른쪽에 고정',
+      floating: '플로팅'
+    },
+    workspaceGroup: '워크스페이스',
+    adminOnly: '관리자만 변경할 수 있습니다',
+    nameLabel: '어시스턴트 이름',
+    nameDescription: '워크스페이스의 모든 멤버에게 보이는 이름입니다. 비워 두면 기본 이름을 사용합니다.',
+    ceilingLabel: '최고 권한 수준',
+    ceilingDescription: '멤버가 선택할 수 있는 최고 수준입니다. "읽기 전용"으로 설정하면 이 워크스페이스에서 어시스턴트는 아무것도 변경하지 않습니다.',
+    saved: '저장했습니다',
+    saveFailed: '저장하지 못했습니다: {message}'
   },
   commandPalette: {
     placeholder: '지식베이스, 파일, 대화 검색…',
@@ -2096,7 +2233,7 @@ export default {
       organizations: '공유 공간 열기',
       settings: '설정 열기',
       productTour: '사용 가이드',
-      assistant: 'WeKnora 어시스턴트 열기'
+      assistant: '{name} 열기'
     },
     match: {
       vector: '벡터',
@@ -5265,8 +5402,9 @@ export default {
     notConfigured: '구성되지 않음',
     sharedAgentModelLabel: '공유 에이전트에 구성된 모델',
     noModel: '사용 가능한 모델 없음',
-    modelAuto: '자동',
-    modelAutoHint: '현재 지식 베이스의 대화 모델을 사용하고, 설정되지 않은 경우 시스템 기본 모델을 사용합니다',
+    modelAuto: '기본',
+    modelFollowDefault: '기본값 따르기',
+    modelAutoHint: '현재 지식 베이스의 대화 모델을 사용하며, 지식 베이스 밖이거나 설정되지 않은 경우 첫 번째로 사용 가능한 대화 모델을 사용합니다',
     stopGeneration: '생성 중지',
     send: '전송',
     steerCurrent: '현재 작업에 추가',
@@ -6832,6 +6970,8 @@ export default {
       capabilityUnconfigured: '미구성'
     },
     editor: {
+      assistantChanged: '어시스턴트가 이 에이전트를 변경했습니다. 최신 설정을 보려면 다시 여세요.',
+      assistantDeleted: '어시스턴트가 이 에이전트를 삭제했습니다.',
       reasoningEffortUnsupported: '선택한 모델은 사고를 지원하지 않습니다. "끄기" 외의 옵션은 무시됩니다.',
       reasoningEffortAlwaysOn: '선택한 모델은 항상 사고하며 끌 수 없습니다. 강도만 조정할 수 있습니다.',
       createTitle: '에이전트 만들기',

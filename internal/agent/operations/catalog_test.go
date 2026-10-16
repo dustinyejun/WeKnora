@@ -18,7 +18,7 @@ func TestBuiltinCatalogIsValid(t *testing.T) {
 	catalog := Builtin()
 	require.NotEmpty(t, catalog.All())
 	for _, op := range catalog.All() {
-		if op.Risk.Mutates() {
+		if op.Risk.Mutates() && op.LabelParam == "" {
 			require.NotNil(t, op.Target, op.ID)
 		}
 	}
@@ -38,16 +38,21 @@ func TestNewCatalogRejectsUnsafeDeclarations(t *testing.T) {
 		"api keys":       readOp("keys.list", "/api/v1/api-keys"),
 		"outside v1":     readOp("x.get", "/health"),
 		// Areas whose names extend a sensitive one, or that no list named.
-		"sandbox configs":     readOp("x.get", "/api/v1/sandbox-configs"),
-		"storage backends":    readOp("x.get", "/api/v1/storage-backends"),
-		"web search provider": readOp("x.get", "/api/v1/web-search-providers/types"),
-		"im channels":         readOp("x.get", "/api/v1/im-channels"),
-		"agent approvals":     readOp("x.get", "/api/v1/agent/tool-approvals"),
-		"memory":              readOp("x.get", "/api/v1/memory/items"),
-		"messages":            readOp("x.get", "/api/v1/messages/chat-history-stats"),
-		"a new area":          readOp("x.get", "/api/v1/something-new"),
-		"kb shares":           readOp("x.get", "/api/v1/knowledge-bases/:id/shares", kb),
-		"kb prefix lookalike": readOp("x.get", "/api/v1/knowledge-bases-admin"),
+		"sandbox configs":      readOp("x.get", "/api/v1/sandbox-configs"),
+		"storage backends":     readOp("x.get", "/api/v1/storage-backends"),
+		"web search provider":  readOp("x.get", "/api/v1/web-search-providers/types"),
+		"im channels":          readOp("x.get", "/api/v1/im-channels"),
+		"agent approvals":      readOp("x.get", "/api/v1/agent/tool-approvals"),
+		"memory":               readOp("x.get", "/api/v1/memory/items"),
+		"messages":             readOp("x.get", "/api/v1/messages/chat-history-stats"),
+		"a new area":           readOp("x.get", "/api/v1/something-new"),
+		"kb shares":            readOp("x.get", "/api/v1/knowledge-bases/:id/shares", kb),
+		"kb prefix lookalike":  readOp("x.get", "/api/v1/knowledge-bases-admin"),
+		"agent shares":         readOp("x.get", "/api/v1/agents/:id/shares", kb),
+		"agent embed channels": readOp("x.get", "/api/v1/agents/:id/embed-channels", kb),
+		"agent im channels":    readOp("x.get", "/api/v1/agents/:id/im-channels", kb),
+		"model credentials":    readOp("x.get", "/api/v1/models/:id/credentials", kb),
+		"mcp oauth":            readOp("x.get", "/api/v1/mcp-services/:id/oauth/status", kb),
 		"read as POST": {
 			ID: "x.get", Summary: "s", Risk: RiskRead, Method: http.MethodPost,
 			Route: "/api/v1/knowledge-bases",
@@ -67,10 +72,49 @@ func TestNewCatalogRejectsUnsafeDeclarations(t *testing.T) {
 		"route segment without param": readOp("x.get", "/api/v1/knowledge-bases/:id"),
 		"param without route segment": readOp("x.get", "/api/v1/knowledge-bases", kb),
 	}
+	for _, route := range []struct{ method, path string }{
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills"},
+		{http.MethodPost, "/api/v1/sandbox-configs/:id/skills"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId/files"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId/files/content"},
+		{http.MethodPost, "/api/v1/sandbox-configs/:id/skills/:skillId/reinstall"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId/guidance"},
+		{http.MethodPost, "/api/v1/sandbox-configs/:id/skills/:skillId/guidance"},
+		{http.MethodPost, "/api/v1/sandbox-configs/:id/skills/:skillId/stop"},
+		{http.MethodPatch, "/api/v1/sandbox-configs/:id/skills/:skillId"},
+		{http.MethodDelete, "/api/v1/sandbox-configs/:id/skills/:skillId"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId/install-events"},
+		{http.MethodGet, "/api/v1/sandbox-configs/:id/skills/:skillId/transcript"},
+		{http.MethodGet, "/api/v1/skills/catalog"},
+		{http.MethodPost, "/api/v1/skills/catalog"},
+		{http.MethodPost, "/api/v1/skills/catalog/:id/install"},
+		{http.MethodGet, "/api/v1/skills/catalog/:id/files"},
+		{http.MethodGet, "/api/v1/skills/catalog/:id/files/content"},
+		{http.MethodDelete, "/api/v1/skills/catalog/:id"},
+	} {
+		op := readOp("skill.admin", route.path)
+		op.Method = route.method
+		if route.method != http.MethodGet {
+			op.Risk = RiskWrite
+			op.Target = &Target{Operation: "skill.get", Label: "name"}
+		}
+		if route.method == http.MethodDelete {
+			op.Risk = RiskDestructive
+		}
+		cases[route.method+" "+route.path] = op
+	}
 	for name, op := range cases {
 		t.Run(name, func(t *testing.T) {
 			_, err := NewCatalog(op)
-			assert.Error(t, err)
+			require.Error(t, err)
+			if strings.HasPrefix(name, op.Method+" ") {
+				if strings.HasPrefix(op.Route, "/api/v1/sandbox-configs") {
+					assert.Contains(t, err.Error(), "outside the areas")
+				} else {
+					assert.Contains(t, err.Error(), `reaches "catalog"`)
+				}
+			}
 		})
 	}
 }
@@ -96,6 +140,36 @@ func TestNewCatalogChecksTargets(t *testing.T) {
 	noParam.Params = nil
 	_, err = NewCatalog(get, noParam)
 	assert.Error(t, err, "target needs a param the mutation does not declare")
+}
+
+func TestNewCatalogChecksLabelParam(t *testing.T) {
+	name := Param{Name: "name", In: InBody, Type: TypeString, Required: true, Description: "d"}
+	create := Operation{
+		ID: "agent.create", Summary: "s", Risk: RiskWrite, Method: http.MethodPost,
+		Route: "/api/v1/agents", Params: []Param{name}, LabelParam: "name",
+	}
+	_, err := NewCatalog(create)
+	require.NoError(t, err)
+
+	cases := map[string]func(*Operation){
+		"unknown param": func(op *Operation) { op.LabelParam = "title" },
+		"optional param": func(op *Operation) {
+			op.Params = []Param{{Name: "name", In: InBody, Type: TypeString, Description: "d"}}
+		},
+		"destructive":     func(op *Operation) { op.Risk = RiskDestructive },
+		"not a POST":      func(op *Operation) { op.Method = http.MethodPut },
+		"with a target":   func(op *Operation) { op.Target = &Target{Operation: "x.get", Label: "title"} },
+		"read with label": func(op *Operation) { op.Risk, op.Method = RiskRead, http.MethodGet },
+	}
+	for name, mut := range cases {
+		t.Run(name, func(t *testing.T) {
+			op := create
+			op.Params = append([]Param(nil), create.Params...)
+			mut(&op)
+			_, err := NewCatalog(op, readOp("x.get", "/api/v1/agents"))
+			assert.Error(t, err)
+		})
+	}
 }
 
 func TestNewCatalogChecksItemTargets(t *testing.T) {
@@ -348,4 +422,190 @@ func TestDispatchRejectsOversizedResponses(t *testing.T) {
 		Call{Method: http.MethodGet, Path: "/x"},
 	)
 	assert.ErrorIs(t, err, ErrResponseTooLarge)
+}
+
+func TestCatalogForFiltersByRoleAndLevel(t *testing.T) {
+	id := Param{Name: "knowledge_id", In: InPath, Key: "id", Type: TypeString, Required: true, Description: "d"}
+	get := readOp("knowledge.get", "/api/v1/knowledge/:id", id)
+	audit := readOp("knowledge.audit", "/api/v1/knowledge/:id/audit", id)
+	audit.Role = types.TenantRoleAdmin
+	write := func(opID, route string, target string) Operation {
+		return Operation{
+			ID: opID, Summary: "s", Risk: RiskWrite, Method: http.MethodPost, Route: route, Params: []Param{id},
+			Target: &Target{Operation: target, Label: "title"},
+			Result: Result{Root: "data", Fields: []Field{{From: "title"}}},
+		}
+	}
+	catalog, err := NewCatalog(
+		get, audit,
+		write("knowledge.reparse", "/api/v1/knowledge/:id/reparse", "knowledge.get"),
+		write("knowledge.seal", "/api/v1/knowledge/:id/seal", "knowledge.audit"),
+	)
+	require.NoError(t, err)
+	ids := func(c *Catalog) []string {
+		var out []string
+		for _, op := range c.All() {
+			out = append(out, op.ID)
+		}
+		return out
+	}
+
+	assert.Equal(t, []string{"knowledge.get"},
+		ids(catalog.For(Access{Role: types.TenantRoleViewer, EnforceRole: true})))
+	assert.Equal(t, []string{"knowledge.get", "knowledge.reparse"},
+		ids(catalog.For(Access{Role: types.TenantRoleContributor, EnforceRole: true})),
+		"a mutation is dropped with the target it could not show")
+	assert.Equal(t, ids(catalog),
+		ids(catalog.For(Access{Role: types.TenantRoleViewer})), "roles filter only when RBAC is enforced")
+	assert.Equal(t, []string{"knowledge.audit", "knowledge.get"},
+		ids(catalog.For(Access{Role: types.TenantRoleOwner, EnforceRole: true, Level: types.AssistantAccessReadOnly})))
+}
+
+func TestBuiltinSkillList(t *testing.T) {
+	op, ok := Builtin().Get("skill.list")
+	require.True(t, ok)
+	assert.Equal(t, types.TenantRoleViewer, op.Role)
+	require.Len(t, op.Params, 1)
+	param, ok := op.Param("sandbox_config_id")
+	require.True(t, ok)
+	assert.Equal(t, InQuery, param.In)
+	assert.True(t, param.Required)
+	assert.True(t, param.AllowEmpty)
+	_, err := op.Build(nil)
+	require.Error(t, err)
+	for _, id := range []string{`"cfg-1"`, `"host"`, `""`} {
+		_, err = op.Build(map[string]json.RawMessage{"sandbox_config_id": json.RawMessage(id)})
+		require.NoError(t, err)
+	}
+	for _, hidden := range []string{"agent_id", "agent_source_tenant_id"} {
+		_, err = op.Build(map[string]json.RawMessage{
+			"sandbox_config_id": json.RawMessage(`"cfg-1"`),
+			hidden:              json.RawMessage(`"secret"`),
+		})
+		require.Error(t, err)
+	}
+	assert.Equal(t, []Field{{From: "description", As: "description"}, {From: "name", As: "name"}}, op.Result.Fields)
+	assert.Equal(t, []Field{{From: "skills_available", As: "skills_available"}}, op.Result.Meta)
+	for _, tc := range []struct{ body, want string }{
+		{
+			`{"success":true,"data":[{"id":"row-1","name":"ppt-generator","description":"Make slides",
+			"env_values":{"TOKEN":"secret"},"source":"https://private","headers":{"Authorization":"secret"}}],
+			"skills_available":true,"tenant_id":1}`,
+			`{"data":[{"name":"ppt-generator","description":"Make slides"}],"meta":{"skills_available":true}}`,
+		},
+		{`{"success":true,"data":[],"skills_available":false}`, `{"data":[],"meta":{"skills_available":false}}`},
+	} {
+		projected, err := op.Project([]byte(tc.body))
+		require.NoError(t, err)
+		out, err := json.Marshal(projected)
+		require.NoError(t, err)
+		assert.JSONEq(t, tc.want, string(out))
+	}
+	_, ok = Builtin().Get("skill.get")
+	assert.False(t, ok)
+}
+
+func TestBuiltinAgentSandboxProjection(t *testing.T) {
+	for _, id := range []string{"agent.get", "agent.list"} {
+		op, ok := Builtin().Get(id)
+		require.True(t, ok)
+		data := `{"id":"a1","config":{"sandbox_config_id":"cfg-1","api_key":"secret",
+			"headers":{"Authorization":"secret"},"extensions":{"url":"https://private"}}}`
+		want := `{"agent_id":"a1","sandbox_config_id":"cfg-1"}`
+		if id == "agent.list" {
+			data = "[" + data + "]"
+			want = `[{"agent_id":"a1"}]`
+		}
+		projected, err := op.Project([]byte(`{"data":` + data + `}`))
+		require.NoError(t, err)
+		out, err := json.Marshal(projected)
+		require.NoError(t, err)
+		assert.JSONEq(t, `{"data":`+want+`}`, string(out))
+	}
+}
+
+func TestBuiltinAgentSkillParams(t *testing.T) {
+	op, ok := Builtin().Get("agent.update")
+	require.True(t, ok)
+	mode, ok := op.Param("agent_mode")
+	require.True(t, ok)
+	assert.Equal(t, []string{"quick-answer", "smart-reasoning"}, mode.Enum)
+	skills, ok := op.Param("skills_selection_mode")
+	require.True(t, ok)
+	assert.Equal(t, []string{"all", "selected", "none"}, skills.Enum)
+	names, ok := op.Param("selected_skills")
+	require.True(t, ok)
+	assert.Equal(t, TypeStringList, names.Type)
+	assert.Equal(t, 50, names.MaxItems)
+	for _, value := range []any{"not-a-list", make([]string, 51)} {
+		raw, err := json.Marshal(value)
+		require.NoError(t, err)
+		_, err = op.Build(map[string]json.RawMessage{"agent_id": json.RawMessage(`"a1"`), "selected_skills": raw})
+		require.Error(t, err)
+	}
+}
+
+func TestBuiltinKnowledgeBaseLifecycle(t *testing.T) {
+	catalog := Builtin()
+	create, ok := catalog.Get("knowledge_base.create")
+	require.True(t, ok)
+	assert.Equal(t, "name", create.LabelParam)
+	name, ok := create.Param("name")
+	require.True(t, ok)
+	assert.True(t, name.Required)
+	_, ok = create.Param("knowledge_base_id")
+	assert.False(t, ok)
+	_, ok = create.Param("indexing_strategy")
+	assert.False(t, ok)
+	vector, ok := create.Param("vector_enabled")
+	require.True(t, ok)
+	assert.Equal(t, TypeBoolean, vector.Type)
+	_, ok = create.Param("embedding_model_id")
+	assert.True(t, ok)
+	_, ok = create.Param("chunk_size")
+	assert.True(t, ok)
+	_, ok = create.Param("vector_store_id")
+	assert.True(t, ok)
+	kind, ok := create.Param("type")
+	require.True(t, ok)
+	assert.Equal(t, []string{"document", "faq", "wiki"}, kind.Enum)
+
+	update, ok := catalog.Get("knowledge_base.update")
+	require.True(t, ok)
+	assert.Equal(t, http.MethodPatch, update.Method)
+	_, ok = update.Param("name")
+	assert.True(t, ok)
+	_, ok = update.Param("description")
+	assert.True(t, ok)
+	_, ok = update.Param("vector_enabled")
+	assert.True(t, ok)
+	_, ok = update.Param("embedding_model_id")
+	assert.True(t, ok)
+	_, ok = update.Param("chunk_size")
+	assert.True(t, ok)
+	_, ok = update.Param("vector_store_id")
+	assert.False(t, ok, "the vector store is chosen when the knowledge base is created")
+
+	del, ok := catalog.Get("knowledge_base.delete")
+	require.True(t, ok)
+	assert.Equal(t, RiskDestructive, del.Risk)
+
+	setTags, ok := catalog.Get("knowledge.set_tags")
+	require.True(t, ok)
+	docs, ok := setTags.Param("knowledge_ids")
+	require.True(t, ok)
+	assert.Equal(t, TypeStringList, docs.Type)
+	assert.Equal(t, 20, docs.MaxItems)
+	tags, ok := setTags.Param("tag_ids")
+	require.True(t, ok)
+	assert.Equal(t, 50, tags.MaxItems)
+	require.NotNil(t, setTags.Target)
+	require.NotNil(t, setTags.Target.Items)
+	assert.Equal(t, "knowledge_ids", setTags.Target.Items.Param)
+
+	manual, ok := catalog.Get("knowledge.update_manual")
+	require.True(t, ok)
+	content, ok := manual.Param("content")
+	require.True(t, ok)
+	assert.True(t, content.Required)
 }

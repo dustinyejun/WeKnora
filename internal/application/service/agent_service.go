@@ -13,6 +13,7 @@ import (
 	"github.com/Tencent/WeKnora/internal/agent/operations"
 	"github.com/Tencent/WeKnora/internal/agent/skills"
 	"github.com/Tencent/WeKnora/internal/agent/tools"
+	"github.com/Tencent/WeKnora/internal/application/access"
 	"github.com/Tencent/WeKnora/internal/application/attachment"
 	"github.com/Tencent/WeKnora/internal/application/repository"
 	"github.com/Tencent/WeKnora/internal/browserskill"
@@ -117,6 +118,7 @@ type agentService struct {
 	memoryService         interfaces.MemoryService
 	storageResolver       interfaces.StorageBackendResolver
 	toolApprovalGate      approval.MCPApproval
+	customAgentService    interfaces.CustomAgentService
 	operationDispatcher   operations.Dispatcher
 	sandboxMgr            sandbox.Manager
 	sandboxResolver       sandbox.TenantSandboxResolver
@@ -158,8 +160,10 @@ func NewAgentService(
 	userRepo interfaces.UserRepository,
 	graphRepo interfaces.RetrieveGraphRepository,
 	operationDispatcher *operations.HandlerDispatcher,
+	customAgentService interfaces.CustomAgentService,
 ) interfaces.AgentService {
 	svc := &agentService{
+		customAgentService:   customAgentService,
 		operationDispatcher:  operationDispatcher,
 		browserSkill:         browserSkill,
 		userRepo:             userRepo,
@@ -270,6 +274,7 @@ func (s *agentService) CreateAgentEngine(
 	)
 	engine.SetQuestionOrigin(s.resolveQuestionOriginInfo(ctx, config.QuestionOrigin, config.SearchTargets, kbInfos))
 	engine.SetPageContext(s.resolvePageContextInfo(ctx, config.PageContext, config.SearchTargets, kbInfos))
+	engine.SetAssistantName(config.AssistantName)
 
 	// Non-vision chat models use the configured VLM to describe tool images.
 	// Vision chat models receive the original images after the tool replies.
@@ -469,13 +474,21 @@ func (s *agentService) registerOperationTools(
 	}
 	identity.Agent.AgentID = config.OperationsAgentID
 	gate, _ := s.toolApprovalGate.(approval.BuiltinApproval)
+	// The router authorizes every call anyway; checking the role up front
+	// lets the model tell the user why instead of failing at the router.
+	operationAccess := operations.Access{
+		Role:        types.CallerFromContext(ctx).Role,
+		EnforceRole: s.cfg != nil && s.cfg.Tenant.IsRBACEnforced() && !access.IsCrossTenantSuperuser(ctx, s.cfg),
+		Level:       config.AssistantAccess,
+	}
 	catalog := operations.Builtin()
-	toolRegistry.RegisterTool(tools.NewFindOperationsTool(catalog))
+	toolRegistry.RegisterTool(tools.NewFindOperationsTool(catalog, operationAccess))
 	toolRegistry.RegisterTool(tools.NewRunOperationTool(tools.OperationsRuntime{
 		Catalog:    catalog,
 		Dispatcher: s.operationDispatcher,
 		Gate:       gate,
 		Identity:   identity,
+		Access:     operationAccess,
 	}))
 }
 
@@ -1390,12 +1403,29 @@ func (s *agentService) registerTools(
 			if toolToRegister.Name() != toolName {
 				logger.Warnf(ctx, "Tool name mismatch: expected %s, got %s", toolName, toolToRegister.Name())
 			}
+			if risk, writes := assistantWriteToolRisk[toolName]; writes && config.OperationsAgentID != "" {
+				gate, _ := s.toolApprovalGate.(approval.BuiltinApproval)
+				toolToRegister = tools.NewConfirmedTool(toolToRegister, risk,
+					operations.Access{Level: config.AssistantAccess}, gate)
+			}
 			registry.RegisterTool(toolToRegister)
 		}
 	}
 
 	logger.Infof(ctx, "Registered %d tools", len(registry.ListTools()))
 	return nil
+}
+
+// assistantWriteToolRisk are the direct tools of the WeKnora assistant that
+// change data outside the operation catalog. Its access level decides which
+// of them ask the user first, as it does for catalog operations.
+var assistantWriteToolRisk = map[string]operations.Risk{
+	tools.ToolWikiWritePage:   operations.RiskWrite,
+	tools.ToolWikiReplaceText: operations.RiskWrite,
+	tools.ToolWikiRenamePage:  operations.RiskWrite,
+	tools.ToolWikiFlagIssue:   operations.RiskWrite,
+	tools.ToolWikiUpdateIssue: operations.RiskWrite,
+	tools.ToolWikiDeletePage:  operations.RiskDestructive,
 }
 
 // withoutWikiWriteTools drops the tools that write Wiki state. They execute
@@ -1650,14 +1680,28 @@ func (s *agentService) resolvePageContextInfo(
 	ctx context.Context, page *types.PageContext, targets types.SearchTargets,
 	kbInfos []*agent.KnowledgeBaseInfo,
 ) *agent.PageContextInfo {
-	if page == nil || page.KnowledgeBaseID == "" || !targets.ContainsKB(page.KnowledgeBaseID) {
+	if page == nil {
 		return nil
 	}
-	kbID := page.KnowledgeBaseID
-	info := &agent.PageContextInfo{
-		KnowledgeBaseID:   kbID,
-		KnowledgeBaseName: s.knowledgeBaseName(ctx, kbID, kbInfos),
+	info := &agent.PageContextInfo{}
+	if page.AgentID != "" && s.customAgentService != nil {
+		agentCtx := ctx
+		if tenantID := types.CallerFromContext(ctx).TenantID; tenantID != 0 {
+			agentCtx = types.WithExecutionTenant(ctx, tenantID)
+		}
+		if a, err := s.customAgentService.GetAgentByID(agentCtx, page.AgentID); err == nil && a != nil {
+			info.Agent = &agent.PageContextAgent{ID: a.ID, Name: a.Name}
+		}
 	}
+	kbID := page.KnowledgeBaseID
+	if kbID == "" || !targets.ContainsKB(kbID) {
+		if info.Agent == nil {
+			return nil
+		}
+		return info
+	}
+	info.KnowledgeBaseID = kbID
+	info.KnowledgeBaseName = s.knowledgeBaseName(ctx, kbID, kbInfos)
 	if page.KnowledgeID != "" {
 		docs, err := s.getSelectedDocumentInfos(ctx, []string{page.KnowledgeID})
 		if err == nil && len(docs) == 1 && docs[0].KnowledgeBaseID == kbID {

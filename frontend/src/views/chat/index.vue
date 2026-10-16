@@ -187,7 +187,7 @@
                         </div>
                     </transition>
                     <PendingPromptDock :embedded-mode="embeddedMode" />
-                    <InputField ref="inputFieldRef" :auto-focus="focusComposerOnMount" :compact="!embeddedMode"
+                    <InputField ref="inputFieldRef" :auto-focus="focusComposerOnMount" compact
                         @send-msg="(query, modelId, mentionedItems, imageFiles, attachmentFiles, options) => sendMsg(query, modelId, mentionedItems, imageFiles, attachmentFiles, options)"
                         @steer-msg="(query, mentionedItems, delivery) => handleSteerMsg(query, mentionedItems, delivery)"
                         @promote-steer="handlePromoteSteer"
@@ -197,9 +197,11 @@
                         @stop-confirmed="handleStopConfirmed"
                         @stop-failed="handleStopFailed" :isReplying="isReplying" :composer-locked="composerLocked" :sessionId="session_id"
                         :assistantMessageId="currentAssistantMessageId" :embeddedMode="embeddedMode"
-                        :model-id="modelId" @update:model-id="(id) => emit('update:modelId', id)"
+                        :model-id="modelId" :default-model-id="defaultModelId"
+                        @update:model-id="(id) => emit('update:modelId', id)"
                         :queuedSteers="steerQueue.filter(item => item.delivery === 'after')" :canSteer="isAgentStreamSession()">
                         <template v-if="$slots['composer-chips']" #chips><slot name="composer-chips" /></template>
+                        <template v-if="$slots['composer-controls']" #controls><slot name="composer-controls" /></template>
                     </InputField>
                 </div>
             </div>
@@ -294,9 +296,10 @@ const props = defineProps({
     // Embedded only: returns { knowledgeBaseIds, pageContext } for each send,
     // read at send time so the host can follow the page the user is on.
     hostScope: { type: Function, default: null },
-    // Embedded only: the host's model choice (v-model:model-id), '' for the
-    // agent's own.
+    // Embedded only: the host's model choice (v-model:model-id), '' to
+    // follow defaultModelId.
     modelId: { type: String, default: '' },
+    defaultModelId: { type: String, default: '' },
 });
 const emit = defineEmits(['update:modelId']);
 
@@ -1605,6 +1608,7 @@ const sendMsg = async (value, modelId = '', mentionedItems = [], imageFiles = []
         suggestion_attribution: suggestionAttribution || undefined,
         question_origin: options?.questionOrigin,
         page_context: agentEnabled ? (hostScope?.pageContext || undefined) : undefined,
+        assistant_access: agentEnabled ? (hostScope?.assistantAccess || undefined) : undefined,
         method: 'POST',
         url: endpoint,
     });
@@ -1784,7 +1788,7 @@ onMounted(async () => {
     if (props.embeddedMode && props.initialQuery) {
         scrollLock.value = true;
         historyLoading.value = false;
-        sendMsg(props.initialQuery, props.modelId);
+        sendMsg(props.initialQuery, inputFieldRef.value?.getComposerModelId?.() || props.modelId);
     } else if (!props.embeddedMode && firstQuery.value) {
         scrollLock.value = true;
         historyLoading.value = false;
@@ -2062,8 +2066,6 @@ async function openShareInBrowser() {
 
     &.is-embedded :deep(.answers-input) .t-textarea__inner {
         width: 100% !important;
-        min-height: 48px !important;
-        padding: 10px 14px;
     }
 }
 
@@ -2310,6 +2312,12 @@ async function openShareInBrowser() {
     &:not(.is-embedded) {
         padding: 0 var(--chat-content-inset, 20px);
         max-width: calc(960px + 2 * var(--chat-content-inset, 20px));
+    }
+
+    // Matches the composer's inset, and keeps text clear of the scrollbar,
+    // which overlays content where the platform uses overlay scrollbars.
+    &.is-embedded {
+        padding: 0 16px;
     }
 
     /*
