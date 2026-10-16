@@ -99,9 +99,17 @@ func JoinCJKLineWraps(text string) string {
 	return b.String()
 }
 
+// startsStructuralLine reports whether the text begins with a Markdown
+// heading or table row. It inspects runes directly instead of copying to a
+// string: JoinCJKLineWraps passes an ever-growing prefix (lineStart is not
+// advanced while wraps are merged), and the string() copy made long CJK
+// PDFs quadratic in allocation.
 func startsStructuralLine(line []rune) bool {
-	s := strings.TrimSpace(string(line))
-	return strings.HasPrefix(s, "#") || strings.HasPrefix(s, "|")
+	i := 0
+	for i < len(line) && unicode.IsSpace(line[i]) {
+		i++
+	}
+	return i < len(line) && (line[i] == '#' || line[i] == '|')
 }
 
 // startsClause reports whether text begins with 第…章/节/条/款/项/编.
