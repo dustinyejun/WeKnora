@@ -86,7 +86,12 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
         ./scripts/build-anydoc-lib.sh; \
     fi
 
-# Build the application with version info
+# Build the application with version info. Mount the Go build cache as well as
+# the module cache: `COPY . .` invalidates this layer on every source change,
+# and without the mount each rebuild regenerates the whole compile cache inside
+# the layer (~2.7 GB), which occupies disk locally and is uploaded to the CI
+# layer cache. Mounted, the cache lives outside the layer and repeated builds
+# reuse compiled objects instead of recompiling from scratch.
 ARG GO_BUILD_PARALLELISM=
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
