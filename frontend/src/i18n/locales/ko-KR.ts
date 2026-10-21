@@ -125,19 +125,19 @@ export default {
     "historyNoOverrides": "관리자 변경 없음",
   },
   automation: {
+    conversationNotice: "자동화 작업이 실행하는 대화입니다. 메시지를 직접 보낼 수 없습니다. 대기 중인 요청은 위에서 처리하세요.",
     title: '자동화',
-    description: '에이전트가 일정에 따라 사용자 본인으로 작업을 실행합니다. 결과와 승인 대기 항목은 알림으로 받습니다.',
+    description: 'WeKnora 도우미가 예약된 시간에 사용자를 대신해 작업을 실행합니다. 결과와 승인 대기 항목을 알려드립니다.',
     add: '새 자동화',
     addHint: 'WeKnora 어시스턴트에게 만들어 달라고 할 수도 있습니다',
     paused: '일시 중지됨',
+    scheduleEnded: '종료됨',
+    scheduleEndedHint: '일회성 일정이 종료되었습니다. 지금 실행하거나 실행 시간을 변경한 후 재개하세요.',
     nextRunAt: '다음 {time}',
-    notScheduled: '예약 없음',
-    agentUnavailable: '에이전트를 사용할 수 없음',
-    deleteTitle: '자동화 삭제',
+    runConfirm: '"{name}"을(를) 지금 실행할까요? 기존 일정을 변경하지 않고 추가로 실행합니다.',
     deleteBody: '진행 중인 실행을 중지하고 "{name}"의 실행 기록, 대화, 상시 승인을 삭제합니다. 되돌릴 수 없습니다.',
     fields: {
       name: '이름',
-      agent: '실행 에이전트',
       instruction: '작업',
       schedule: '일정',
       timezone: '시간대',
@@ -153,14 +153,16 @@ export default {
       enabled: '사용',
     },
     editor: {
+      model: "실행 모델",
+      modelHelp: '도우미의 기본 모델을 사용하거나 이 작업에 사용할 모델을 선택하세요. 위임받은 에이전트는 각자의 모델을 사용합니다. 변경 사항은 이후 실행에 적용됩니다.',
+      modelDefault: '도우미 기본 모델 사용',
       createTitle: '새 자동화',
       editTitle: '자동화 편집',
       namePlaceholder: '예: 매일 지식 베이스 요약',
       instructionPlaceholder: '무엇을 할지, 어떤 자료를 쓸지, 결과를 어떻게 낼지 적어 주세요',
       variablesHint: '사용 가능한 변수:',
-      unattendedHint: '실행 중에는 아무도 보고 있지 않으므로 에이전트가 질문할 수 없습니다. 승인이 필요한 작업은 일시 중지되고 알림이 갑니다.',
+      unattendedHint: '실행 중에는 사용자가 없으므로 도우미가 질문할 수 없습니다. 승인이 필요한 작업은 일시 중지되고 알림이 전송됩니다.',
       nameDesc: '목록과 알림에 표시되어 작업을 구분하는 데 쓰입니다',
-      agentDesc: '작업을 실행할 에이전트. 해당 지식베이스, 도구, 스킬을 사용할 수 있습니다',
       frequency: '반복',
       weekdays: '요일',
       dayOfMonthDesc: '해당 날짜가 없는 달에는 마지막 날에 실행합니다',
@@ -179,7 +181,7 @@ export default {
       sections: {
         basic: {
           title: '기본 정보',
-          desc: '작업 이름을 정하고, 실행할 에이전트를 고른 뒤 할 일을 적습니다.',
+          desc: 'WeKnora 도우미가 작업을 실행합니다. 다른 에이전트에 위임하려면 작업에 에이전트와 맡길 일을 명시하세요.',
         },
         schedule: {
           title: '실행 시간',
@@ -196,7 +198,7 @@ export default {
       },
       sessionModeDesc: {
         per_run: '실행마다 새 대화를 엽니다',
-        persistent: '모든 실행이 같은 대화에서 진행되어 이전 내용을 볼 수 있습니다',
+        persistent: '모든 실행이 하나의 대화를 공유하므로 도우미가 이전 내용을 볼 수 있습니다',
       },
       errors: {
         name: '이름을 입력하세요',
@@ -280,8 +282,6 @@ export default {
       stop: '중지',
     },
     detail: {
-      overview: '개요',
-      lastRun: '마지막 실행',
       pausedBecause: '일시 중지됨: {reason}',
       runs: '실행 기록',
       noRuns: '아직 실행되지 않았습니다',
@@ -314,6 +314,20 @@ export default {
     },
   },
   notifications: {
+    pending: "처리 필요",
+    history: "알림 기록",
+    clearRead: "읽은 알림 삭제",
+    clearReadConfirm: "읽은 알림을 삭제할까요? 실행 기록, 대화 및 처리 대기 항목은 유지됩니다.",
+    handle: "열기",
+    review: "승인 검토",
+    unreadCount: "읽지 않음 {count}개",
+    unread: "읽지 않음",
+    newItems: "새 알림이 있습니다. 새로고침",
+    loadError: "알림을 불러오지 못했습니다",
+    awaitingApproval: "작업 승인 대기 중",
+    awaitingAuthorization: "인증 완료 대기 중",
+    awaitingReply: "답변 대기 중",
+
     title: '알림',
     markAllRead: '모두 읽음',
     pendingInvitations: '대기 중인 초대 {count}개',
@@ -2007,6 +2021,11 @@ export default {
       notFound: '콘텐츠를 찾을 수 없습니다',
       loadFailed: '로드 실패',
       noKbForWiki: '연결된 지식베이스를 식별할 수 없어 Wiki를 열 수 없습니다'
+    },
+    entityLink: {
+      kb: '지식베이스',
+      doc: '문서',
+      chunk: '청크'
     },
     tools: {
       searchKnowledge: '지식베이스 검색',

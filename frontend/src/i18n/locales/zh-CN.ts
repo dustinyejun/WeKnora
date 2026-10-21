@@ -125,19 +125,19 @@ export default {
     "historyNoOverrides": "无管理员修改",
   },
   automation: {
+    conversationNotice: "此会话由自动化任务运行，不能手动发送消息。请在上方处理待审批事项。",
     title: '自动化',
-    description: '让智能体按计划以你的身份执行任务，结果和待审批事项会通知你。',
+    description: '让 WeKnora 助手按计划以你的身份执行任务，结果和待审批事项会通知你。',
     add: '新建自动化',
     addHint: '也可以直接让 WeKnora 助手帮你创建',
     paused: '已暂停',
+    scheduleEnded: '已结束',
+    scheduleEndedHint: '一次性计划已结束。可立即运行，或修改运行时间后恢复。',
     nextRunAt: '下次 {time}',
-    notScheduled: '未排程',
-    agentUnavailable: '智能体不可用',
-    deleteTitle: '删除自动化',
+    runConfirm: '立即运行「{name}」？这将启动一次额外运行，不影响原有计划。',
     deleteBody: '将停止进行中的运行，并删除「{name}」的运行记录、对话和长期授权。此操作无法撤销。',
     fields: {
       name: '名称',
-      agent: '执行智能体',
       instruction: '任务',
       schedule: '运行时间',
       timezone: '时区',
@@ -153,14 +153,16 @@ export default {
       enabled: '启用',
     },
     editor: {
+      model: "运行模型",
+      modelHelp: '默认沿用助手的模型设置，也可以单独指定。委派的智能体使用各自的模型。修改后用于后续运行。',
+      modelDefault: '跟随助手默认模型',
       createTitle: '新建自动化',
       editTitle: '编辑自动化',
       namePlaceholder: '例如：每日知识库周报',
       instructionPlaceholder: '写清楚要做什么、用哪些资料、结果如何输出',
       variablesHint: '可用变量：',
-      unattendedHint: '运行时无人在场，智能体不能向你提问；需要审批的操作会暂停并通知你。',
+      unattendedHint: '运行时无人在场，助手不能向你提问；需要审批的操作会暂停并通知你。',
       nameDesc: '在列表和通知里显示，方便你认出这项任务',
-      agentDesc: '由哪个智能体执行任务，它的知识库、工具和技能都可用',
       frequency: '重复频率',
       weekdays: '星期',
       dayOfMonthDesc: '当月没有这一天时，在最后一天运行',
@@ -179,7 +181,7 @@ export default {
       sections: {
         basic: {
           title: '基本信息',
-          desc: '给任务起个名字，选择执行的智能体，并写下要做的事。',
+          desc: '任务由 WeKnora 助手执行。需要其他智能体时，请在任务中写明委派对象和工作。',
         },
         schedule: {
           title: '运行时间',
@@ -196,7 +198,7 @@ export default {
       },
       sessionModeDesc: {
         per_run: '每次运行开一个新对话，互不影响',
-        persistent: '所有运行都在同一个对话里，智能体能看到之前的内容',
+        persistent: '所有运行都在同一个对话里，助手能看到之前的内容',
       },
       errors: {
         name: '请填写名称',
@@ -280,8 +282,6 @@ export default {
       stop: '停止',
     },
     detail: {
-      overview: '概览',
-      lastRun: '上次运行',
       pausedBecause: '已暂停：{reason}',
       runs: '运行记录',
       noRuns: '还没有运行过',
@@ -314,6 +314,20 @@ export default {
     },
   },
   notifications: {
+    pending: "待处理",
+    history: "通知记录",
+    clearRead: "清理已读",
+    clearReadConfirm: "清理已读通知？不会删除运行记录、对话或待处理事项。",
+    handle: "去处理",
+    review: "去审批",
+    unreadCount: "{count} 条未读",
+    unread: "未读",
+    newItems: "有新通知，点击刷新",
+    loadError: "通知加载失败",
+    awaitingApproval: "等待你确认操作",
+    awaitingAuthorization: "等待你完成授权",
+    awaitingReply: "等待你回复",
+
     title: '通知',
     markAllRead: '全部已读',
     pendingInvitations: '{count} 个待处理邀请',
@@ -2009,6 +2023,11 @@ export default {
       notFound: '未找到内容',
       loadFailed: '加载失败',
       noKbForWiki: '无法识别关联的知识库，无法打开 Wiki'
+    },
+    entityLink: {
+      kb: '知识库',
+      doc: '文档',
+      chunk: '片段'
     },
     tools: {
       searchKnowledge: '知识库检索',

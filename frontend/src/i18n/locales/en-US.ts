@@ -125,19 +125,19 @@ export default {
     "historyNoOverrides": "No administrator changes",
   },
   automation: {
+    conversationNotice: "This conversation is run by an automation. Manual messages are unavailable; handle pending requests above.",
     title: 'Automations',
-    description: 'Have an agent run tasks on a schedule as you. You are notified of results and pending approvals.',
+    description: 'Have the WeKnora assistant run tasks on a schedule as you. You are notified of results and pending approvals.',
     add: 'New automation',
     addHint: 'Or ask the WeKnora assistant to set one up',
     paused: 'Paused',
+    scheduleEnded: 'Ended',
+    scheduleEndedHint: 'This one-time schedule has ended. Run it now, or edit the run time before resuming.',
     nextRunAt: 'Next {time}',
-    notScheduled: 'Not scheduled',
-    agentUnavailable: 'Agent unavailable',
-    deleteTitle: 'Delete automation',
+    runConfirm: 'Run "{name}" now? This starts an extra run without changing its schedule.',
     deleteBody: 'Stops any run in progress and deletes the runs, conversations and standing approvals of "{name}". This cannot be undone.',
     fields: {
       name: 'Name',
-      agent: 'Agent',
       instruction: 'Task',
       schedule: 'Schedule',
       timezone: 'Timezone',
@@ -153,14 +153,16 @@ export default {
       enabled: 'Enabled',
     },
     editor: {
+      model: "Run model",
+      modelHelp: 'Use the assistant’s default model or choose one for this task. Delegated agents use their own models. Changes apply to future runs.',
+      modelDefault: 'Use assistant default',
       createTitle: 'New automation',
       editTitle: 'Edit automation',
       namePlaceholder: 'e.g. Daily knowledge base digest',
       instructionPlaceholder: 'Say what to do, which sources to use and how to present the result',
       variablesHint: 'Variables:',
-      unattendedHint: 'Nobody is watching a run, so the agent cannot ask you questions. Actions that need approval pause it and notify you.',
+      unattendedHint: 'Nobody is watching a run, so the assistant cannot ask you questions. Actions that need approval pause it and notify you.',
       nameDesc: 'Shown in the list and in notifications so you can tell it apart',
-      agentDesc: 'The agent that does the task, with its knowledge bases, tools and skills',
       frequency: 'Repeats',
       weekdays: 'Days',
       dayOfMonthDesc: 'In months without this day, it runs on the last day',
@@ -179,7 +181,7 @@ export default {
       sections: {
         basic: {
           title: 'Basics',
-          desc: 'Name the task, pick the agent that runs it and describe what to do.',
+          desc: 'The WeKnora assistant runs each task. To delegate work, name the agents and their assignments in the task.',
         },
         schedule: {
           title: 'Schedule',
@@ -196,7 +198,7 @@ export default {
       },
       sessionModeDesc: {
         per_run: 'Each run starts a new conversation',
-        persistent: 'All runs share one conversation, so the agent sees earlier ones',
+        persistent: 'All runs share one conversation, so the assistant sees earlier ones',
       },
       errors: {
         name: 'Enter a name',
@@ -280,8 +282,6 @@ export default {
       stop: 'Stop',
     },
     detail: {
-      overview: 'Overview',
-      lastRun: 'Last run',
       pausedBecause: 'Paused: {reason}',
       runs: 'Runs',
       noRuns: 'No runs yet',
@@ -314,6 +314,20 @@ export default {
     },
   },
   notifications: {
+    pending: "Needs attention",
+    history: "Notification history",
+    clearRead: "Clear read",
+    clearReadConfirm: "Clear read notifications? Run records, conversations, and pending actions will be kept.",
+    handle: "Open",
+    review: "Review",
+    unreadCount: "{count} unread",
+    unread: "Unread",
+    newItems: "New notifications — refresh",
+    loadError: "Could not load notifications",
+    awaitingApproval: "Waiting for your approval",
+    awaitingAuthorization: "Waiting for authorization",
+    awaitingReply: "Waiting for your reply",
+
     title: 'Notifications',
     markAllRead: 'Mark all read',
     pendingInvitations: '{count} pending invitations',
@@ -7166,6 +7180,11 @@ export default {
       notFound: 'Content not found',
       loadFailed: 'Failed to load',
       noKbForWiki: 'Unable to identify associated knowledge base. Cannot open Wiki.'
+    },
+    entityLink: {
+      kb: 'Knowledge base',
+      doc: 'Document',
+      chunk: 'Passage'
     },
     toolSummary: {
       getDocument: 'Get document: {title}',
