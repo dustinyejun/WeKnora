@@ -236,6 +236,7 @@ func BuildContainer(container *dig.Container) *dig.Container {
 		return b
 	}))
 	must(container.Provide(newAdmissionRegistry))
+	must(container.Provide(newSessionBindingStore))
 	must(container.Provide(newTenantSandboxResolver))
 	// The resolver admits user-mode sessions, so the allocation service has to
 	// exist before the first Invoke that builds a TenantSandboxResolver
@@ -247,6 +248,9 @@ func BuildContainer(container *dig.Container) *dig.Container {
 	) *sandboxalloc.Service {
 		return sandboxalloc.New(repo, configs, sessions, sandboxRedisNamespace())
 	}))
+	must(container.Provide(newBackgroundActivityRegistry))
+	must(container.Provide(newBackgroundNoticeInbox))
+	must(container.Provide(service.NewBackgroundWork))
 
 	// Business service layer
 	logger.Debugf(ctx, "[Container] Registering business services...")
@@ -322,7 +326,7 @@ func BuildContainer(container *dig.Container) *dig.Container {
 	must(container.Provide(repository.NewStorageBackendRepository))
 	must(container.Provide(repository.NewResourceRepository))
 	must(container.Provide(repository.NewTemporaryDocumentRepository))
-	must(container.Provide(service.NewResourceCatalog))
+	must(container.Provide(service.NewResourceCatalogWithStorage))
 	// TenantStoreOwnership adapter used by the retriever factory functions
 	// to verify that a resolved VectorStore belongs to the caller's tenant.
 	must(container.Provide(retriever.NewVectorStoreRepoOwnership))
@@ -436,11 +440,12 @@ func BuildContainer(container *dig.Container) *dig.Container {
 	must(container.Provide(func(
 		mgr sandbox.Manager,
 		pinned *service.PinnedSessionSandbox,
+		activity interfaces.ActivityRegistry,
 	) *service.WorkspaceCheckpointer {
 		if runner, ok := mgr.(service.SandboxShellRunner); ok {
-			return service.NewWorkspaceCheckpointer(runner)
+			return service.NewWorkspaceCheckpointer(runner).WithActivityRegistry(activity)
 		}
-		return service.NewWorkspaceCheckpointer(pinned)
+		return service.NewWorkspaceCheckpointer(pinned).WithActivityRegistry(activity)
 	}))
 	must(container.Provide(func(
 		mgr sandbox.Manager,
@@ -1048,6 +1053,7 @@ func initDatabase(cfg *config.Config) (*gorm.DB, error) {
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},
+		Logger: newGormLogger(os.Stdout),
 	})
 	if err != nil {
 		return nil, err
@@ -1344,7 +1350,10 @@ func initFileService(cfg *config.Config, catalog interfaces.ResourceCatalog) (in
 	if err != nil {
 		return nil, err
 	}
-	return file.NewResourceCatalogFileService(inner, catalog), nil
+	if _, dummy := inner.(*file.DummyFileService); dummy {
+		return file.NewResourceCatalogFileService(inner, catalog), nil
+	}
+	return file.NewGlobalResourceCatalogFileService(inner, catalog), nil
 }
 
 func initRawFileService(_ *config.Config) (interfaces.FileService, error) {

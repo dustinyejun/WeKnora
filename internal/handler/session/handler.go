@@ -3,7 +3,6 @@ package session
 import (
 	"context"
 	stderrors "errors"
-	"gorm.io/gorm"
 	"net/http"
 
 	"github.com/Tencent/WeKnora/internal/agent/hitl"
@@ -18,6 +17,7 @@ import (
 	secutils "github.com/Tencent/WeKnora/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 // Handler handles all HTTP requests related to conversation sessions
@@ -82,6 +82,7 @@ type Handler struct {
 	suspendedRuns     *service.SuspendedRunService
 	stopCollaboration func(context.Context, string, string) error
 	delegatedPrompt   func(context.Context, *types.AgentPrompt) bool
+	background        *service.BackgroundWork
 }
 
 // NewHandler creates a new instance of Handler with all necessary dependencies
@@ -119,6 +120,7 @@ func NewHandler(
 	rewindService *service.SessionRewindService,
 	approvedProjectDirs HostProjectDirsLoader,
 	db *gorm.DB,
+	backgroundWork *service.BackgroundWork,
 ) *Handler {
 	h := &Handler{
 		browserSkill:          browserSkill,
@@ -150,6 +152,7 @@ func NewHandler(
 		redis:                 rdb,
 		approvedProjectDirs:   approvedProjectDirs,
 		db:                    db,
+		background:            backgroundWork,
 		attachmentProcessor: NewAttachmentProcessor(
 			fileService,
 			documentReader,
