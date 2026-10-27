@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Tencent/WeKnora/internal/agent/tools"
 	"github.com/Tencent/WeKnora/internal/application/access"
 	"github.com/Tencent/WeKnora/internal/application/repository"
 	chatpipeline "github.com/Tencent/WeKnora/internal/application/service/chat_pipeline"
@@ -1101,7 +1102,7 @@ func validateSummaryOutput(response *types.ChatResponse) (string, error) {
 	if response == nil {
 		return "", errEmptySummaryOutput
 	}
-	content := strings.TrimSpace(response.Content)
+	content := strings.TrimSpace(tools.StripThinkBlocks(response.Content))
 	if content == "" {
 		return "", errEmptySummaryOutput
 	}
@@ -2632,8 +2633,14 @@ func (s *knowledgeService) generateQuestionsWithContext(ctx context.Context,
 		return nil, fmt.Errorf("failed to generate questions: %w", err)
 	}
 
-	// Parse response
-	lines := strings.Split(response.Content, "\n")
+	return parseGeneratedQuestions(response.Content, questionCount), nil
+}
+
+// parseGeneratedQuestions drops inline <think> reasoning first: servers that
+// ignore Thinking=false still emit it in content, and each reasoning line
+// would otherwise be indexed as a question.
+func parseGeneratedQuestions(content string, questionCount int) []string {
+	lines := strings.Split(tools.StripThinkBlocks(content), "\n")
 	questions := make([]string, 0, questionCount)
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -2649,8 +2656,7 @@ func (s *knowledgeService) generateQuestionsWithContext(ctx context.Context,
 			}
 		}
 	}
-
-	return questions, nil
+	return questions
 }
 
 // RegenerateChunkQuestions synchronously refreshes Doc2Query-style auxiliary
@@ -4419,7 +4425,7 @@ func (s *knowledgeService) convert(
 
 	result, err := s.callDocReaderWithTimeout(ctx, reader, req)
 	// Parser resource limits are permanent document rejections, not transient reader failures.
-	if errors.Is(err, anydoc.ErrResourceLimit) {
+	if errors.Is(err, docparser.ErrCSVMarkdownTooLarge) || errors.Is(err, anydoc.ErrResourceLimit) {
 		result, err = &types.ReadResult{Error: err.Error()}, nil
 	}
 	if err != nil {
