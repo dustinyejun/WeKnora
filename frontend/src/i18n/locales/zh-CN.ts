@@ -2497,6 +2497,29 @@ export default {
         smartReasoning: '智能推理',
         indexSep: '、'
       }
+    },
+    hostApproval: {
+      titleDelete: '删除文件前需要你确认',
+      titleDangerous: '危险操作确认',
+      titleDenied: '命令被沙盒拦截，需要访问以下目录',
+      titleGeneric: '需要你确认',
+      command: '命令',
+      cwd: '目录',
+      grantPath: '需要访问',
+      accessWrite: '读写',
+      accessRead: '只读',
+      firstAttemptRan: '这条命令已经执行过一次并失败，批准后会整条重新执行',
+      snippet: '拦截详情',
+      sessionRules: '本会话允许后，同目录下这类删除不再询问（文件名可以不同）',
+      reject: '拒绝',
+      approveOnce: '允许一次',
+      approveSession: '本会话允许',
+      approvedOnce: '已允许一次',
+      approvedSession: '本会话已允许',
+      rejectedTag: '已拒绝',
+      submitted: '已提交',
+      submitFailed: '提交失败',
+      userRejected: '用户拒绝'
     }
   },
   kbSettings: {
@@ -2873,6 +2896,7 @@ export default {
     chooseAction: "选择一个功能，或直接输入你的需求。",
     create: {
       agentTitle: "用自然语言创建智能体",
+      agentAction: "用助手创建",
       agentHint: "说说它为谁服务、需要完成什么，助手会帮你选择资源并创建。",
       agentPlaceholder: "例如：创建一个产品客服助手，根据产品知识库回答使用问题，回答附上来源，找不到答案时说明原因。",
       automationTitle: "用助手创建任务",
@@ -6966,6 +6990,68 @@ export default {
     clearSuccess: '已清除你的值。',
     updatedAt: '你于 {time} 设置'
   },
+  defaultSettings: {
+    loadFailed: '默认设置加载失败，请重试后再编辑。',
+    title: '默认配置',
+    description: '集中管理本空间各项功能默认使用的模型和搜索引擎。',
+    introTitle: '资源未单独指定时使用这里的默认值',
+    introDescription: '智能体、知识库或单次对话明确选择的模型优先；没有选择时使用这里的空间默认；空间也没设置时，使用部署内置的默认模型。',
+    readOnly: '仅空间管理员可以修改，你可以查看当前生效的默认值。',
+    modelGroup: '模型',
+    webSearchGroup: '网络搜索',
+    unsetPlaceholder: '未设置（使用系统默认）',
+    followChatPlaceholder: '未设置（跟随默认对话模型）',
+    slots: {
+      chat: {
+        label: '默认对话模型',
+        description: '新建智能体和问答默认使用，也作为后台任务的兜底模型。',
+        none: '空间内没有可用的对话模型，问答和后台生成将无法使用。',
+      },
+      utility: {
+        label: '轻量生成模型',
+        description: '用于生成会话标题、MCP 服务使用说明、记忆提取等短文本任务，可选更快更便宜的模型。',
+        none: '空间内没有可用的对话模型，标题和说明生成将无法使用。',
+      },
+      embedding: {
+        label: '默认 Embedding 模型',
+        description: '新建知识库时默认选用。已有知识库不受影响。',
+        none: '空间内没有可用的 Embedding 模型，无法新建知识库。',
+      },
+      rerank: {
+        label: '默认 Rerank 模型',
+        description: '未单独配置重排模型的检索和内置智能体使用。',
+        none: '空间内没有可用的 Rerank 模型，检索将按召回顺序返回。',
+      },
+      vlm: {
+        label: '默认视觉模型',
+        description: '用于图片理解和多模态解析的默认选择。',
+        none: '空间内没有可用的视觉模型，图片理解不可用。',
+      },
+      asr: {
+        label: '默认语音识别模型',
+        description: '用于音视频转写的默认选择。',
+        none: '空间内没有可用的语音识别模型，音视频转写不可用。',
+      },
+    },
+    hints: {
+      workspace: '使用空间设置。',
+      system: '未设置，当前使用系统默认：{name}',
+      auto: '未设置，当前自动使用首个可用模型：{name}',
+      followChat: '未设置，跟随默认对话模型：{name}',
+      staleFallback: '所选模型已删除或不可用，当前回退到：{name}',
+      staleNone: '所选模型已删除或不可用，且没有可回退的模型。',
+    },
+    webSearch: {
+      label: '默认搜索引擎',
+      description: '未单独指定搜索引擎的智能体开启联网搜索时使用。',
+      unset: '未设置默认搜索引擎，未单独指定搜索引擎的智能体将无法联网搜索。',
+      placeholder: '选择搜索引擎',
+    },
+    toasts: {
+      saveSuccess: '默认配置已保存',
+      saveFailed: '保存失败：{message}',
+    },
+  },
   memoryWorkspaceSettings: {
     title: '长期记忆',
     description: '让助手跨会话记住成员说过的个人信息、偏好、事实与在办事项。',
@@ -7085,6 +7171,14 @@ export default {
     baseUrlLabel: '实例地址',
     baseUrlPlaceholder: 'https://searxng.example.com',
     apiKeyPlaceholder: '请输入 API 密钥',
+    clients: {
+      label: '搜索与网页读取',
+      search: '搜索',
+      fetch: '网页读取',
+      viaApi: '{name} API',
+      local: '内置网页读取器',
+      help: '搜索结果由该引擎返回；智能体读取网页正文时使用上面的网页读取方式。'
+    },
     toasts: {
       providerCreated: '搜索引擎配置已创建',
       providerUpdated: '搜索引擎配置已更新',
@@ -8374,6 +8468,8 @@ export default {
       countHint: '当前目录 {direct} 个文档，含子目录共 {total} 个',
       filteredCount: '匹配 {count} 个文档',
       title: '目录',
+      folderSection: '文件夹',
+      documentSection: '文档',
       rootRow: '根目录',
       rootRowTip: '知识库根目录，未归入子文件夹的文档在此',
       folderCardCount: '{count} 个文档',
@@ -8933,6 +9029,11 @@ export default {
       }
     }
   },
+  assistantEntryGuide: {
+    stepOf: 'v0.9.0 新功能',
+    skip: '知道了',
+    interactHint: '点击高亮入口，打开助手试试。',
+  },
   newUserGuide: {
     stepOf: '{current} / {total}',
     skip: '跳过引导',
@@ -8941,6 +9042,10 @@ export default {
     done: '完成',
     reopen: '新手引导',
     steps: {
+      assistant: {
+        title: '认识 WeKnora 助手',
+        desc: '可以问 WeKnora 的版本、功能和配置，也可以结合当前页面，以你的身份创建智能体、设置定时任务或整理知识。'
+      },
       done: {
         title: '一切就绪',
         desc: '你已经了解了核心功能，现在就开始构建你的知识助手吧！随时可点击菜单顶部昵称旁的帮助按钮重新查看引导。'

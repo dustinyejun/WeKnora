@@ -609,6 +609,11 @@ export default {
       references: '出典'
     }
   },
+  assistantEntryGuide: {
+    stepOf: 'v0.9.0 の新機能',
+    skip: 'わかりました',
+    interactHint: '強調表示された入口をクリックしてアシスタントを開いてみましょう。',
+  },
   newUserGuide: {
     stepOf: '{current} / {total}',
     skip: 'スキップ',
@@ -617,6 +622,10 @@ export default {
     done: '完了',
     reopen: 'プロダクトツアー',
     steps: {
+      assistant: {
+        title: 'WeKnora アシスタントのご紹介',
+        desc: 'WeKnora のバージョン、機能、設定について質問できます。現在のページをもとに、あなたの権限でエージェントの作成、定期タスクの設定、ナレッジの整理も行えます。'
+      },
       welcome: {
         title: 'KnowPulseへようこそ',
         desc: '数ステップでナレッジベース、チャット、エージェントの使い方をご紹介します。「次へ」をクリックして開始してください。'
@@ -945,6 +954,8 @@ export default {
       countHint: 'このフォルダ内 {direct} 件、サブフォルダを含めて {total} 件',
       filteredCount: '{count} 件一致',
       title: 'フォルダ',
+      folderSection: 'フォルダ',
+      documentSection: 'ドキュメント',
       rootRow: 'ルート',
       rootRowTip: 'ナレッジベースのルート。サブフォルダに属さないドキュメントはここに置かれます',
       folderCardCount: '{count}件のドキュメント',
@@ -2517,6 +2528,14 @@ export default {
     baseUrlLabel: 'インスタンスURL',
     baseUrlPlaceholder: 'https://searxng.example.com',
     apiKeyPlaceholder: 'APIキーを入力',
+    clients: {
+      label: '検索とページ読み取り',
+      search: '検索',
+      fetch: 'ページ読み取り',
+      viaApi: '{name} API',
+      local: '内蔵ページリーダー',
+      help: '検索結果はこのプロバイダから取得し、エージェントは上記の方法でページ本文を読み取ります。'
+    },
     toasts: {
       providerCreated: '検索プロバイダを作成しました',
       providerUpdated: '検索プロバイダを更新しました',
@@ -2760,6 +2779,68 @@ export default {
     clearConfirm: '{name}に設定した自分の値を削除しますか？ワークスペースの値がある場合は、以後そちらが適用されます。',
     clearSuccess: '自分の値を削除しました。',
     updatedAt: '{time}に設定しました'
+  },
+  defaultSettings: {
+    loadFailed: 'デフォルト設定を読み込めませんでした。再試行してから編集してください。',
+    title: 'デフォルト設定',
+    description: 'このワークスペースの各機能が既定で使うモデルと検索エンジンをまとめて管理します。',
+    introTitle: 'リソース側で指定がない場合に使われます',
+    introDescription: 'エージェント、ナレッジベース、会話で明示的に選んだモデルが優先されます。未選択の場合はここのワークスペース既定値、それも未設定ならデプロイ組み込みの既定モデルが使われます。',
+    readOnly: '変更できるのはワークスペース管理者のみです。現在有効な既定値は確認できます。',
+    modelGroup: 'モデル',
+    webSearchGroup: 'ウェブ検索',
+    unsetPlaceholder: '未設定（システム既定）',
+    followChatPlaceholder: '未設定（既定のチャットモデルに従う）',
+    slots: {
+      chat: {
+        label: '既定のチャットモデル',
+        description: '新規エージェントと Q&A で使われ、バックグラウンド処理の代替モデルにもなります。',
+        none: '利用可能なチャットモデルがないため、Q&A とバックグラウンド生成は使えません。',
+      },
+      utility: {
+        label: '軽量生成モデル',
+        description: 'セッションタイトル、MCP 利用説明、記憶抽出などの短いテキスト生成に使います。高速で安価なモデルがおすすめです。',
+        none: '利用可能なチャットモデルがないため、タイトルや説明を生成できません。',
+      },
+      embedding: {
+        label: '既定の Embedding モデル',
+        description: '新規ナレッジベース作成時に既定で選ばれます。既存のナレッジベースには影響しません。',
+        none: '利用可能な Embedding モデルがないため、ナレッジベースを作成できません。',
+      },
+      rerank: {
+        label: '既定の Rerank モデル',
+        description: '独自のリランクモデルを持たない検索と組み込みエージェントで使われます。',
+        none: '利用可能な Rerank モデルがないため、検索結果は取得順のまま返されます。',
+      },
+      vlm: {
+        label: '既定のビジョンモデル',
+        description: '画像理解とマルチモーダル解析の既定の選択です。',
+        none: '利用可能なビジョンモデルがないため、画像理解は使えません。',
+      },
+      asr: {
+        label: '既定の音声認識モデル',
+        description: '音声・動画の文字起こしの既定の選択です。',
+        none: '利用可能な音声認識モデルがないため、文字起こしは使えません。',
+      },
+    },
+    hints: {
+      workspace: 'ワークスペースの設定を使用中です。',
+      system: '未設定。現在はシステム既定を使用中：{name}',
+      auto: '未設定。現在は最初に利用可能なモデルを使用中：{name}',
+      followChat: '未設定。既定のチャットモデルに従います：{name}',
+      staleFallback: '選択したモデルは削除されたか利用できません。現在の代替：{name}',
+      staleNone: '選択したモデルは削除されたか利用できず、代替できるモデルもありません。',
+    },
+    webSearch: {
+      label: '既定の検索エンジン',
+      description: '独自の検索エンジンを持たないエージェントでウェブ検索が有効なときに使われます。',
+      unset: '既定の検索エンジンが未設定です。独自の検索エンジンを持たないエージェントはウェブ検索できません。',
+      placeholder: '検索エンジンを選択',
+    },
+    toasts: {
+      saveSuccess: 'デフォルト設定を保存しました',
+      saveFailed: '保存に失敗しました：{message}',
+    },
   },
   memoryWorkspaceSettings: {
     title: '長期メモリ',
@@ -6696,6 +6777,7 @@ export default {
       chooseAction: "機能を選ぶか、希望する内容を入力してください。",
     create: {
       agentTitle: "自然言語でエージェントを作成",
+      agentAction: "アシスタントで作成",
       agentHint: "利用者と目的を説明してください。アシスタントがリソースを選び、作成します。",
       agentPlaceholder: "例：製品ナレッジベースから質問に回答し、出典を示し、不明な点は説明するサポート担当。",
       automationTitle: "アシスタントでタスクを作成",
@@ -7197,6 +7279,29 @@ export default {
         smartReasoning: 'スマート推論',
         indexSep: '、'
       }
+    },
+    hostApproval: {
+      titleDelete: 'ファイルを削除する前に確認してください',
+      titleDangerous: '危険な操作の確認',
+      titleDenied: 'サンドボックスがこのコマンドを拒否しました。次のディレクトリへのアクセスが必要です',
+      titleGeneric: '確認が必要です',
+      command: 'コマンド',
+      cwd: 'ディレクトリ',
+      grantPath: 'アクセス先',
+      accessWrite: '読み書き',
+      accessRead: '読み取り専用',
+      firstAttemptRan: 'このコマンドは一度実行して失敗しています。承認するとコマンド全体が再実行されます',
+      snippet: '拒否の詳細',
+      sessionRules: 'このセッションで許可すると、このディレクトリでの次の削除は再確認しません（ファイル名は異なっても可）',
+      reject: '拒否',
+      approveOnce: '今回のみ許可',
+      approveSession: 'このセッションでは許可',
+      approvedOnce: '今回のみ許可しました',
+      approvedSession: 'このセッションでは許可済み',
+      rejectedTag: '拒否済み',
+      submitted: '送信しました',
+      submitFailed: '送信に失敗しました',
+      userRejected: 'ユーザーが拒否しました'
     },
     mcpOAuth: {
       waiting: '認可待ち · {target}',

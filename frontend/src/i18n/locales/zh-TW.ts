@@ -2497,6 +2497,29 @@ export default {
         smartReasoning: '智能推理',
         indexSep: '、'
       }
+    },
+    hostApproval: {
+      titleDelete: '刪除檔案前需要你確認',
+      titleDangerous: '危險操作確認',
+      titleDenied: '命令被沙盒攔截，需要存取以下目錄',
+      titleGeneric: '需要你確認',
+      command: '命令',
+      cwd: '目錄',
+      grantPath: '需要存取',
+      accessWrite: '讀寫',
+      accessRead: '唯讀',
+      firstAttemptRan: '這條命令已經執行過一次並失敗，批准後會整條重新執行',
+      snippet: '攔截詳情',
+      sessionRules: '本工作階段允許後，同目錄下這類刪除不再詢問（檔名可以不同）',
+      reject: '拒絕',
+      approveOnce: '允許一次',
+      approveSession: '本工作階段允許',
+      approvedOnce: '已允許一次',
+      approvedSession: '本工作階段已允許',
+      rejectedTag: '已拒絕',
+      submitted: '已提交',
+      submitFailed: '提交失敗',
+      userRejected: '使用者拒絕'
     }
   },
   kbSettings: {
@@ -2873,6 +2896,7 @@ export default {
     chooseAction: "選擇一項功能，或直接輸入你的需求。",
     create: {
       agentTitle: "用自然語言建立智慧體",
+      agentAction: "用助手建立",
       agentHint: "說說它為誰服務、需要完成什麼，助手會協助選擇資源並建立。",
       agentPlaceholder: "例如：建立產品客服智慧體，根據產品知識庫回答使用問題，附上來源，找不到答案時說明原因。",
       automationTitle: "用助手建立任務",
@@ -6966,6 +6990,68 @@ export default {
     clearSuccess: '已清除你的值。',
     updatedAt: '你於 {time} 設定'
   },
+  defaultSettings: {
+    loadFailed: '預設設定載入失敗，請重試後再編輯。',
+    title: '預設設定',
+    description: '集中管理本空間各項功能預設使用的模型和搜尋引擎。',
+    introTitle: '資源未單獨指定時使用這裡的預設值',
+    introDescription: '智慧體、知識庫或單次對話明確選擇的模型優先；未選擇時使用這裡的空間預設；空間也未設定時，使用部署內建的預設模型。',
+    readOnly: '僅空間管理員可以修改，你可以查看目前生效的預設值。',
+    modelGroup: '模型',
+    webSearchGroup: '網路搜尋',
+    unsetPlaceholder: '未設定（使用系統預設）',
+    followChatPlaceholder: '未設定（跟隨預設對話模型）',
+    slots: {
+      chat: {
+        label: '預設對話模型',
+        description: '新建智慧體和問答預設使用，也作為背景任務的備援模型。',
+        none: '空間內沒有可用的對話模型，問答和背景生成將無法使用。',
+      },
+      utility: {
+        label: '輕量生成模型',
+        description: '用於生成會話標題、MCP 服務使用說明、記憶擷取等短文字任務，可選更快更便宜的模型。',
+        none: '空間內沒有可用的對話模型，標題和說明生成將無法使用。',
+      },
+      embedding: {
+        label: '預設 Embedding 模型',
+        description: '新建知識庫時預設選用。既有知識庫不受影響。',
+        none: '空間內沒有可用的 Embedding 模型，無法新建知識庫。',
+      },
+      rerank: {
+        label: '預設 Rerank 模型',
+        description: '未單獨設定重排模型的檢索和內建智慧體使用。',
+        none: '空間內沒有可用的 Rerank 模型，檢索將依召回順序返回。',
+      },
+      vlm: {
+        label: '預設視覺模型',
+        description: '用於圖片理解和多模態解析的預設選擇。',
+        none: '空間內沒有可用的視覺模型，圖片理解不可用。',
+      },
+      asr: {
+        label: '預設語音辨識模型',
+        description: '用於影音轉寫的預設選擇。',
+        none: '空間內沒有可用的語音辨識模型，影音轉寫不可用。',
+      },
+    },
+    hints: {
+      workspace: '使用空間設定。',
+      system: '未設定，目前使用系統預設：{name}',
+      auto: '未設定，目前自動使用第一個可用模型：{name}',
+      followChat: '未設定，跟隨預設對話模型：{name}',
+      staleFallback: '所選模型已刪除或不可用，目前回退到：{name}',
+      staleNone: '所選模型已刪除或不可用，且沒有可回退的模型。',
+    },
+    webSearch: {
+      label: '預設搜尋引擎',
+      description: '未單獨指定搜尋引擎的智慧體開啟聯網搜尋時使用。',
+      unset: '未設定預設搜尋引擎，未單獨指定搜尋引擎的智慧體將無法聯網搜尋。',
+      placeholder: '選擇搜尋引擎',
+    },
+    toasts: {
+      saveSuccess: '預設設定已儲存',
+      saveFailed: '儲存失敗：{message}',
+    },
+  },
   memoryWorkspaceSettings: {
     title: '長期記憶',
     description: '讓助手跨會話記住成員說過的個人資料、偏好、事實與在辦事項。',
@@ -7085,6 +7171,14 @@ export default {
     baseUrlLabel: '實例地址',
     baseUrlPlaceholder: 'https://searxng.example.com',
     apiKeyPlaceholder: '請輸入 API 金鑰',
+    clients: {
+      label: '搜尋與網頁讀取',
+      search: '搜尋',
+      fetch: '網頁讀取',
+      viaApi: '{name} API',
+      local: '內建網頁讀取器',
+      help: '搜尋結果由該引擎回傳；智慧體讀取網頁內文時使用上方的網頁讀取方式。'
+    },
     toasts: {
       providerCreated: '搜尋引擎設定已建立',
       providerUpdated: '搜尋引擎設定已更新',
@@ -8374,6 +8468,8 @@ export default {
       countHint: '當前目錄 {direct} 個文件，含子目錄共 {total} 個',
       filteredCount: '比對 {count} 個文件',
       title: '目錄',
+      folderSection: '資料夾',
+      documentSection: '文件',
       rootRow: '根目錄',
       rootRowTip: '知識庫根目錄，未歸入子資料夾的文件在此',
       folderCardCount: '{count} 個文件',
@@ -8933,6 +9029,11 @@ export default {
       }
     }
   },
+  assistantEntryGuide: {
+    stepOf: 'v0.9.0 新功能',
+    skip: '知道了',
+    interactHint: '點擊反白的入口，開啟助手試試。',
+  },
   newUserGuide: {
     stepOf: '{current} / {total}',
     skip: '跳過引導',
@@ -8941,6 +9042,10 @@ export default {
     done: '完成',
     reopen: '新手引導',
     steps: {
+      assistant: {
+        title: '認識 WeKnora 助手',
+        desc: '可以詢問 WeKnora 的版本、功能與設定，也可以結合目前頁面，以你的身分建立智慧代理、設定定時任務或整理知識。'
+      },
       done: {
         title: '一切就緒',
         desc: '你已經了解了核心功能，現在就開始建構你的知識助手吧！隨時可點擊選單頂部暱稱旁的幫助按鈕重新查看引導。'

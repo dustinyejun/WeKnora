@@ -2495,6 +2495,29 @@ export default {
         smartReasoning: '스마트 추론',
         indexSep: ', '
       }
+    },
+    hostApproval: {
+      titleDelete: '파일을 삭제하기 전에 확인이 필요합니다',
+      titleDangerous: '위험한 작업 확인',
+      titleDenied: '샌드박스가 이 명령을 차단했습니다. 다음 디렉터리에 대한 접근이 필요합니다',
+      titleGeneric: '확인이 필요합니다',
+      command: '명령',
+      cwd: '디렉터리',
+      grantPath: '접근이 필요한 경로',
+      accessWrite: '읽기 및 쓰기',
+      accessRead: '읽기 전용',
+      firstAttemptRan: '이 명령은 이미 한 번 실행되어 실패했습니다. 승인하면 명령 전체가 다시 실행됩니다',
+      snippet: '차단 상세',
+      sessionRules: '이 세션에서 허용하면 이 디렉터리의 다음 삭제는 다시 묻지 않습니다(파일 이름은 달라도 됨)',
+      reject: '거부',
+      approveOnce: '한 번만 허용',
+      approveSession: '이 세션에서 허용',
+      approvedOnce: '한 번 허용됨',
+      approvedSession: '이 세션에서 허용됨',
+      rejectedTag: '거부됨',
+      submitted: '제출됨',
+      submitFailed: '제출 실패',
+      userRejected: '사용자가 거부함'
     }
   },
   kbSettings: {
@@ -2871,6 +2894,7 @@ export default {
     chooseAction: "기능을 선택하거나 원하는 작업을 입력하세요.",
     create: {
       agentTitle: "자연어로 에이전트 만들기",
+      agentAction: "어시스턴트로 만들기",
       agentHint: "누구를 위해 어떤 일을 해야 하는지 설명하면 어시스턴트가 리소스를 선택하고 생성합니다.",
       agentPlaceholder: "예: 제품 지식 베이스로 질문에 답하고 출처를 제시하며 정보가 없으면 알려주는 고객 지원 에이전트.",
       automationTitle: "어시스턴트로 작업 만들기",
@@ -6965,6 +6989,68 @@ export default {
     clearSuccess: '내 값을 삭제했습니다.',
     updatedAt: '{time}에 설정함'
   },
+  defaultSettings: {
+    loadFailed: '기본 설정을 불러오지 못했습니다. 편집하기 전에 다시 시도하세요.',
+    title: '기본 설정',
+    description: '이 워크스페이스의 각 기능이 기본으로 사용하는 모델과 검색 엔진을 한곳에서 관리합니다.',
+    introTitle: '리소스에서 따로 지정하지 않으면 여기의 기본값을 사용합니다',
+    introDescription: '에이전트, 지식베이스, 대화에서 직접 선택한 모델이 우선합니다. 선택하지 않았으면 여기의 워크스페이스 기본값을, 그것도 없으면 배포에 내장된 기본 모델을 사용합니다.',
+    readOnly: '워크스페이스 관리자만 변경할 수 있습니다. 현재 적용 중인 기본값은 확인할 수 있습니다.',
+    modelGroup: '모델',
+    webSearchGroup: '웹 검색',
+    unsetPlaceholder: '설정 안 함(시스템 기본값)',
+    followChatPlaceholder: '설정 안 함(기본 대화 모델 따름)',
+    slots: {
+      chat: {
+        label: '기본 대화 모델',
+        description: '새 에이전트와 Q&A에서 사용하며, 백그라운드 작업의 대체 모델로도 쓰입니다.',
+        none: '사용 가능한 대화 모델이 없어 Q&A와 백그라운드 생성을 사용할 수 없습니다.',
+      },
+      utility: {
+        label: '경량 생성 모델',
+        description: '세션 제목, MCP 사용 안내, 기억 추출 같은 짧은 텍스트 작업에 사용합니다. 더 빠르고 저렴한 모델을 권장합니다.',
+        none: '사용 가능한 대화 모델이 없어 제목과 안내를 생성할 수 없습니다.',
+      },
+      embedding: {
+        label: '기본 Embedding 모델',
+        description: '새 지식베이스를 만들 때 기본으로 선택됩니다. 기존 지식베이스에는 영향이 없습니다.',
+        none: '사용 가능한 Embedding 모델이 없어 지식베이스를 만들 수 없습니다.',
+      },
+      rerank: {
+        label: '기본 Rerank 모델',
+        description: '자체 재정렬 모델이 없는 검색과 내장 에이전트에서 사용합니다.',
+        none: '사용 가능한 Rerank 모델이 없어 검색 결과가 검색 순서대로 반환됩니다.',
+      },
+      vlm: {
+        label: '기본 비전 모델',
+        description: '이미지 이해와 멀티모달 파싱의 기본 선택입니다.',
+        none: '사용 가능한 비전 모델이 없어 이미지 이해를 사용할 수 없습니다.',
+      },
+      asr: {
+        label: '기본 음성 인식 모델',
+        description: '오디오·비디오 전사의 기본 선택입니다.',
+        none: '사용 가능한 음성 인식 모델이 없어 전사를 사용할 수 없습니다.',
+      },
+    },
+    hints: {
+      workspace: '워크스페이스 설정을 사용 중입니다.',
+      system: '설정 안 됨. 현재 시스템 기본값 사용 중: {name}',
+      auto: '설정 안 됨. 현재 첫 번째 사용 가능 모델 사용 중: {name}',
+      followChat: '설정 안 됨. 기본 대화 모델을 따릅니다: {name}',
+      staleFallback: '선택한 모델이 삭제되었거나 사용할 수 없습니다. 현재 대체 모델: {name}',
+      staleNone: '선택한 모델이 삭제되었거나 사용할 수 없으며, 대체할 모델도 없습니다.',
+    },
+    webSearch: {
+      label: '기본 검색 엔진',
+      description: '자체 검색 엔진이 없는 에이전트에서 웹 검색을 켜면 사용합니다.',
+      unset: '기본 검색 엔진이 없습니다. 자체 검색 엔진이 없는 에이전트는 웹 검색을 할 수 없습니다.',
+      placeholder: '검색 엔진 선택',
+    },
+    toasts: {
+      saveSuccess: '기본 설정을 저장했습니다',
+      saveFailed: '저장 실패: {message}',
+    },
+  },
   memoryWorkspaceSettings: {
     title: '장기 기억',
     description: '구성원이 말한 개인 정보, 선호, 사실, 진행 중인 일을 어시스턴트가 대화를 넘어 기억하도록 합니다.',
@@ -7084,6 +7170,14 @@ export default {
     baseUrlLabel: '인스턴스 URL',
     baseUrlPlaceholder: 'https://searxng.example.com',
     apiKeyPlaceholder: 'API 키를 입력하세요',
+    clients: {
+      label: '검색 및 페이지 읽기',
+      search: '검색',
+      fetch: '페이지 읽기',
+      viaApi: '{name} API',
+      local: '내장 페이지 리더',
+      help: '검색 결과는 이 프로바이더에서 가져오며, 에이전트는 위의 방식으로 페이지 본문을 읽습니다.'
+    },
     toasts: {
       providerCreated: '검색 엔진 프로바이더가 생성되었습니다',
       providerUpdated: '검색 엔진 프로바이더가 업데이트되었습니다',
@@ -8373,6 +8467,8 @@ export default {
       countHint: '현재 폴더 문서 {direct}개, 하위 폴더 포함 {total}개',
       filteredCount: '일치하는 문서 {count}개',
       title: '폴더',
+      folderSection: '폴더',
+      documentSection: '문서',
       rootRow: '루트',
       rootRowTip: '지식 베이스 루트 디렉터리, 하위 폴더에 없는 문서가 여기에 있습니다',
       folderCardCount: '문서 {count}개',
@@ -8932,6 +9028,11 @@ export default {
       }
     }
   },
+  assistantEntryGuide: {
+    stepOf: 'v0.9.0의 새로운 기능',
+    skip: '알겠습니다',
+    interactHint: '강조된 아이콘을 클릭해 어시스턴트를 열어 보세요.',
+  },
   newUserGuide: {
     stepOf: '{current} / {total}',
     skip: '건너뛰기',
@@ -8940,6 +9041,10 @@ export default {
     done: '완료',
     reopen: '사용 가이드',
     steps: {
+      assistant: {
+        title: 'WeKnora 어시스턴트를 만나보세요',
+        desc: 'WeKnora의 버전, 기능, 설정에 대해 질문할 수 있습니다. 현재 페이지를 바탕으로 사용자의 권한 내에서 에이전트를 만들고, 작업을 예약하고, 지식을 정리할 수도 있습니다.'
+      },
       done: {
         title: '준비 완료',
         desc: '핵심 기능을 모두 익혔습니다. 이제 나만의 지식 어시스턴트를 만들어 보세요! 메뉴 상단 닉네임 옆 도움말 버튼에서 언제든 가이드를 다시 볼 수 있습니다.'
