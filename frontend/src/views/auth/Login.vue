@@ -345,6 +345,7 @@ import {
 } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
+import { getApiBaseUrl } from '@/utils/api-base'
 
 const router = useRouter()
 const route = useRoute()
@@ -545,7 +546,7 @@ const persistLoginResponse = async (response: any, skipRedirect = false) => {
   router.replace(authStore.hasValidTenant ? '/platform/knowledge-bases' : '/onboarding/workspace')
 }
 
-const getBackendOIDCRedirectURI = () => `${window.location.origin}/api/v1/auth/oidc/callback`
+const getBackendOIDCRedirectURI = () => `${window.location.origin}${getApiBaseUrl()}/api/v1/auth/oidc/callback`
 
 const loadOIDCConfig = async () => {
   try {
