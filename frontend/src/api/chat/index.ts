@@ -226,3 +226,11 @@ export async function createConversationShare(
 ): Promise<{ data: { token: string; path: string; url: string } }> {
   return post(`/api/v1/sessions/${session_id}/shares`, data) as any;
 }
+
+export async function getHostApprovalMode(session_id: string) {
+  return get(`/api/v1/sessions/${encodeURIComponent(session_id)}/host-approval-mode`);
+}
+
+export async function setHostApprovalMode(session_id: string, mode: 'ask' | 'auto') {
+  return put(`/api/v1/sessions/${encodeURIComponent(session_id)}/host-approval-mode`, { mode });
+}
