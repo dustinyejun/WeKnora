@@ -901,6 +901,12 @@ func (s *knowledgeService) processChunks(ctx context.Context,
 			tenantInfo, err = s.tenantRepo.GetTenantByID(ctx, tenantInfo.ID)
 			if err != nil {
 				s.failKnowledgeAfterSwapCleanup(ctx, tenantInfo, kb, knowledge, hadPreviousContent, previousStorageSize, err.Error())
+				// The embedding span is already open at this point. Returning
+				// without closing it leaves the stage "running" until the
+				// housekeeping reaper promotes it to TASK_STALLED, so the UI
+				// reports a stall instead of the lookup failure that happened.
+				s.failStage(ctx, knowledge.ID, types.StageEmbedding,
+					werrors.ErrCodeUnknown, "reload tenant storage failed", err)
 				s.deleteUnindexedChunks(ctx, knowledge)
 				return nil
 			}
@@ -908,6 +914,11 @@ func (s *knowledgeService) processChunks(ctx context.Context,
 			effectiveUsed := max(int64(0), tenantInfo.StorageUsed-previousStorageSize)
 			if effectiveUsed+totalStorageSize > tenantInfo.StorageQuota {
 				s.failKnowledgeAfterSwapCleanup(ctx, tenantInfo, kb, knowledge, hadPreviousContent, previousStorageSize, "存储空间不足")
+				// Same reason as above: the quota rejection is the outcome the
+				// user needs to see. A quota rejection is not a stall, and it
+				// is not retryable until the tenant frees space.
+				s.failStage(ctx, knowledge.ID, types.StageEmbedding,
+					werrors.ErrCodeStorageQuotaExceeded, "storage quota exceeded", nil)
 				s.deleteUnindexedChunks(ctx, knowledge)
 				return nil
 			}
@@ -4404,6 +4415,11 @@ func (s *knowledgeService) ProcessDocument(ctx context.Context, t *asynq.Task) e
 		for i := range sourceBlocks {
 			sourceBlocks[i].Locator.SourceHash = knowledge.FileHash
 		}
+		for i := range convertResult.ImageRefs {
+			for j := range convertResult.ImageRefs[i].SourceLocators {
+				convertResult.ImageRefs[i].SourceLocators[j].SourceHash = knowledge.FileHash
+			}
+		}
 	}
 	sanitizeReadResult(convertResult)
 	normalizeStarted := time.Now()
@@ -4695,8 +4711,15 @@ func (s *knowledgeService) convert(
 	if err == nil && result == nil {
 		err = fmt.Errorf("document parser returned no result")
 	}
-	// Parser resource limits are permanent document rejections, not transient reader failures.
-	if errors.Is(err, docparser.ErrCSVMarkdownTooLarge) || errors.Is(err, anydoc.ErrResourceLimit) {
+	// These rejections cannot succeed on a retry of the same document.
+	var rejectionCause error
+	switch {
+	case errors.Is(err, anydoc.ErrEncrypted):
+		rejectionCause = err
+		result, err = &types.ReadResult{
+			Error: "This document is encrypted. Upload a copy without password protection.",
+		}, nil
+	case errors.Is(err, docparser.ErrCSVMarkdownTooLarge), errors.Is(err, anydoc.ErrResourceLimit):
 		result, err = &types.ReadResult{Error: err.Error()}, nil
 	}
 	if err != nil {
@@ -4722,7 +4745,7 @@ func (s *knowledgeService) convert(
 			logger.Errorf(ctx, "failed to persist parser error for %s: %v", knowledge.ID, err)
 		}
 		s.failStage(ctx, knowledge.ID, types.StageDocReader,
-			werrors.ErrCodeDocReaderParseFailed, result.Error, nil)
+			werrors.ErrCodeDocReaderParseFailed, result.Error, rejectionCause)
 		return nil, nil
 	}
 	if !isURL {
